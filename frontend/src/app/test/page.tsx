@@ -1,6 +1,5 @@
-import { getCustomerConfig } from "@/mock_db";
-import { headers } from "next/headers";
 import React from "react";
+import { getCustomerConfig } from "@/mock_db";
 
 export default async function Test() {
   const data = await getCustomerConfig();
