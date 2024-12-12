@@ -4,8 +4,10 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TestController : ControllerBase
+public class TestController(RestaurantContext context) : ControllerBase
 {
+    private readonly RestaurantContext _context = context;
+
     [HttpPost("post-test")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
