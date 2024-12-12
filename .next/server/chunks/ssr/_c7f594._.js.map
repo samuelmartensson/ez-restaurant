@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///Users/wilhelmdurelius/Documents/Code/ez-restaurant/src/mock_db.ts"],"sourcesContent":["import { headers } from \"next/headers\";\n\ninterface CustomerConfig {\n  name: string;\n  theme: \"rustic\" | \"modern\";\n  heroType: 1 | 2;\n}\n\nconst createConfig = (data: CustomerConfig) => ({ ...data });\n\nconst customerConfigs: Record<string, CustomerConfig> = {\n  testdomain: createConfig({ name: \"MinButik\", heroType: 1, theme: \"rustic\" }),\n  elpaso: createConfig({ name: \"El Paso\", heroType: 2, theme: \"modern\" }),\n};\n\nexport const getCustomerConfig = async () => {\n  const headerList = await headers();\n  const customerId = headerList.get(\"x-customer-id\");\n  return customerConfigs?.[customerId ?? \"\"];\n};\n"],"names":[],"mappings":";;;AAAA;;AAQA,MAAM,eAAe,CAAC,OAAyB,CAAC;QAAE,GAAG,IAAI;IAAC,CAAC;AAE3D,MAAM,kBAAkD;IACtD,YAAY,aAAa;QAAE,MAAM;QAAY,UAAU;QAAG,OAAO;IAAS;IAC1E,QAAQ,aAAa;QAAE,MAAM;QAAW,UAAU;QAAG,OAAO;IAAS;AACvE;AAEO,MAAM,oBAAoB;IAC/B,MAAM,aAAa,MAAM,CAAA,GAAA,+HAAA,CAAA,UAAO,AAAD;IAC/B,MAAM,aAAa,WAAW,GAAG,CAAC;IAClC,OAAO,iBAAiB,CAAC,cAAc,GAAG;AAC5C"}},
+    {"offset": {"line": 32, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 38, "column": 0}, "map": {"version":3,"sources":["file:///Users/wilhelmdurelius/Documents/Code/ez-restaurant/src/app/test/page.tsx"],"sourcesContent":["import { getCustomerConfig } from \"@/mock_db\";\nimport { headers } from \"next/headers\";\nimport React from \"react\";\n\nexport default async function Test() {\n  const data = await getCustomerConfig();\n\n  return <div>{data.name}</div>;\n}\n"],"names":[],"mappings":";;;;AAAA;;;AAIe,eAAe;IAC5B,MAAM,OAAO,MAAM,CAAA,GAAA,8GAAA,CAAA,oBAAiB,AAAD;IAEnC,qBAAO,8OAAC;kBAAK,KAAK,IAAI;;;;;;AACxB"}},
+    {"offset": {"line": 55, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 66, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":""}},
+    {"offset": {"line": 66, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+}
