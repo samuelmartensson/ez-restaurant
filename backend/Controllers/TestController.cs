@@ -27,11 +27,33 @@ public class TestController : ControllerBase
         return Ok(new { test = test + " post test" });
     }
 
-    [HttpGet("get-test")]
+
+    public class CustomerConfig
+    {
+        required public string Name { get; set; }
+        required public string Theme { get; set; }
+        required public int HeroType { get; set; }
+    }
+
+    [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult GetTest()
+    public IActionResult GetCustomerConfig([FromQuery] string key)
     {
-        return Ok(new { test = "get test" });
+        var customerConfigs = new Dictionary<string, CustomerConfig>
+        {
+            { "testdomain", new CustomerConfig { Name = "MinButik", HeroType = 1, Theme = "rustic" } },
+            { "elpaso", new CustomerConfig { Name = "El Paso", HeroType = 2, Theme = "modern" } },
+            { "test", new CustomerConfig { Name = "Test Customer", HeroType = 2, Theme = "modern" } }
+        };
+
+        if (string.IsNullOrEmpty(key) || !customerConfigs.ContainsKey(key))
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        }
+
+        return Ok(customerConfigs[key]);
     }
+
+
 }
