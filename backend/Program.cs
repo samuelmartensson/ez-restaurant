@@ -31,20 +31,13 @@ builder.Services.AddCors(options =>
 });
 string path = System.Environment.GetEnvironmentVariable("sqlitedbtypingtestpath") ?? "NO PATH. ERROR";
 
-// builder.Services.AddDbContext<TypingTestContext>(options =>
-// options.UseSqlite($"Data Source = {path}"));
-if (builder.Environment.IsProduction())
-{
-    builder.Services.AddDbContext<RestaurantContext>(options =>
-    options.UseSqlite($"Data Source = {path}"));
 
-}
-else
-{
-    builder.Services.AddDbContext<RestaurantContext>(options =>
-options.UseSqlite(path));
+builder.Services.AddDbContext<RestaurantContext>(options =>
+options.UseSqlite($"Data Source = {path}"));
 
-}
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
