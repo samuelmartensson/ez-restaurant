@@ -39,6 +39,7 @@ if (builder.Environment.IsProduction())
 }
 
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
