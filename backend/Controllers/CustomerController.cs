@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers;
 
@@ -7,30 +8,25 @@ namespace webapi.Controllers;
 public class CustomerController(RestaurantContext context) : ControllerBase
 {
     private readonly RestaurantContext _context = context;
-    record CustomerConfig
-    {
-        required public string Name { get; set; }
-        required public string Theme { get; set; }
-        required public int HeroType { get; set; }
-    }
+
 
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetCustomerConfig([FromQuery] string key)
     {
+
         var customerConfigs = new Dictionary<string, CustomerConfig>
         {
-            { "testdomain", new CustomerConfig { Name = "MinButik", HeroType = 1, Theme = "rustic" } },
-            { "elpaso", new CustomerConfig { Name = "El Paso", HeroType = 2, Theme = "modern" } },
-            { "test", new CustomerConfig { Name = "Test Customer", HeroType = 2, Theme = "modern" } }
         };
 
-        if (string.IsNullOrEmpty(key) || !customerConfigs.ContainsKey(key))
+        var cg = _context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
+
+        if (string.IsNullOrEmpty(key) || cg == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
 
-        return Ok(customerConfigs[key]);
+        return Ok(cg);
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,20 +32,21 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
-string path = Environment.GetEnvironmentVariable("sqlitedbtypingtestpath") ?? "NO PATH. ERROR";
-
-if (builder.Environment.IsProduction())
-{
-    path = $"Data Source = {path}";
-}
+string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")}" ?? "NO PATH. ERROR";
 
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
 
+
+
 var app = builder.Build();
+
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    Console.WriteLine("test db success: " + CreateTestDb.createTestDbWithData(path));
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -53,3 +55,4 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
