@@ -4,21 +4,10 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TestController(RestaurantContext context) : ControllerBase
+public class CustomerController(RestaurantContext context) : ControllerBase
 {
     private readonly RestaurantContext _context = context;
-
-    [HttpPost("post-test")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult PostTest([FromBody] string request)
-    {
-        string test = "system";
-        return Ok(new { test = test + " post test" });
-    }
-
-
-    public class CustomerConfig
+    record CustomerConfig
     {
         required public string Name { get; set; }
         required public string Theme { get; set; }
@@ -44,6 +33,4 @@ public class TestController(RestaurantContext context) : ControllerBase
 
         return Ok(customerConfigs[key]);
     }
-
-
 }

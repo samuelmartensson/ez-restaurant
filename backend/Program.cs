@@ -13,12 +13,13 @@ builder.Services.AddCors(options =>
   {
       options.AddPolicy("Prod",
           builder => builder
-              .WithOrigins("https://helptype.se", "https://www.helptype.se", "https://djcarldurelius.se", "https://wwww.djcarldurelius.se")// todo fix prod cors
+              .WithOrigins("https://*.tidochplats.se")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
               );
   });
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Dev",
@@ -29,22 +30,15 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowCredentials());
 });
-string path = System.Environment.GetEnvironmentVariable("sqlitedbtypingtestpath") ?? "NO PATH. ERROR";
 
-// builder.Services.AddDbContext<TypingTestContext>(options =>
-// options.UseSqlite($"Data Source = {path}"));
+string path = Environment.GetEnvironmentVariable("sqlitedbtypingtestpath") ?? "NO PATH. ERROR";
+
 if (builder.Environment.IsProduction())
 {
-    builder.Services.AddDbContext<RestaurantContext>(options =>
-    options.UseSqlite($"Data Source = {path}"));
-
+    path = $"Data Source = {path}";
 }
-else
-{
-    builder.Services.AddDbContext<RestaurantContext>(options =>
-options.UseSqlite(path));
 
-}
+builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -57,12 +51,4 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 
-
-
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
