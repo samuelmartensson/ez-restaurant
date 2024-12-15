@@ -8,5 +8,5 @@ export const getCustomerConfig = async () => {
     `http://localhost:5232/customer/get-customer-config?key=${customerId}`
   ).then((r) => r.json());
 
-  return response;
+  return { ...response, font: "custom" };
 };
