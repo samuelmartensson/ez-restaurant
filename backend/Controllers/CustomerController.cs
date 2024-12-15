@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers;
 
@@ -79,6 +80,97 @@ public class CustomerController(RestaurantContext context) : ControllerBase
         {
             return BadRequest(new { message = "Upload failed" });
         }
+    }
+
+
+    public record Input
+    {
+        public int Id { get; set; }
+
+        required public string Name { get; set; }
+
+        required public string Category { get; set; }
+        public decimal Price { get; set; }
+
+        public string? Description { get; set; } = "";
+
+        public string? Tags { get; set; } = "";
+
+        public string? Image { get; set; } = "";
+    }
+    [HttpPost("upload-customer-menu")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadCustomerMenu(List<Input> menuItems, [FromQuery] string key)
+    {
+        var existingMenuItems = await context.MenuItems
+            .Where(m => m.ProjectId == key)
+            .ToListAsync();
+
+
+
+        if (menuItems == null || !menuItems.Any())
+        {
+            context.MenuItems.RemoveRange(existingMenuItems);
+            await context.SaveChangesAsync();
+
+            return Ok(new List<MenuItem>());
+        }
+
+        if (string.IsNullOrEmpty(key))
+        {
+            return BadRequest("Key is required.");
+        }
+
+
+        var incomingMenuItemIds = menuItems.Select(m => m.Id).ToList();
+
+        var itemsToDelete = existingMenuItems
+                    .Where(m => !incomingMenuItemIds.Contains(m.Id))
+                    .ToList();
+        context.MenuItems.RemoveRange(itemsToDelete);
+
+
+        // Update or add new items
+        foreach (var menuItem in menuItems)
+        {
+            // Find the existing item or create a new one
+            var existingItem = existingMenuItems.FirstOrDefault(m => m.Id == menuItem.Id);
+
+            if (existingItem != null)
+            {
+                existingItem.Name = menuItem.Name;
+                existingItem.Description = menuItem.Description;
+                existingItem.Price = menuItem.Price;
+                existingItem.Image = menuItem.Image;
+                existingItem.Tags = menuItem.Tags;
+                existingItem.Category = menuItem.Category;
+                existingItem.Id = menuItem.Id;
+                // Update other properties as needed
+            }
+            else
+            {
+                var newMenuItem = new MenuItem
+                {
+                    ProjectId = key,
+                    Name = menuItem.Name,
+                    Description = menuItem.Description,
+                    Price = menuItem.Price,
+                    Image = menuItem.Image,
+                    Tags = menuItem.Tags,
+                    Category = menuItem.Category,
+                    Id = menuItem.Id
+                };
+                context.MenuItems.Add(newMenuItem);
+            }
+        }
+
+
+
+
+        await context.SaveChangesAsync();
+
+        return Ok(menuItems);
     }
 
 }

@@ -165,8 +165,11 @@ public static class CreateTestDb
                     Console.WriteLine(ex);
                 }
 
+
+
                 try
                 {
+
                     using (var cmd = new SqliteCommand(insertMenuItemsData, connection))
                     {
                         string[] names =
@@ -211,6 +214,7 @@ public static class CreateTestDb
                             }
                         }
                     }
+
                 }
                 catch (SqliteException ex)
                 {

@@ -64,7 +64,7 @@ const MenuRender = ({ data }: { data: MenuItemType[] }) => {
   return (
     <div className="grid gap-4">
       <Tabs
-        defaultValue={selectedCategory}
+        value={selectedCategory}
         onValueChange={(category) =>
           router.push(pathname + "?selectedCategory=" + category)
         }
@@ -89,7 +89,7 @@ const MenuRender = ({ data }: { data: MenuItemType[] }) => {
           ),
           "category"
         ).map((item) => (
-          <div key={item.group} className="mb-8">
+          <div key={item.group} className="mb-8 border-b">
             <div className="text-2xl">{item.group}</div>
             {item.items.map((x, i) => (
               <MenuItem key={i} {...x} />

@@ -1,11 +1,7 @@
 import { headers } from "next/headers";
 import { CUSTOMER_ID_HEADER } from "./middleware";
 import { CustomerConfig } from "./types";
-
-const getURL = (key: string, endpoint: string) => {
-  const base = "http://localhost:5232/customer/";
-  return `${base}${endpoint}?key=${key}`;
-};
+import { getURL } from "./utils";
 
 export const getCustomerConfig = async () => {
   const headerList = await headers();

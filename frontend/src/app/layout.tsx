@@ -3,6 +3,7 @@ import { getCustomerConfig } from "@/mock_db";
 import { CustomerConfig } from "@/types";
 import type { Metadata } from "next";
 import "./globals.css";
+import AdminTool from "@/components/AdminTool";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -88,11 +89,7 @@ export default async function RootLayout({
           </div>
         </div>
         {children}
-        <div className="fixed bottom-0 right-0 bg-white rounded border p-4">
-          <div>Customer ID: {data.customer_id}</div>
-          <div>Domain: {data.domain}</div>
-          <div>Theme: {data.theme}</div>
-        </div>
+        <AdminTool {...data} />
       </body>
     </html>
   );

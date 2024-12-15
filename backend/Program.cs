@@ -12,12 +12,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
   {
+
       options.AddPolicy("Prod",
           builder => builder
-              .WithOrigins("https://*.tidochplats.se")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
+                .WithOrigins("https://*.tidochplats.se")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
               );
   });
 
@@ -28,8 +29,7 @@ builder.Services.AddCors(options =>
             // .WithOrigins("http://localhost:3000", "https://localhost:3000", "http://localhost:3001", "https://localhost:3001", "http://localhost:5173")
             .AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials());
+            .AllowAnyMethod());
 });
 
 string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")}" ?? "NO PATH. ERROR";
@@ -40,15 +40,13 @@ builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(pa
 
 var app = builder.Build();
 
-
-
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     Console.WriteLine("test db success: " + CreateTestDb.createTestDbWithData(path));
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("Dev");
 }
 
 app.UseHttpsRedirection();
