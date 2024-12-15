@@ -9,6 +9,7 @@ public class RestaurantContext : DbContext
     { }
     public required DbSet<CustomerConfig> CustomerConfigs { get; set; }
     public required DbSet<Customer> Customers { get; set; }
+    public required DbSet<MenuItem> MenuItems { get; set; }
 
 }
 

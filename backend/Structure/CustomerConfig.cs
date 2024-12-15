@@ -15,7 +15,4 @@ public class CustomerConfig
 
     public required string Theme { get; set; }
 
-
-
-
 }

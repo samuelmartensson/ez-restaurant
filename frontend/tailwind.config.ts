@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
+import tailwindCssAnimate from "tailwindcss-animate";
 
 export default {
+  darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,21 +14,64 @@ export default {
         customer: "var(--font-main)",
       },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        "primary-50": "var(--primary-50)",
-        "primary-100": "var(--primary-100)",
-        "primary-200": "var(--primary-200)",
-        "primary-300": "var(--primary-300)",
-        "primary-400": "var(--primary-400)",
-        "primary-500": "var(--primary-500)",
-        "primary-600": "var(--primary-600)",
-        "primary-700": "var(--primary-700)",
-        "primary-800": "var(--primary-800)",
-        "primary-900": "var(--primary-900)",
-        "primary-950": "var(--primary-950)",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        "neutral-50": "var(--primary-50)",
+        "neutral-100": "var(--primary-100)",
+        "neutral-200": "var(--primary-200)",
+        "neutral-300": "var(--primary-300)",
+        "neutral-400": "var(--primary-400)",
+        "neutral-500": "var(--primary-500)",
+        "neutral-600": "var(--primary-600)",
+        "neutral-700": "var(--primary-700)",
+        "neutral-800": "var(--primary-800)",
+        "neutral-900": "var(--primary-900)",
+        "neutral-950": "var(--primary-950)",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
     },
   },
-  plugins: [],
+  plugins: [tailwindCssAnimate],
 } satisfies Config;

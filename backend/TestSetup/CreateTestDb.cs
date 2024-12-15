@@ -28,6 +28,29 @@ public static class CreateTestDb
         FOREIGN KEY (customer_id) REFERENCES customer(id)
         )";
 
+        string createMenuItemsTable = @"CREATE TABLE IF NOT EXISTS menu_item(
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
+        category TEXT NOT NULL,
+        description,
+        tags,
+        image,
+        project_id TEXT NOT NULL,
+        FOREIGN KEY (project_id) REFERENCES customer_config(domain)
+        )";
+
+        string insertMenuItemsData = @"INSERT INTO
+        menu_item(
+        name,
+        price,
+        category,
+        description,
+        tags,
+        image,
+        project_id)
+        VALUES(@name,@price,@category,@description,@tags,@image,@project_id)";
+
         string getCustomerData = @"SELECT * FROM customer";
 
         string insertCustomerConfigurations = @"INSERT INTO
@@ -38,19 +61,24 @@ public static class CreateTestDb
         theme)
         VALUES(@customer_id, @domain, @hero_type, @theme)";
 
+        string[] tables = { createCustomerTable, createCustomerConfTable, createMenuItemsTable };
+
         try
         {
             using (var connection = new SqliteConnection(path))
             {
 
                 connection.Open();
-
-                using (var cmd = new SqliteCommand(createCustomerTable, connection))
+                foreach (string table in tables)
                 {
-                    cmd.ExecuteNonQuery();
-                };
+                    using (var cmd = new SqliteCommand(table, connection))
+                    {
+                        cmd.ExecuteNonQuery();
+                    };
 
+                }
                 connection.Close();
+
                 connection.Open();
                 try
                 {
@@ -102,21 +130,21 @@ public static class CreateTestDb
                         {
                             var customer = new Customer(Convert.ToInt32(reader["id"].ToString()),
                             reader["subscription"],
-                             reader["contact_name"],
-                             reader["contact_email"],
-                             reader["register_date"]);
+                            reader["contact_name"],
+                            reader["contact_email"],
+                            reader["register_date"]);
 
                             customers.Add(customer);
 
                         }
                     }
                 }
+                string[] domains = ["tidochplats.se", "adflow.se", "burrito.com"];
                 try
                 {
-
                     using (var cmd = new SqliteCommand(insertCustomerConfigurations, connection))
                     {
-                        string[] domains = ["tidochplats.se", "adflow.se", "burrito.com"];
+
                         int[] heroTypes = [1, 2, 1];
                         string[] themes = ["rustic", "modern", "rustic"];
 
@@ -129,6 +157,58 @@ public static class CreateTestDb
                             cmd.Parameters.AddWithValue("@theme", themes[i]);
                             cmd.ExecuteNonQuery();
 
+                        }
+                    }
+                }
+                catch (SqliteException ex)
+                {
+                    Console.WriteLine(ex);
+                }
+
+                try
+                {
+                    using (var cmd = new SqliteCommand(insertMenuItemsData, connection))
+                    {
+                        string[] names =
+                        {
+                            "Classic Cheeseburger",
+                            "Margherita Pizza",
+                            "Spaghetti Carbonara",
+                            "Caesar Salad",
+                            "BBQ Ribs"
+                        };
+
+                        decimal[] prices =
+                        {
+                            8.99m,
+                            12.99m,
+                            14.50m,
+                            7.49m,
+                            18.99m
+                        };
+                        string[] categories =
+                        {
+                            "Burger",
+                            "Pizza",
+                            "Pasta",
+                            "Salad",
+                            "Grill"
+                        };
+
+                        for (int j = 0; j < domains.Length; j++)
+                        {
+                            for (int i = 0; i < names.Length; i++)
+                            {
+                                cmd.Parameters.Clear();
+                                cmd.Parameters.AddWithValue("@name", names[i]);
+                                cmd.Parameters.AddWithValue("@price", prices[i]);
+                                cmd.Parameters.AddWithValue("@category", categories[i]);
+                                cmd.Parameters.AddWithValue("@description", "");
+                                cmd.Parameters.AddWithValue("@tags", "");
+                                cmd.Parameters.AddWithValue("@image", "");
+                                cmd.Parameters.AddWithValue("@project_id", domains[j]);
+                                cmd.ExecuteNonQuery();
+                            }
                         }
                     }
                 }

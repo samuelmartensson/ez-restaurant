@@ -1,4 +1,6 @@
+import { Navigation } from "@/components/Navigation";
 import { getCustomerConfig } from "@/mock_db";
+import { CustomerConfig } from "@/types";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -10,34 +12,62 @@ export const metadata: Metadata = {
 const themes = (font: string) =>
   ({
     rustic: {
-      "--primary-50": "#fff4ec",
-      "--primary-100": "#ffe7d3",
-      "--primary-200": "#ffcaa5",
-      "--primary-300": "#ffa56d",
-      "--primary-400": "#ff7432",
-      "--primary-500": "#ff4e0a",
-      "--primary-600": "#ff3300",
-      "--primary-700": "#cc2002",
-      "--primary-800": "#a11b0b",
-      "--primary-900": "#82190c",
-      "--primary-950": "#460904",
+      "--primary": "10 100% 41%",
+      "--primary-50": "30 100% 94%",
+      "--primary-100": "30 100% 88%",
+      "--primary-200": "30 100% 80%",
+      "--primary-300": "30 100% 61%",
+      "--primary-400": "30 100% 53%",
+      "--primary-500": "30 100% 50%",
+      "--primary-600": "30 100% 47%",
+      "--primary-700": "10 100% 41%",
+      "--primary-800": "10 100% 35%",
+      "--primary-900": "10 100% 32%",
+      "--primary-950": "10 100% 19%",
       "--font-main": font,
     },
     modern: {
-      "--primary-50": "#edf7ff",
-      "--primary-100": "#d6ebff",
-      "--primary-200": "#b5ddff",
-      "--primary-300": "#83c9ff",
-      "--primary-400": "#48aaff",
-      "--primary-500": "#1e83ff",
-      "--primary-600": "#0661ff",
-      "--primary-700": "#004cfe",
-      "--primary-800": "#083bc5",
-      "--primary-900": "#0d379b",
-      "--primary-950": "#0e235d",
+      "--primary": "216 100% 49%",
+      "--primary-foreground": "0 0% 100%",
+      "--primary-50": "210 100% 96%",
+      "--primary-100": "210 100% 91%",
+      "--primary-200": "210 100% 85%",
+      "--primary-300": "210 100% 70%",
+      "--primary-400": "210 92% 59%",
+      "--primary-500": "210 97% 58%",
+      "--primary-600": "214 100% 51%",
+      "--primary-700": "216 100% 49%",
+      "--primary-800": "214 100% 42%",
+      "--primary-900": "216 100% 38%",
+      "--primary-950": "216 100% 26%",
       "--font-main": font,
     },
   } as Record<string, React.CSSProperties>);
+
+const FontInitializer = ({
+  fontUrl,
+}: {
+  fontUrl: CustomerConfig["fontUrl"];
+}) => {
+  return fontUrl ? (
+    // Load custom
+    <style precedence="1" href="1">{`
+        @font-face {
+          font-family: "Customer";
+          src: url("${fontUrl}")
+            format("truetype");
+          font-weight: normal;
+          font-style: normal;
+        }
+        `}</style>
+  ) : (
+    // Load standard
+    <style
+      precedence="1"
+      href="1"
+    >{`@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');`}</style>
+  );
+};
 
 export default async function RootLayout({
   children,
@@ -45,24 +75,25 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const data = await getCustomerConfig();
-  const resolvedFont = data.font === "custom" ? "Poppins" : "Roboto";
+  if (!data) return null;
+  const resolvedFont = data.fontUrl ? "Customer" : "Roboto";
 
   return (
     <html lang="en" style={themes(resolvedFont)[data.theme]}>
-      {data.font === "custom" ? (
-        // Load from custom CDN
-        <style
-          precedence="1"
-          href="1"
-        >{`@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');`}</style>
-      ) : (
-        // Load standard
-        <style
-          precedence="1"
-          href="1"
-        >{`@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');`}</style>
-      )}
-      <body className={`antialiased`}>{children}</body>
+      <FontInitializer fontUrl={data.fontUrl} />
+      <body className="antialiased relative">
+        <div className="w-full absolute inset-x-0 py-10 px-4 z-50">
+          <div className="max-w-screen-xl m-auto">
+            <Navigation />
+          </div>
+        </div>
+        {children}
+        <div className="fixed bottom-0 right-0 bg-white rounded border p-4">
+          <div>Customer ID: {data.customer_id}</div>
+          <div>Domain: {data.domain}</div>
+          <div>Theme: {data.theme}</div>
+        </div>
+      </body>
     </html>
   );
 }
