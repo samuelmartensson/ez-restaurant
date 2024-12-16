@@ -28,10 +28,10 @@ function groupBy<T extends MenuItemType>(
 
 const MenuItem = ({ description, name, price, tags }: MenuItemType) => {
   return (
-    <div className="border-b last:border-none py-4 flex justify-between">
+    <div className="border-b py-1 mb-2 flex justify-between">
       <div className="grid gap-4">
         <div className="grid gap-1">
-          <span className="text-lg font-bold text-primary">{name}</span>
+          <span>{name}</span>
           {description && (
             <span className="text-muted-foreground">{description}</span>
           )}
@@ -49,7 +49,7 @@ const MenuItem = ({ description, name, price, tags }: MenuItemType) => {
           </div>
         )}
       </div>
-      <span className="font-medium">{price} SEK</span>
+      <span className="font-semibold text-primary">{price} SEK</span>
     </div>
   );
 };
@@ -62,14 +62,15 @@ const MenuRender = ({ data }: { data: MenuItemType[] }) => {
   const categories = Array.from(new Set(data.map((m) => m.category)));
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-8">
       <Tabs
+        className="max-w-full grid"
         value={selectedCategory}
         onValueChange={(category) =>
           router.push(pathname + "?selectedCategory=" + category)
         }
       >
-        <TabsList className="w-full">
+        <TabsList className="w-full overflow-auto max-w-full justify-start">
           <TabsTrigger className="w-full" value="all">
             Allt
           </TabsTrigger>
@@ -81,7 +82,7 @@ const MenuRender = ({ data }: { data: MenuItemType[] }) => {
         </TabsList>
       </Tabs>
 
-      <div>
+      <div className="max-w-screen-md m-auto w-full">
         {groupBy(
           data.filter(
             (item) =>
@@ -89,8 +90,8 @@ const MenuRender = ({ data }: { data: MenuItemType[] }) => {
           ),
           "category"
         ).map((item) => (
-          <div key={item.group} className="mb-8 border-b">
-            <div className="text-2xl">{item.group}</div>
+          <div key={item.group} className="mb-6">
+            <div className="text-2xl mb-3">{item.group}</div>
             {item.items.map((x, i) => (
               <MenuItem key={i} {...x} />
             ))}

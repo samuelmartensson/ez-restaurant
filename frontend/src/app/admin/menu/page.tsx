@@ -125,11 +125,9 @@ const AdminMenu = () => {
     <div>
       <div className="mb-8">
         <div>Categories</div>
-        <div className="flex gap-1 mb-2">
+        <div className="flex flex-wrap gap-1 mb-2">
           {categories.filter(Boolean).map((c) => (
-            <Badge className="text-base" key={c}>
-              {c}
-            </Badge>
+            <Badge key={c}>{c}</Badge>
           ))}
         </div>
         <div className="flex gap-2">
@@ -160,7 +158,7 @@ const AdminMenu = () => {
                   {selectedField.description}
                 </DrawerDescription>
               </DrawerHeader>
-              <div className="overflow-y-auto overscroll-none">
+              <div className="overflow-y-auto overscroll-none max-h-[60svh]">
                 <div className="grid gap-2 p-4">
                   {inputSchema.map((input) => (
                     <FormField
@@ -229,7 +227,9 @@ const AdminMenu = () => {
                 className="block text-left w-full"
                 variant="outline"
               >
-                {field.category} - {form.watch(`menu.${index}.name`)}
+                {form.watch(`menu.${index}.category`)} -{" "}
+                {form.watch(`menu.${index}.name`)} (
+                {form.watch(`menu.${index}.price`)})
               </Button>
               <Button
                 variant={
