@@ -5,6 +5,8 @@ export interface MenuItem {
   description: string;
   tags: string;
   image: string;
+  id: number;
+  tempId: string;
 }
 
 export interface CustomerConfig {

@@ -1,6 +1,4 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers;
 
@@ -87,111 +85,18 @@ public class CustomerController(RestaurantContext context, MenuService menuServi
         }
     }
 
-
-    public class Input
-    {
-        public int Id { get; set; }
-        public string TempId { get; set; }
-        public string Name { get; set; }
-        public string Category { get; set; }
-        public decimal Price { get; set; }
-        public string? Description { get; set; }
-        public string? Tags { get; set; }
-    }
-
-
     [HttpPost("upload-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery] string key)
     {
-        S3Service s3 = new S3Service();
-        var menuItems = JsonSerializer.Deserialize<List<Input>>(menuItemsJson, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-
-        });
-
-        var existingMenuItems = await context.MenuItems
-            .Where(m => m.ProjectId == key)
-            .ToListAsync();
-
-        if (menuItems == null || !menuItems.Any())
-        {
-            context.MenuItems.RemoveRange(existingMenuItems);
-            foreach (var item in existingMenuItems)
-            {
-                string imageUrlKey = $"{key}/{item.Id}";
-                await s3.DeleteFileAsync(imageUrlKey);
-            }
-            await context.SaveChangesAsync();
-
-            return Ok(new List<MenuItem>());
-        }
-
         if (string.IsNullOrEmpty(key))
         {
             return BadRequest("Key is required.");
         }
 
-
-        var incomingMenuItemIds = menuItems.Select(m => m.Id).ToList();
-        var itemsToDelete = existingMenuItems
-                    .Where(m => !incomingMenuItemIds.Contains(m.Id))
-                    .ToList();
-        context.MenuItems.RemoveRange(itemsToDelete);
-
-        foreach (var item in itemsToDelete)
-        {
-            string imageUrlKey = $"{key}/{item.Id}";
-            await s3.DeleteFileAsync(imageUrlKey);
-        }
-
-        foreach (var menuItem in menuItems)
-        {
-            var existingItem = existingMenuItems.FirstOrDefault(m => m.Id == menuItem.Id);
-            if (existingItem != null)
-            {
-                existingItem.Name = menuItem.Name;
-                existingItem.Description = menuItem.Description;
-                existingItem.Price = menuItem.Price;
-                existingItem.Tags = menuItem.Tags;
-                existingItem.Category = menuItem.Category;
-                existingItem.Id = menuItem.Id;
-
-                var file = files.FirstOrDefault(f => f.FileName == menuItem.Id.ToString());
-                if (file != null)
-                {
-                    string imageUrl = await s3.UploadFileAsync(file, $"{key}/{file.FileName}");
-                    existingItem.Image = imageUrl;
-                };
-            }
-            else
-            {
-                var newMenuItem = new MenuItem
-                {
-                    ProjectId = key,
-                    Name = menuItem.Name,
-                    Description = menuItem.Description,
-                    Price = menuItem.Price,
-                    Tags = menuItem.Tags,
-                    Category = menuItem.Category,
-                };
-                context.MenuItems.Add(newMenuItem);
-                await context.SaveChangesAsync();
-
-                var file = files.FirstOrDefault(f => f.FileName == menuItem.TempId);
-                if (file != null)
-                {
-                    string imageUrl = await s3.UploadFileAsync(file, $"{key}/{newMenuItem.Id}");
-                    newMenuItem.Image = imageUrl;
-                };
-
-            }
-        }
-        await context.SaveChangesAsync();
-
-        return Ok(menuItems);
+        await menuService.UploadCustomerMenu(menuItemsJson, files, key);
+        return Ok(new { message = "Success" });
     }
 }
 

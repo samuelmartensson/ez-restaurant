@@ -35,6 +35,8 @@ builder.Services.AddCors(options =>
 string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")}" ?? "NO PATH. ERROR";
 
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
+builder.Services.AddScoped<MenuService>();
+builder.Services.AddScoped<S3Service>();
 
 
 

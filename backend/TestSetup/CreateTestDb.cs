@@ -52,6 +52,7 @@ public static class CreateTestDb
         VALUES(@name,@price,@category,@description,@tags,@image,@project_id)";
 
         string getCustomerData = @"SELECT * FROM customer";
+        string getMenuData = @"SELECT * FROM menu_item";
 
         string insertCustomerConfigurations = @"INSERT INTO
         customer_config(
@@ -165,15 +166,29 @@ public static class CreateTestDb
                     Console.WriteLine(ex);
                 }
 
-
-
+                int menuItemCount = 0;
+                using (var cmd = new SqliteCommand(getMenuData, connection))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            menuItemCount++;
+                        }
+                    }
+                }
                 try
                 {
-
-                    using (var cmd = new SqliteCommand(insertMenuItemsData, connection))
+                    if (menuItemCount > 0)
                     {
-                        string[] names =
+
+                    }
+                    else
+                    {
+                        using (var cmd = new SqliteCommand(insertMenuItemsData, connection))
                         {
+                            string[] names =
+                            {
                             "Classic Cheeseburger",
                             "Margherita Pizza",
                             "Spaghetti Carbonara",
@@ -181,16 +196,16 @@ public static class CreateTestDb
                             "BBQ Ribs"
                         };
 
-                        decimal[] prices =
-                        {
+                            decimal[] prices =
+                            {
                             8.99m,
                             12.99m,
                             14.50m,
                             7.49m,
                             18.99m
                         };
-                        string[] categories =
-                        {
+                            string[] categories =
+                            {
                             "Burger",
                             "Pizza",
                             "Pasta",
@@ -198,22 +213,25 @@ public static class CreateTestDb
                             "Grill"
                         };
 
-                        for (int j = 0; j < domains.Length; j++)
-                        {
-                            for (int i = 0; i < names.Length; i++)
+                            for (int j = 0; j < domains.Length; j++)
                             {
-                                cmd.Parameters.Clear();
-                                cmd.Parameters.AddWithValue("@name", names[i]);
-                                cmd.Parameters.AddWithValue("@price", prices[i]);
-                                cmd.Parameters.AddWithValue("@category", categories[i]);
-                                cmd.Parameters.AddWithValue("@description", "");
-                                cmd.Parameters.AddWithValue("@tags", "");
-                                cmd.Parameters.AddWithValue("@image", "");
-                                cmd.Parameters.AddWithValue("@project_id", domains[j]);
-                                cmd.ExecuteNonQuery();
+                                for (int i = 0; i < names.Length; i++)
+                                {
+                                    cmd.Parameters.Clear();
+                                    cmd.Parameters.AddWithValue("@name", names[i]);
+                                    cmd.Parameters.AddWithValue("@price", prices[i]);
+                                    cmd.Parameters.AddWithValue("@category", categories[i]);
+                                    cmd.Parameters.AddWithValue("@description", "");
+                                    cmd.Parameters.AddWithValue("@tags", "");
+                                    cmd.Parameters.AddWithValue("@image", "");
+                                    cmd.Parameters.AddWithValue("@project_id", domains[j]);
+                                    cmd.ExecuteNonQuery();
+                                }
                             }
                         }
                     }
+
+
 
                 }
                 catch (SqliteException ex)

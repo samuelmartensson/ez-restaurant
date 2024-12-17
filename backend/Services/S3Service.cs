@@ -16,14 +16,13 @@ public class S3Service
         _bucketURL = $"https://{_bucketName}.s3.eu-north-1.amazonaws.com/";
     }
 
-    public async Task<bool> UploadFileAsync(IFormFile formFile, string keyName)
+    public async Task<string> UploadFileAsync(IFormFile formFile, string keyName)
     {
         try
         {
             if (formFile == null || formFile.Length == 0)
             {
-                Console.WriteLine("No file selected for upload.");
-                return false;
+                throw new Exception("No file selected for upload.");
             }
 
             var fileTransferUtility = new TransferUtility(_s3Client);
@@ -37,14 +36,28 @@ public class S3Service
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 await fileTransferUtility.UploadAsync(memoryStream, _bucketName, keyName);
                 Console.WriteLine($"File uploaded to S3 with key: {keyName}");
-                return true;
+                return _bucketURL + keyName;
             }
         }
         catch (AmazonS3Exception e)
         {
-            Console.WriteLine($"Error uploading file: {e.Message}");
-            return false;
+            throw new Exception($"Error uploading file to S3: {e.Message}", e);
         }
+
+    }
+
+    public async Task<bool> DeleteFileAsync(string keyName)
+    {
+        try
+        {
+            await _s3Client.DeleteAsync(_bucketName, keyName, null);
+            return true;
+        }
+        catch (AmazonS3Exception e)
+        {
+            throw new Exception($"Error uploading file to S3: {e.Message}", e);
+        }
+
     }
 
 }
