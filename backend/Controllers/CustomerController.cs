@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,9 +6,13 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CustomerController(RestaurantContext context) : ControllerBase
+public class CustomerController(RestaurantContext context, MenuService menuService) : ControllerBase
 {
     private RestaurantContext context = context;
+    private MenuService menuService = menuService;
+
+
+
 
     private string ResolveBucketObjectKey(string key)
     {
@@ -69,9 +74,9 @@ public class CustomerController(RestaurantContext context) : ControllerBase
     {
         S3Service s3 = new S3Service();
 
-        bool uploadSucceeded = await s3.UploadFileAsync(file, Guid.NewGuid().ToString());
+        string uploadSucceeded = await s3.UploadFileAsync(file, Guid.NewGuid().ToString());
 
-        if (uploadSucceeded)
+        if (uploadSucceeded != "")
         {
             Console.WriteLine("Upload succeeded!");
             return Ok(new { message = "File uploaded successfully" });
@@ -83,35 +88,42 @@ public class CustomerController(RestaurantContext context) : ControllerBase
     }
 
 
-    public record Input
+    public class Input
     {
         public int Id { get; set; }
-
-        required public string Name { get; set; }
-
-        required public string Category { get; set; }
+        public string TempId { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
         public decimal Price { get; set; }
-
-        public string? Description { get; set; } = "";
-
-        public string? Tags { get; set; } = "";
-
-        public string? Image { get; set; } = "";
+        public string? Description { get; set; }
+        public string? Tags { get; set; }
     }
+
+
     [HttpPost("upload-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadCustomerMenu(List<Input> menuItems, [FromQuery] string key)
+    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery] string key)
     {
+        S3Service s3 = new S3Service();
+        var menuItems = JsonSerializer.Deserialize<List<Input>>(menuItemsJson, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+
+        });
+
         var existingMenuItems = await context.MenuItems
             .Where(m => m.ProjectId == key)
             .ToListAsync();
 
-
-
         if (menuItems == null || !menuItems.Any())
         {
             context.MenuItems.RemoveRange(existingMenuItems);
+            foreach (var item in existingMenuItems)
+            {
+                string imageUrlKey = $"{key}/{item.Id}";
+                await s3.DeleteFileAsync(imageUrlKey);
+            }
             await context.SaveChangesAsync();
 
             return Ok(new List<MenuItem>());
@@ -124,29 +136,35 @@ public class CustomerController(RestaurantContext context) : ControllerBase
 
 
         var incomingMenuItemIds = menuItems.Select(m => m.Id).ToList();
-
         var itemsToDelete = existingMenuItems
                     .Where(m => !incomingMenuItemIds.Contains(m.Id))
                     .ToList();
         context.MenuItems.RemoveRange(itemsToDelete);
 
+        foreach (var item in itemsToDelete)
+        {
+            string imageUrlKey = $"{key}/{item.Id}";
+            await s3.DeleteFileAsync(imageUrlKey);
+        }
 
-        // Update or add new items
         foreach (var menuItem in menuItems)
         {
-            // Find the existing item or create a new one
             var existingItem = existingMenuItems.FirstOrDefault(m => m.Id == menuItem.Id);
-
             if (existingItem != null)
             {
                 existingItem.Name = menuItem.Name;
                 existingItem.Description = menuItem.Description;
                 existingItem.Price = menuItem.Price;
-                existingItem.Image = menuItem.Image;
                 existingItem.Tags = menuItem.Tags;
                 existingItem.Category = menuItem.Category;
                 existingItem.Id = menuItem.Id;
-                // Update other properties as needed
+
+                var file = files.FirstOrDefault(f => f.FileName == menuItem.Id.ToString());
+                if (file != null)
+                {
+                    string imageUrl = await s3.UploadFileAsync(file, $"{key}/{file.FileName}");
+                    existingItem.Image = imageUrl;
+                };
             }
             else
             {
@@ -156,22 +174,24 @@ public class CustomerController(RestaurantContext context) : ControllerBase
                     Name = menuItem.Name,
                     Description = menuItem.Description,
                     Price = menuItem.Price,
-                    Image = menuItem.Image,
                     Tags = menuItem.Tags,
                     Category = menuItem.Category,
-                    Id = menuItem.Id
                 };
                 context.MenuItems.Add(newMenuItem);
+                await context.SaveChangesAsync();
+
+                var file = files.FirstOrDefault(f => f.FileName == menuItem.TempId);
+                if (file != null)
+                {
+                    string imageUrl = await s3.UploadFileAsync(file, $"{key}/{newMenuItem.Id}");
+                    newMenuItem.Image = imageUrl;
+                };
+
             }
         }
-
-
-
-
         await context.SaveChangesAsync();
 
         return Ok(menuItems);
     }
-
 }
 
