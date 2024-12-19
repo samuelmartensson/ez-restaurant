@@ -1,15 +1,44 @@
-
+using Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 public class RestaurantContext : DbContext
 {
     public RestaurantContext(DbContextOptions<RestaurantContext> options)
         : base(options)
     { }
-    public required DbSet<CustomerConfig> CustomerConfigs { get; set; }
     public required DbSet<Customer> Customers { get; set; }
+    public required DbSet<CustomerConfig> CustomerConfigs { get; set; }
     public required DbSet<MenuItem> MenuItems { get; set; }
+    public required DbSet<User> Users { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Customer>().HasKey(c => c.Id);
+        modelBuilder.Entity<CustomerConfig>().HasKey(c => c.Domain);
+        modelBuilder.Entity<MenuItem>().HasKey(c => c.Id);
+        modelBuilder.Entity<User>().HasKey(c => c.Id);
+        modelBuilder.Entity<OpeningHour>().HasKey(c => c.Id);
+
+        modelBuilder.Entity<Customer>()
+            .HasMany(c => c.CustomerConfigs)
+            .WithOne(cf => cf.Customer)
+            .HasForeignKey(c => c.CustomerId);
+
+        modelBuilder.Entity<Customer>()
+            .HasMany(c => c.Users)
+            .WithOne(u => u.Customer)
+            .HasForeignKey(c => c.CustomerId);
+
+        modelBuilder.Entity<CustomerConfig>()
+            .HasMany(cf => cf.MenuItems)
+            .WithOne(c => c.CustomerConfig)
+            .HasForeignKey(c => c.CustomerConfigDomain);
+
+        modelBuilder.Entity<CustomerConfig>()
+            .HasMany(cf => cf.OpeningHours)
+            .WithOne(c => c.CustomerConfig)
+            .HasForeignKey(c => c.CustomerConfigDomain);
+    }
 
 }
 

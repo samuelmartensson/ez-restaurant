@@ -28,12 +28,12 @@ function groupBy<T extends MenuItemType>(
 
 const MenuItem = ({ description, name, price, tags }: MenuItemType) => {
   return (
-    <div className="border-b last:border-none py-4 flex justify-between">
+    <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-2 justify-between">
       <div className="grid gap-4">
         <div className="grid gap-1">
-          <span className="text-lg font-bold text-primary">{name}</span>
+          <span className="text-lg">{name}</span>
           {description && (
-            <span className="text-muted-foreground">{description}</span>
+            <span className="text-muted-foreground text-sm">{description}</span>
           )}
         </div>
         {tags && (
@@ -49,7 +49,9 @@ const MenuItem = ({ description, name, price, tags }: MenuItemType) => {
           </div>
         )}
       </div>
-      <span className="font-medium">{price} SEK</span>
+      <span className="text-primary font-bold self-end whitespace-nowrap">
+        {price} SEK
+      </span>
     </div>
   );
 };
@@ -58,44 +60,52 @@ const MenuRender = ({ data }: { data: MenuItemType[] }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const selectedCategory = searchParams.get("selectedCategory") ?? "all";
   const categories = Array.from(new Set(data.map((m) => m.category)));
+  const selectedCategory =
+    searchParams.get("selectedCategory") || categories?.[0];
 
   return (
-    <div className="grid gap-4">
-      <Tabs
-        value={selectedCategory}
-        onValueChange={(category) =>
-          router.push(pathname + "?selectedCategory=" + category)
-        }
-      >
-        <TabsList className="w-full">
-          <TabsTrigger className="w-full" value="all">
-            Allt
-          </TabsTrigger>
-          {categories.map((c) => (
-            <TabsTrigger value={c} key={c} className="w-full">
-              {c}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
-      <div>
-        {groupBy(
-          data.filter(
-            (item) =>
-              selectedCategory === "all" || item.category === selectedCategory
-          ),
-          "category"
-        ).map((item) => (
-          <div key={item.group} className="mb-8 border-b">
-            <div className="text-2xl">{item.group}</div>
-            {item.items.map((x, i) => (
-              <MenuItem key={i} {...x} />
+    <div className="relative grid gap-4 p-4 rounded rounded-tr-3xl rounded-bl-3xl shadow-lg bg-white overflow-hidden">
+      <div
+        className="inset-0 absolute"
+        style={{
+          opacity: 0.35,
+          background:
+            "url(https://ez-rest.s3.eu-north-1.amazonaws.com/adflow.se/menu-backdrop.jpg)",
+        }}
+      />
+      <div className="relative z-10 grid gap-8">
+        <Tabs
+          value={selectedCategory}
+          onValueChange={(category) =>
+            router.push(pathname + "?selectedCategory=" + category)
+          }
+        >
+          <TabsList className="w-full">
+            {categories.map((c) => (
+              <TabsTrigger value={c} key={c} className="w-full">
+                {c}
+              </TabsTrigger>
             ))}
-          </div>
-        ))}
+          </TabsList>
+        </Tabs>
+
+        <div>
+          {groupBy(
+            data.filter(
+              (item) =>
+                selectedCategory === "all" || item.category === selectedCategory
+            ),
+            "category"
+          ).map((item) => (
+            <div key={item.group}>
+              <div className="text-2xl">{item.group}</div>
+              {item.items.map((x, i) => (
+                <MenuItem key={i} {...x} />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,18 +1,18 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-[Table("customer_config")]
-
 public class CustomerConfig
 {
-    [Key]
-    public int Customer_id { get; set; }
-
     public required string Domain { get; set; }
-
-    [Column("hero_type")]
+    public int CustomerId { get; set; }
     public int HeroType { get; set; }
-
     public required string Theme { get; set; }
+    required public string SiteName { get; set; }
+    required public string SiteMetaTitle { get; set; }
+    required public string Logo { get; set; }
+    public string? Adress { get; set; } = "";
+    public string? Phone { get; set; } = "";
+    public string? Email { get; set; } = "";
+
+    public Customer? Customer { get; set; }
+    public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
+    public ICollection<OpeningHour> OpeningHours { get; set; } = new List<OpeningHour>();
 
 }

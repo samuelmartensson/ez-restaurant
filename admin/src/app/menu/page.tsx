@@ -32,11 +32,14 @@ import {
 } from "@/components/ui/select";
 import { CustomerConfig, MenuItem } from "@/types";
 import { getURL } from "@/utils";
-import { Plus, Save, SaveOff, Trash, X } from "lucide-react";
+import { Plus, Save, Trash, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import FilePreview from "@/components/FilePreview";
 import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "@clerk/nextjs";
+import { useDataContext } from "@/components/DataContextProvider";
+import hasDomain from "@/components/hasDomain";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
@@ -76,6 +79,8 @@ const inputSchema = [
 ] as const;
 
 const AdminMenu = () => {
+  const { selectedDomain } = useDataContext();
+
   const [data, setData] = useState<CustomerConfig["menu"]>([]);
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedField, setSelectedField] = useState<
@@ -86,7 +91,9 @@ const AdminMenu = () => {
     {}
   );
   const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [addCategory, setAddCategory] = useState("");
+  const { getToken } = useAuth();
 
   const form = useForm<{ menu: MenuItem[] }>({
     defaultValues: { menu: data ?? [] },
@@ -99,14 +106,14 @@ const AdminMenu = () => {
   });
 
   const fetchCustomerMenu = useCallback(() => {
-    return fetch(getURL("adflow.se", "get-customer-menu"))
+    return fetch(getURL(selectedDomain, "get-customer-menu"))
       .then((r) => r.json())
       .then((d: CustomerConfig["menu"]) => {
         setData(d);
         setCategories(Array.from(new Set(d.map((m) => m.category))));
         form.reset({ menu: d });
       });
-  }, [form]);
+  }, [form, selectedDomain]);
 
   useEffect(() => {
     fetchCustomerMenu();
@@ -141,9 +148,12 @@ const AdminMenu = () => {
       )
     );
 
-    await fetch(getURL("adflow.se", "upload-customer-menu"), {
+    await fetch(getURL(selectedDomain, "upload-customer-menu"), {
       method: "post",
       body: formData,
+      headers: {
+        Authorization: `Bearer ${await getToken()}`,
+      },
     }).then((r) => r.json());
 
     await fetchCustomerMenu();
@@ -154,19 +164,12 @@ const AdminMenu = () => {
     field.id === -1 ? field.tempId : field.id;
 
   return (
-    <div>
+    <div className="grid grid-rows-[auto_1fr_auto] max-h-screen h-full p-4">
       <div className="mb-8">
-        <div>Categories</div>
-        <div className="flex gap-1 mb-2">
-          {categories.filter(Boolean).map((c) => (
-            <Badge className="text-base" key={c}>
-              {c}
-            </Badge>
-          ))}
-        </div>
-        <div className="flex gap-2">
+        <div className="text-xl mb-2">Categories</div>
+        <div className="flex gap-2 mb-2">
           <Input
-            placeholder="Category..."
+            placeholder="Add category..."
             value={addCategory}
             onChange={(e) => setAddCategory(e.target.value)}
           />
@@ -180,6 +183,20 @@ const AdminMenu = () => {
           >
             Add category
           </Button>
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {categories.filter(Boolean).map((c) => (
+            <Badge
+              variant={selectedCategory === c ? "default" : "outline"}
+              onClick={() =>
+                setSelectedCategory(selectedCategory === c ? "" : c)
+              }
+              className="text-base cursor-pointer"
+              key={c}
+            >
+              {c}
+            </Badge>
+          ))}
         </div>
       </div>
       <Form {...form}>
@@ -296,82 +313,97 @@ const AdminMenu = () => {
             </DrawerContent>
           )}
         </Drawer>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-2">
-          {fields.map((field, index) => {
-            const isDirty = form.getFieldState(`menu.${index}`).isDirty;
-            const deleteStaged = deletedItems.includes(index);
-            const saveStaged = !data.map((d) => d.id).includes(field.id);
+        <form
+          className="grid gap-4 overflow-auto"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <div className="overflow-auto">
+            <div className="grid gap-2">
+              {fields.map((field, index) => {
+                const deleteStaged = deletedItems.includes(index);
+                const saveStaged = !data.map((d) => d.id).includes(field.id);
 
-            return (
-              <div
-                key={field.formId}
-                className="flex justify-between gap-2 border-b pb-2"
-              >
-                <Button
-                  onClick={() => {
-                    setSelectedField({ ...field, index });
-                    setIsOpen(true);
-                  }}
-                  type="button"
-                  className="block text-left w-full h-auto"
-                  variant={(() => {
-                    if (saveStaged) return "default";
-                    return deleteStaged ? "destructive" : "ghost";
-                  })()}
-                >
-                  <div className="flex gap-2 items-center">
-                    {uploadedImages?.[resolveImageId(field)] ? (
-                      <FilePreview
-                        file={uploadedImages[resolveImageId(field)]}
-                      />
-                    ) : (
-                      <>
-                        {field.image &&
-                        form.watch(`menu.${index}.image`) !== ACTIONS.REMOVE ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            className="h-20 w-20 object-contain bg-gray-100 rounded"
-                            src={field.image}
-                            alt=""
+                if (
+                  selectedCategory &&
+                  form.watch(`menu.${index}.category`) !== selectedCategory
+                )
+                  return null;
+
+                return (
+                  <div
+                    key={field.formId}
+                    className="flex justify-between gap-2 border-b pb-2"
+                  >
+                    <Button
+                      onClick={() => {
+                        setSelectedField({ ...field, index });
+                        setIsOpen(true);
+                      }}
+                      type="button"
+                      className="block text-left w-full h-auto"
+                      variant={(() => {
+                        if (saveStaged) return "default";
+                        return deleteStaged ? "destructive" : "ghost";
+                      })()}
+                    >
+                      <div className="flex gap-2 items-center">
+                        {uploadedImages?.[resolveImageId(field)] ? (
+                          <FilePreview
+                            file={uploadedImages[resolveImageId(field)]}
                           />
                         ) : (
-                          <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
-                            No image
-                          </div>
+                          <>
+                            {field.image &&
+                            form.watch(`menu.${index}.image`) !==
+                              ACTIONS.REMOVE ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                className="h-20 w-20 object-contain bg-gray-100 rounded"
+                                src={field.image}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                                No image
+                              </div>
+                            )}
+                          </>
                         )}
-                      </>
-                    )}
-                    <span>
-                      {form.watch(`menu.${index}.category`)} -{" "}
-                      {form.watch(`menu.${index}.name`)}
-                    </span>
+                        <div className="grid gap-1 justify-items-start">
+                          <span className="text-base">
+                            {form.watch(`menu.${index}.name`)}
+                          </span>
+                          <Badge>{form.watch(`menu.${index}.category`)}</Badge>
+                        </div>
+                      </div>
+                    </Button>
+                    <div className="grid gap-2 justify-items-center">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => {
+                          if (saveStaged) {
+                            remove(index);
+                            return;
+                          }
+                          setDeletedItems((state) =>
+                            state.includes(index)
+                              ? state.filter((n) => n !== index)
+                              : [...state, index]
+                          );
+                        }}
+                        size="icon"
+                      >
+                        {deleteStaged ? <X /> : <Trash />}
+                      </Button>
+                    </div>
                   </div>
-                </Button>
-                <div className="grid gap-2 justify-items-center">
-                  <Button
-                    variant="outline"
-                    type="button"
-                    onClick={() => {
-                      if (saveStaged) {
-                        remove(index);
-                        return;
-                      }
-                      setDeletedItems((state) =>
-                        state.includes(index)
-                          ? state.filter((n) => n !== index)
-                          : [...state, index]
-                      );
-                    }}
-                    size="icon"
-                  >
-                    {deleteStaged ? <X /> : <Trash />}
-                  </Button>
-                  {isDirty && <SaveOff size={16} />}
-                </div>
-              </div>
-            );
-          })}
-          <div className="grid gap-2 grid-cols-2">
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid gap-2 grid-cols-2 items-end">
             <Button
               onClick={() => {
                 const item = {
@@ -403,4 +435,4 @@ const AdminMenu = () => {
   );
 };
 
-export default AdminMenu;
+export default hasDomain(AdminMenu);

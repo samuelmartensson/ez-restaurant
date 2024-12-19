@@ -42,7 +42,7 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
     private async Task<List<MenuItem>> GetExistingMenuItems(string key)
     {
         return await context.MenuItems
-            .Where(m => m.ProjectId == key)
+            .Where(m => m.CustomerConfigDomain == key)
             .ToListAsync();
     }
 
@@ -107,7 +107,7 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
     {
         var newMenuItem = new MenuItem
         {
-            ProjectId = key,
+            CustomerConfigDomain = key,
             Name = menuItem.Name,
             Description = menuItem.Description,
             Price = menuItem.Price,
