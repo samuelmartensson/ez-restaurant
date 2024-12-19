@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 public class SiteConfigurationService(RestaurantContext context, S3Service s3Service)
 {
@@ -16,7 +16,6 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         string? Phone,
         string? Email
     );
-
 
     public async Task UpdateSiteConfiguration(string siteConfigurationJson, IFormFile? logo, string key)
     {
@@ -48,6 +47,33 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Adress = siteConfiguration.Adress;
         customerConfig.Email = siteConfiguration.Email;
         customerConfig.Phone = siteConfiguration.Phone;
+        await context.SaveChangesAsync();
+    }
+
+
+    public record CreateConfigRequest(string domain);
+
+    public async Task CreateSiteConfiguration(string domain, int customerId)
+    {
+        var domainAlreadyExists = await context.CustomerConfigs.AnyAsync(c => c.Domain == domain);
+
+        if (domainAlreadyExists)
+        {
+            throw new Exception("Domain already exists");
+        }
+
+        var newConfig = new CustomerConfig
+        {
+            CustomerId = customerId,
+            Domain = domain,
+            HeroType = 1,
+            Logo = "",
+            SiteMetaTitle = "Meta title",
+            SiteName = "Site name 2",
+            Theme = "rustic",
+        };
+
+        await context.CustomerConfigs.AddAsync(newConfig);
         await context.SaveChangesAsync();
     }
 }

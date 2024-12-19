@@ -15,6 +15,7 @@ import { SignOutButton, UserButton } from "@clerk/nextjs";
 import { Globe, Home, Menu } from "lucide-react";
 import Link from "next/link";
 import { VersionSwitcher } from "./ConfigSwitcher";
+import { usePathname } from "next/navigation";
 
 const items = [
   {
@@ -36,6 +37,7 @@ const items = [
 
 export function AppSidebar() {
   const { configs } = useDataContext();
+  const pathname = usePathname();
 
   return (
     <Sidebar>
@@ -65,7 +67,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={item.url === pathname}>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>

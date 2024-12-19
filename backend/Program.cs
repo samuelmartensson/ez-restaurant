@@ -71,6 +71,7 @@ builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(pa
 builder.Services.AddScoped<MenuService>();
 builder.Services.AddScoped<SiteConfigurationService>();
 builder.Services.AddScoped<S3Service>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();

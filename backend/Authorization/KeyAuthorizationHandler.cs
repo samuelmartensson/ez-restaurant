@@ -43,7 +43,6 @@ public class KeyAuthorizationHandler(RestaurantContext dbContext) : Authorizatio
             return;
         }
 
-
         context.Succeed(requirement);
     }
 }

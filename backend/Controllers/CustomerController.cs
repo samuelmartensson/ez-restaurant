@@ -6,10 +6,17 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CustomerController(RestaurantContext context, MenuService menuService, S3Service s3Service, SiteConfigurationService siteConfigurationService) : ControllerBase
+public class CustomerController(
+    RestaurantContext context,
+    MenuService menuService,
+    S3Service s3Service,
+    SiteConfigurationService siteConfigurationService,
+    UserService userService
+) : ControllerBase
 {
     private RestaurantContext context = context;
     private MenuService menuService = menuService;
+    private UserService userService = userService;
     private S3Service s3Service = s3Service;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
 
@@ -17,6 +24,17 @@ public class CustomerController(RestaurantContext context, MenuService menuServi
     private string ResolveBucketObjectKey(string key)
     {
         return s3Service._bucketURL + key;
+    }
+
+    private async Task<Database.Models.User> assertUser()
+    {
+        var user = await userService.GetUser(User);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        return user;
     }
 
 
@@ -44,11 +62,11 @@ public class CustomerController(RestaurantContext context, MenuService menuServi
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult GetCustomerMenu([FromQuery] string key)
+    public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
     {
-        var menuItems = context.MenuItems
+        var menuItems = await context.MenuItems
             .Where(m => m.CustomerConfigDomain == key)
-            .ToList();
+            .ToListAsync();
 
         if (string.IsNullOrEmpty(key) || menuItems == null)
         {
@@ -63,23 +81,16 @@ public class CustomerController(RestaurantContext context, MenuService menuServi
     [HttpGet("get-customer")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomer()
+    public async Task<IActionResult> GetOrCreateCustomer()
     {
-        var userId = User.Identity?.Name;
-        if (userId == null)
-        {
-            return NotFound();
-        }
+        var user = await userService.GetUser(User);
 
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (user == null)
+        if (user == null && User.Identity?.Name != null)
         {
             var newCustomer = new Customer { Subscription = "free" };
             await context.Customers.AddAsync(newCustomer);
             await context.SaveChangesAsync();
-            await context.Users.AddAsync(new Database.Models.User { Id = userId, CustomerId = newCustomer.Id });
+            await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
             await context.SaveChangesAsync();
             return Ok(new { message = "Success" });
         }
@@ -99,30 +110,16 @@ public class CustomerController(RestaurantContext context, MenuService menuServi
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateConfig([FromBody] CreateConfigRequest config)
     {
-        var userId = User.Identity?.Name;
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (user == null)
+        try
         {
-            NotFound();
+            var user = await assertUser();
+            await siteConfigurationService.CreateSiteConfiguration(config.domain, user.CustomerId);
+            return Ok(new { message = "Success" });
         }
-
-        var newConfig = new CustomerConfig
+        catch (Exception e)
         {
-            CustomerId = user.CustomerId,
-            Domain = config.domain,
-            HeroType = 1,
-            Logo = "",
-            SiteMetaTitle = "Meta title",
-            SiteName = "Site name 2",
-            Theme = "rustic",
-        };
-
-        await context.CustomerConfigs.AddAsync(newConfig);
-        await context.SaveChangesAsync();
-
-        return Ok(new { message = "Success", });
+            return BadRequest(new { message = e.Message });
+        }
     }
 
     [Authorize(Policy = "KeyPolicy")]
