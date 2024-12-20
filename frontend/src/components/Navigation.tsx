@@ -1,33 +1,43 @@
-import * as React from "react";
+"use client";
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import { Button } from "./ui/button";
+import { CustomerConfig } from "@/types";
+import { usePathname } from "next/navigation";
 
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+export function Navigation({ data }: { data: CustomerConfig }) {
+  const pathname = usePathname();
 
-export function Navigation() {
+  if (pathname.includes("admin")) return null;
+
   return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <NavigationMenuItem>
-          <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+    <div className="w-full sticky top-0 inset-x-0 p-2 sm:py-6 sm:px-4 z-50 bg-black/50">
+      <div className="max-w-screen-xl m-auto">
+        <div className="flex items-center gap-1 px-4">
+          <Link href="/">
+            <img
+              src={data.iconUrl}
+              alt=""
+              className="h-12 sm:h-16 rounded-lg mr-4 sm:mr-8"
+            />
+          </Link>
+          <Link href="/">
+            <Button className="text-background text-lg" variant="link">
               Home
-            </NavigationMenuLink>
+            </Button>
           </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <Link href="/menu" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+          <Link href="/menu">
+            <Button className="text-background text-lg" variant="link">
               Menu
-            </NavigationMenuLink>
+            </Button>
           </Link>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+          <Link href="/about">
+            <Button className="text-background text-lg" variant="link">
+              About
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

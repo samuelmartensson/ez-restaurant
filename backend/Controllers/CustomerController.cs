@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,13 +6,35 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CustomerController(RestaurantContext context) : ControllerBase
+public class CustomerController(
+    RestaurantContext context,
+    MenuService menuService,
+    S3Service s3Service,
+    SiteConfigurationService siteConfigurationService,
+    UserService userService
+) : ControllerBase
 {
     private RestaurantContext context = context;
+    private MenuService menuService = menuService;
+    private UserService userService = userService;
+    private S3Service s3Service = s3Service;
+    private SiteConfigurationService siteConfigurationService = siteConfigurationService;
+
 
     private string ResolveBucketObjectKey(string key)
     {
-        return new S3Service()._bucketURL + key;
+        return s3Service._bucketURL + key;
+    }
+
+    private async Task<Database.Models.User> assertUser()
+    {
+        var user = await userService.GetUser(User);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        return user;
     }
 
 
@@ -21,23 +44,29 @@ public class CustomerController(RestaurantContext context) : ControllerBase
     public IActionResult GetCustomerConfig([FromQuery] string key)
     {
         var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
-
         if (string.IsNullOrEmpty(key) || customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
 
-        return Ok(customerConfig);
+        return Ok(new
+        {
+            config = customerConfig,
+            heroUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/hero.jpg"),
+            iconUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/logo"),
+            menuBackdropUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/menu-backdrop.jpg"),
+            fontUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/font.ttf"),
+        });
     }
 
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult GetCustomerMenu([FromQuery] string key)
+    public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
     {
-        var menuItems = context.MenuItems
-            .Where(m => m.ProjectId == key)
-            .ToList();
+        var menuItems = await context.MenuItems
+            .Where(m => m.CustomerConfigDomain == key)
+            .ToListAsync();
 
         if (string.IsNullOrEmpty(key) || menuItems == null)
         {
@@ -47,131 +76,80 @@ public class CustomerController(RestaurantContext context) : ControllerBase
         return Ok(menuItems);
     }
 
-    [HttpGet("get-customer-assets")]
+
+    [Authorize(Policy = "UserPolicy")]
+    [HttpGet("get-customer")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult GetCustomerAssets([FromQuery] string key)
+    public async Task<IActionResult> GetOrCreateCustomer()
     {
-        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
+        var user = await userService.GetUser(User);
 
-        return Ok(new
+        if (user == null && User.Identity?.Name != null)
         {
-            heroUrl = ResolveBucketObjectKey("NZF0096.jpg"),
-            fontUrl = ResolveBucketObjectKey("CircularStd-Book.ttf")
-        });
+            var newCustomer = new Customer { Subscription = "free" };
+            await context.Customers.AddAsync(newCustomer);
+            await context.SaveChangesAsync();
+            await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
+            await context.SaveChangesAsync();
+            return Ok(new { message = "Success" });
+        }
+
+        var configs = await context.CustomerConfigs
+            .Where(cf => cf.CustomerId == user.CustomerId)
+            .ToListAsync();
+
+        return Ok(new { message = "Success", configs });
     }
 
+    public record CreateConfigRequest(string domain);
 
-    [HttpPost("upload-customer-asset")]
+    [Authorize(Policy = "UserPolicy")]
+    [HttpPut("create-config")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadCustomerAsset(IFormFile file)
+    public async Task<IActionResult> CreateConfig([FromBody] CreateConfigRequest config)
     {
-        S3Service s3 = new S3Service();
-
-        bool uploadSucceeded = await s3.UploadFileAsync(file, Guid.NewGuid().ToString());
-
-        if (uploadSucceeded)
+        try
         {
-            Console.WriteLine("Upload succeeded!");
-            return Ok(new { message = "File uploaded successfully" });
+            var user = await assertUser();
+            await siteConfigurationService.CreateSiteConfiguration(config.domain, user.CustomerId);
+            return Ok(new { message = "Success" });
         }
-        else
+        catch (Exception e)
         {
-            return BadRequest(new { message = "Upload failed" });
+            return BadRequest(new { message = e.Message });
         }
     }
 
-
-    public record Input
-    {
-        public int Id { get; set; }
-
-        required public string Name { get; set; }
-
-        required public string Category { get; set; }
-        public decimal Price { get; set; }
-
-        public string? Description { get; set; } = "";
-
-        public string? Tags { get; set; } = "";
-
-        public string? Image { get; set; } = "";
-    }
+    [Authorize(Policy = "KeyPolicy")]
     [HttpPost("upload-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadCustomerMenu(List<Input> menuItems, [FromQuery] string key)
+    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery] string key)
     {
-        var existingMenuItems = await context.MenuItems
-            .Where(m => m.ProjectId == key)
-            .ToListAsync();
-
-
-
-        if (menuItems == null || !menuItems.Any())
-        {
-            context.MenuItems.RemoveRange(existingMenuItems);
-            await context.SaveChangesAsync();
-
-            return Ok(new List<MenuItem>());
-        }
-
         if (string.IsNullOrEmpty(key))
         {
             return BadRequest("Key is required.");
         }
 
-
-        var incomingMenuItemIds = menuItems.Select(m => m.Id).ToList();
-
-        var itemsToDelete = existingMenuItems
-                    .Where(m => !incomingMenuItemIds.Contains(m.Id))
-                    .ToList();
-        context.MenuItems.RemoveRange(itemsToDelete);
-
-
-        // Update or add new items
-        foreach (var menuItem in menuItems)
-        {
-            // Find the existing item or create a new one
-            var existingItem = existingMenuItems.FirstOrDefault(m => m.Id == menuItem.Id);
-
-            if (existingItem != null)
-            {
-                existingItem.Name = menuItem.Name;
-                existingItem.Description = menuItem.Description;
-                existingItem.Price = menuItem.Price;
-                existingItem.Image = menuItem.Image;
-                existingItem.Tags = menuItem.Tags;
-                existingItem.Category = menuItem.Category;
-                existingItem.Id = menuItem.Id;
-                // Update other properties as needed
-            }
-            else
-            {
-                var newMenuItem = new MenuItem
-                {
-                    ProjectId = key,
-                    Name = menuItem.Name,
-                    Description = menuItem.Description,
-                    Price = menuItem.Price,
-                    Image = menuItem.Image,
-                    Tags = menuItem.Tags,
-                    Category = menuItem.Category,
-                    Id = menuItem.Id
-                };
-                context.MenuItems.Add(newMenuItem);
-            }
-        }
-
-
-
-
-        await context.SaveChangesAsync();
-
-        return Ok(menuItems);
+        await menuService.UploadCustomerMenu(menuItemsJson, files, key);
+        return Ok(new { message = "Success" });
     }
 
+    [Authorize(Policy = "KeyPolicy")]
+    [HttpPost("upload-site-configuration")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadSiteConfiguration([FromForm] string siteConfigurationJson, [FromForm] IFormFile? logo, [FromQuery] string key)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            return BadRequest("Key is required.");
+        }
+
+        await siteConfigurationService.UpdateSiteConfiguration(siteConfigurationJson, logo, key);
+        return Ok(new { message = "Success" });
+    }
 }
 
