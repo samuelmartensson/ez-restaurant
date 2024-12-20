@@ -8,11 +8,6 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v3
 
-      - name: Use Node.js 16
-        uses: actions/setup-node@v2
-        with:
-          node-version: "20"
-
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
@@ -33,19 +28,13 @@ jobs:
         run: |
           sudo apt-get -y install rsync openssh-client
 
-      - name: Deploy React App
-        run: /usr/bin/rsync -rlDvz --delete ./reactapp/dist/ wilhelm@172.232.147.147:/var/www/helptype/
-
-      - name: Bring .htaccess
-        run: /usr/bin/rsync -rlDvz --delete ./FTPinclude/.htaccess wilhelm@172.232.147.147:/var/www/helptype/
-
       - name: Deploy Dotnet App
-        run: /usr/bin/rsync -rlDvz --delete ./webapi/publish/ wilhelm@172.232.147.147:/var/www/helptypeapi/
+        run: /usr/bin/rsync -rlDvz --delete ./backend/publish/ wilhelm@172.232.147.147:/var/www/restaurantbackend/
 
       - name: Restart service on CentOS server
         env:
           SUDO_PASSWORD: ${{ secrets.SU_PW }}
         run: |
           ssh -o StrictHostKeyChecking=no wilhelm@172.232.147.147 "
-            echo $SUDO_PASSWORD | sudo -S systemctl restart helptypeapi.service
+            echo $SUDO_PASSWORD | sudo -S systemctl restart restaurantbackend.service
            "
