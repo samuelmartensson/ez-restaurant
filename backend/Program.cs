@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 //swagger url: http://localhost:5232/swagger/index.html
+
+builder.Configuration.AddEnvironmentVariables();
 
 
 // Add services to the container.
@@ -39,7 +42,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(x =>
     {
         // Authority is the URL of your clerk instance
-        x.Authority = "https://upright-killdeer-60.clerk.accounts.dev";
+        x.Authority = builder.Configuration["AppSettings:clerkUrl"];
         x.TokenValidationParameters = new TokenValidationParameters()
         {
             // Disable audience validation as we aren't using it
@@ -48,16 +51,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
         x.Events = new JwtBearerEvents()
         {
+
             // Additional validation for AZP claim
             OnTokenValidated = context =>
             {
                 var azp = context.Principal?.FindFirstValue("azp");
-                // AuthorizedParty is the base URL of your frontend.
-                if (string.IsNullOrEmpty(azp) || !azp.Equals("http://localhost:3000"))
+
+                if (builder.Environment.EnvironmentName == "Development")
+                {
+                    // AuthorizedParty is the base URL of your frontend.
+                    if (string.IsNullOrEmpty(azp) || !azp.Equals("http://localhost:3000"))
+                        context.Fail("AZP Claim is invalid or missing");
+
+                    return Task.CompletedTask;
+                }
+
+                // Check if the AZP claim exists
+                if (string.IsNullOrEmpty(azp))
+                {
                     context.Fail("AZP Claim is invalid or missing");
+                    return Task.CompletedTask;
+                }
+
+                // Ensure the AZP matches any subdomain of example.com
+                var authorizedDomain = builder.Configuration["AppSettings:authorizedDomain"]; // Ensure this includes the leading dot
+                if (!Uri.TryCreate(azp, UriKind.Absolute, out var azpUri) ||
+                    !azpUri.Host.EndsWith(authorizedDomain, StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Fail("AZP Claim does not match the allowed domain");
+                    return Task.CompletedTask;
+                }
 
                 return Task.CompletedTask;
             }
+
         };
     });
 

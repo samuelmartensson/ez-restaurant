@@ -1,5 +1,16 @@
 const baseURL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
+function getCookieValue(cookieName: string) {
+  const cookies = document.cookie.split("; ");
+  for (const cookie of cookies) {
+    const [name, value] = cookie.split("=");
+    if (name === cookieName) {
+      return value;
+    }
+  }
+  return null; // Return null if the cookie is not found
+}
+
 export const authorizedFetch = async <T>({
   url,
   method,
@@ -17,9 +28,8 @@ export const authorizedFetch = async <T>({
   data?: any;
   signal?: AbortSignal;
 }): Promise<T> => {
-  const token = Object.entries(localStorage).find((item) =>
-    item[0].includes("idToken")
-  )?.[1];
+  const token = getCookieValue("__session");
+
   const urlParameters = new URLSearchParams();
 
   // Convert arrays in query param to repeated query parameters (FastAPI default behaviour)
@@ -41,10 +51,10 @@ export const authorizedFetch = async <T>({
 
   const response = await fetch(finalURL, {
     method,
-    // headers: {
-    //   ...(!isFormData ? headers : {}),
-    //   Authorization: `Bearer ${token}`,
-    // },
+    headers: {
+      ...(!isFormData ? headers : {}),
+      Authorization: `Bearer ${token}`,
+    },
     signal,
     ...(data ? { body: isFormData ? data : JSON.stringify(data) } : {}),
   });

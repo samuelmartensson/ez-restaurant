@@ -150,18 +150,20 @@ public class CustomerController(
         return Ok(new { message = "Success" });
     }
 
+    public record ConfigFileUpload(IFormFile? Logo);
+
     [Authorize(Policy = "KeyPolicy")]
     [HttpPost("upload-site-configuration")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadSiteConfiguration([FromForm] string siteConfigurationJson, [FromForm] IFormFile? logo, [FromQuery] string key)
+    public async Task<IActionResult> UploadSiteConfiguration([FromForm] string siteConfigurationJson, [FromForm] ConfigFileUpload upload, [FromQuery] string key)
     {
         if (string.IsNullOrEmpty(key))
         {
             return BadRequest("Key is required.");
         }
 
-        await siteConfigurationService.UpdateSiteConfiguration(siteConfigurationJson, logo, key);
+        await siteConfigurationService.UpdateSiteConfiguration(siteConfigurationJson, upload.Logo, key);
         return Ok(new { message = "Success" });
     }
 }

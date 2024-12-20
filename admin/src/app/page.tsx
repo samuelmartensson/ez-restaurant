@@ -2,6 +2,7 @@
 
 import { useDataContext } from "@/components/DataContextProvider";
 import FilePreview from "@/components/FilePreview";
+import hasDomain from "@/components/hasDomain";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,14 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CustomerConfig } from "@/types";
-import { getURL } from "@/utils";
-import { useAuth } from "@clerk/nextjs";
+import {
+  useGetCustomerGetCustomerConfig,
+  usePostCustomerUploadSiteConfiguration,
+} from "@/generated/endpoints";
 import { Save } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import hasDomain from "@/components/hasDomain";
-import { useGetCustomerGetCustomerConfig } from "@/generated/endpoints";
 
 const inputSchema = [
   {
@@ -86,7 +86,6 @@ const ACTIONS = {
 
 const Site = () => {
   const { selectedDomain } = useDataContext();
-  const { getToken } = useAuth();
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
     {}
   );
@@ -102,7 +101,11 @@ const Site = () => {
     },
   });
 
-  const { data } = useGetCustomerGetCustomerConfig({ key: selectedDomain });
+  const { data, refetch } = useGetCustomerGetCustomerConfig({
+    key: selectedDomain,
+  });
+  const { mutateAsync: uploadSiteConfiguration } =
+    usePostCustomerUploadSiteConfiguration();
 
   useEffect(() => {
     if (!data?.config) return;
@@ -118,43 +121,35 @@ const Site = () => {
     });
   }, [data, form]);
 
-  const fetchCustomerConfig = useCallback(async () => {
-    return fetch(getURL(selectedDomain, "get-customer-config"))
-      .then((r) => r.json())
-      .then((d: CustomerConfig) => {
-        const { config } = d;
-        form.reset({
-          SiteName: config.siteName,
-          SiteMetaTitle: config.siteMetaTitle,
-          Logo: config.logo,
-          Theme: config.theme,
-          Adress: config.adress,
-          Phone: config.phone,
-          Email: config.email,
-        });
-      });
-  }, [form, selectedDomain]);
-
   async function onSubmit(data: UpdateSiteConfigurationRequest) {
-    const formData = new FormData();
-    formData.append(
-      "siteConfigurationJson",
-      JSON.stringify({
-        ...data,
-        Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
-      })
-    );
-    formData.append("logo", uploadedImages?.Logo);
+    // const formData = new FormData();
+    // formData.append(
+    //   "siteConfigurationJson",
+    //   JSON.stringify({
+    //     ...data,
+    //     Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
+    //   })
+    // );
+    // formData.append("logo", uploadedImages?.Logo);
 
-    await fetch(getURL(selectedDomain, "upload-site-configuration"), {
-      method: "post",
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${await getToken()}`,
+    // await fetch(getURL(selectedDomain, "upload-site-configuration"), {
+    //   method: "post",
+    //   body: formData,
+    //   headers: {
+    //     Authorization: `Bearer ${await getToken()}`,
+    //   },
+    // }).then((r) => r.json());
+    await uploadSiteConfiguration({
+      data: {
+        logo: uploadedImages?.Logo,
+        siteConfigurationJson: JSON.stringify({
+          ...data,
+          Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
+        }),
       },
-    }).then((r) => r.json());
-
-    await fetchCustomerConfig();
+      params: { key: selectedDomain },
+    });
+    refetch();
   }
 
   return (
