@@ -30,16 +30,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CustomerConfig, MenuItem } from "@/types";
 import { getURL } from "@/utils";
 import { Plus, Save, Trash, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import FilePreview from "@/components/FilePreview";
-import { v4 as uuidv4 } from "uuid";
-import { useAuth } from "@clerk/nextjs";
 import { useDataContext } from "@/components/DataContextProvider";
+import FilePreview from "@/components/FilePreview";
 import hasDomain from "@/components/hasDomain";
+import {
+  MenuItem,
+  MenuResponse,
+  useGetCustomerGetCustomerMenu,
+} from "@/generated/endpoints";
+import { useAuth } from "@clerk/nextjs";
+import { v4 as uuidv4 } from "uuid";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
@@ -78,14 +82,16 @@ const inputSchema = [
   },
 ] as const;
 
+type InternalMenuItem = MenuResponse & {
+  index: number;
+  tempId: string;
+};
+
 const AdminMenu = () => {
   const { selectedDomain } = useDataContext();
 
-  const [data, setData] = useState<CustomerConfig["menu"]>([]);
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
-  const [selectedField, setSelectedField] = useState<
-    CustomerConfig["menu"][number] & { index: number }
-  >();
+  const [selectedField, setSelectedField] = useState<InternalMenuItem>();
   const [isOpen, setIsOpen] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
     {}
@@ -94,9 +100,10 @@ const AdminMenu = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [addCategory, setAddCategory] = useState("");
   const { getToken } = useAuth();
+  const { data = [] } = useGetCustomerGetCustomerMenu();
 
-  const form = useForm<{ menu: MenuItem[] }>({
-    defaultValues: { menu: data ?? [] },
+  const form = useForm<{ menu: InternalMenuItem[] }>({
+    defaultValues: { menu: data },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -105,19 +112,10 @@ const AdminMenu = () => {
     keyName: "formId",
   });
 
-  const fetchCustomerMenu = useCallback(() => {
-    return fetch(getURL(selectedDomain, "get-customer-menu"))
-      .then((r) => r.json())
-      .then((d: CustomerConfig["menu"]) => {
-        setData(d);
-        setCategories(Array.from(new Set(d.map((m) => m.category))));
-        form.reset({ menu: d });
-      });
-  }, [form, selectedDomain]);
-
   useEffect(() => {
-    fetchCustomerMenu();
-  }, [fetchCustomerMenu]);
+    if (!data) return;
+    form.reset({ menu: data });
+  }, [data, form]);
 
   const removeItemsAsync = () => {
     return new Promise<void>((res) => {
@@ -156,12 +154,11 @@ const AdminMenu = () => {
       },
     }).then((r) => r.json());
 
-    await fetchCustomerMenu();
     setUploadedImages({});
   }
 
-  const resolveImageId = (field: MenuItem) =>
-    field.id === -1 ? field.tempId : field.id;
+  const resolveImageId = (field: MenuItem & { tempId: string }) =>
+    field.id === -1 ? field.tempId : (field.id ?? "");
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] max-h-screen h-full p-4">
@@ -217,7 +214,9 @@ const AdminMenu = () => {
                       control={form.control}
                       name={`menu.${selectedField.index}.${input.id}` as const}
                       render={({ field }) => {
-                        let render = <Input {...field} />;
+                        let render = (
+                          <Input {...field} value={field.value ?? ""} />
+                        );
 
                         if (input.type === "file") {
                           render =
@@ -416,7 +415,7 @@ const AdminMenu = () => {
                   tempId: uuidv4(),
                   id: -1,
                 };
-                append(item);
+                append({ ...item, index: fields.length });
                 setSelectedField({ ...item, index: fields.length });
                 setIsOpen(true);
               }}

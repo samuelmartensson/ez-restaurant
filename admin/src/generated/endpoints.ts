@@ -19,10 +19,6 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
-export type DeleteCustomerDeleteCustomerParams = {
-  key?: number;
-};
-
 export type PostCustomerUploadSiteConfigurationBody = {
   Logo?: Blob;
   siteConfigurationJson?: string;
@@ -39,6 +35,10 @@ export type PostCustomerUploadCustomerMenuBody = {
 
 export type PostCustomerUploadCustomerMenuParams = {
   key?: string;
+};
+
+export type DeleteCustomerDeleteCustomerParams = {
+  key?: number;
 };
 
 export type GetCustomerGetCustomerMenuParams = {
@@ -74,10 +74,9 @@ export interface TimeSpan {
   readonly totalSeconds?: number;
 }
 
-export interface MenuItem {
+export interface MenuResponse {
   /** @nullable */
   category?: string | null;
-  customerConfig?: CustomerConfig;
   /** @nullable */
   customerConfigDomain?: string | null;
   /** @nullable */
@@ -104,6 +103,27 @@ export const DayOfWeek = {
   NUMBER_5: 5,
   NUMBER_6: 6,
 } as const;
+
+export interface CustomerResponse {
+  /** @nullable */
+  adress?: string | null;
+  customerId?: number;
+  /** @nullable */
+  domain?: string | null;
+  /** @nullable */
+  email?: string | null;
+  heroType?: number;
+  /** @nullable */
+  logo?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  siteMetaTitle?: string | null;
+  /** @nullable */
+  siteName?: string | null;
+  /** @nullable */
+  theme?: string | null;
+}
 
 export interface Customer {
   /** @nullable */
@@ -151,9 +171,22 @@ export interface OpeningHour {
   openTime?: TimeSpan;
 }
 
-export interface CustomerResponse {
+export interface MenuItem {
   /** @nullable */
-  configs?: CustomerConfig[] | null;
+  category?: string | null;
+  customerConfig?: CustomerConfig;
+  /** @nullable */
+  customerConfigDomain?: string | null;
+  /** @nullable */
+  description?: string | null;
+  id?: number;
+  /** @nullable */
+  image?: string | null;
+  /** @nullable */
+  name?: string | null;
+  price?: number;
+  /** @nullable */
+  tags?: string | null;
 }
 
 export interface CustomerConfigResponse {
@@ -327,7 +360,7 @@ export const getCustomerGetCustomerMenu = (
   params?: GetCustomerGetCustomerMenuParams,
   signal?: AbortSignal,
 ) => {
-  return authorizedFetch<void>({
+  return authorizedFetch<MenuResponse[]>({
     url: `/Customer/get-customer-menu`,
     method: "GET",
     params,
@@ -471,7 +504,7 @@ export function useGetCustomerGetCustomerMenu<
 }
 
 export const getCustomerGetCustomer = (signal?: AbortSignal) => {
-  return authorizedFetch<CustomerResponse>({
+  return authorizedFetch<CustomerResponse[]>({
     url: `/Customer/get-customer`,
     method: "GET",
     signal,
@@ -657,6 +690,74 @@ export const usePutCustomerCreateConfig = <
   TContext
 > => {
   const mutationOptions = getPutCustomerCreateConfigMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const deleteCustomerDeleteCustomer = (
+  params?: DeleteCustomerDeleteCustomerParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Customer/delete-customer`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteCustomerDeleteCustomerMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+    TError,
+    { params?: DeleteCustomerDeleteCustomerParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+  TError,
+  { params?: DeleteCustomerDeleteCustomerParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+    { params?: DeleteCustomerDeleteCustomerParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return deleteCustomerDeleteCustomer(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCustomerDeleteCustomerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>
+>;
+
+export type DeleteCustomerDeleteCustomerMutationError = unknown;
+
+export const useDeleteCustomerDeleteCustomer = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+    TError,
+    { params?: DeleteCustomerDeleteCustomerParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+  TError,
+  { params?: DeleteCustomerDeleteCustomerParams },
+  TContext
+> => {
+  const mutationOptions =
+    getDeleteCustomerDeleteCustomerMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -861,74 +962,6 @@ export const usePostCustomerUploadSiteConfiguration = <
 > => {
   const mutationOptions =
     getPostCustomerUploadSiteConfigurationMutationOptions(options);
-
-  return useMutation(mutationOptions);
-};
-
-export const deleteCustomerDeleteCustomer = (
-  params?: DeleteCustomerDeleteCustomerParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Customer/delete-customer`,
-    method: "DELETE",
-    params,
-  });
-};
-
-export const getDeleteCustomerDeleteCustomerMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-    TError,
-    { params?: DeleteCustomerDeleteCustomerParams },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-  TError,
-  { params?: DeleteCustomerDeleteCustomerParams },
-  TContext
-> => {
-  const { mutation: mutationOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-    { params?: DeleteCustomerDeleteCustomerParams }
-  > = (props) => {
-    const { params } = props ?? {};
-
-    return deleteCustomerDeleteCustomer(params);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type DeleteCustomerDeleteCustomerMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>
->;
-
-export type DeleteCustomerDeleteCustomerMutationError = unknown;
-
-export const useDeleteCustomerDeleteCustomer = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-    TError,
-    { params?: DeleteCustomerDeleteCustomerParams },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-  TError,
-  { params?: DeleteCustomerDeleteCustomerParams },
-  TContext
-> => {
-  const mutationOptions =
-    getDeleteCustomerDeleteCustomerMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

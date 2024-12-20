@@ -34,7 +34,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataContext.Provider
       value={{
-        configs: data?.configs ?? [],
+        configs: data ?? [],
         setSelectedDomain,
         selectedDomain,
       }}

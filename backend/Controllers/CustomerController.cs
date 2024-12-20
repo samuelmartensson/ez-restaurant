@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.Responses;
 
 namespace webapi.Controllers;
 
@@ -73,7 +74,7 @@ public class CustomerController(
 
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<MenuResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
     {
         var menuItems = await context.MenuItems
@@ -85,18 +86,23 @@ public class CustomerController(
             return NotFound(new { message = "Menu not found for the provided key." });
         }
 
-        return Ok(menuItems);
-    }
-
-    public class CustomerResponse
-    {
-        public List<CustomerConfig>? Configs { get; set; }
+        return Ok(menuItems.Select(m => new MenuResponse
+        {
+            Id = m.Id,
+            CustomerConfigDomain = m.CustomerConfigDomain,
+            Name = m.Name,
+            Category = m.Category,
+            Price = m.Price,
+            Description = m.Description,
+            Tags = m.Tags,
+            Image = m.Image,
+        }));
     }
 
     [Authorize(Policy = "UserPolicy")]
     [HttpGet("get-customer")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<CustomerResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrCreateCustomer()
     {
         var user = await userService.GetUser(User);
@@ -115,12 +121,19 @@ public class CustomerController(
             .Where(cf => cf.CustomerId == user.CustomerId)
             .ToListAsync();
 
-        var response = new CustomerResponse
+        return Ok(configs.Select(c => new CustomerResponse
         {
-            Configs = configs
-        };
-
-        return Ok(response);
+            Domain = c.Domain,
+            CustomerId = c.CustomerId,
+            HeroType = c.HeroType,
+            Theme = c.Theme,
+            SiteName = c.SiteName,
+            SiteMetaTitle = c.SiteMetaTitle,
+            Logo = c.Logo,
+            Adress = c.Adress,
+            Phone = c.Phone,
+            Email = c.Email,
+        }));
     }
 
     public record CreateConfigRequest(string domain);
