@@ -129,7 +129,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseCors("Prod")
+    app.UseCors("Prod");
 }
 
 app.UseHttpsRedirection();
