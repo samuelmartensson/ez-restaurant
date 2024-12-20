@@ -1,0 +1,51 @@
+on: push
+name: 🚀 Deploy website on push
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0.x"
+      - run: dotnet publish -c Release -o publish
+        working-directory: backend
+
+      - name: Add SSH Server to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 172.232.147.147 >> ~/.ssh/known_hosts
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Install rsync and Verify Installation
+        run: |
+          sudo apt-get -y install rsync openssh-client
+
+      - name: Deploy React App
+        run: /usr/bin/rsync -rlDvz --delete ./reactapp/dist/ wilhelm@172.232.147.147:/var/www/helptype/
+
+      - name: Bring .htaccess
+        run: /usr/bin/rsync -rlDvz --delete ./FTPinclude/.htaccess wilhelm@172.232.147.147:/var/www/helptype/
+
+      - name: Deploy Dotnet App
+        run: /usr/bin/rsync -rlDvz --delete ./webapi/publish/ wilhelm@172.232.147.147:/var/www/helptypeapi/
+
+      - name: Restart service on CentOS server
+        env:
+          SUDO_PASSWORD: ${{ secrets.SU_PW }}
+        run: |
+          ssh -o StrictHostKeyChecking=no wilhelm@172.232.147.147 "
+            echo $SUDO_PASSWORD | sudo -S systemctl restart helptypeapi.service
+           "
