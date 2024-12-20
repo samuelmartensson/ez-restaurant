@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,9 +39,18 @@ public class CustomerController(
     }
 
 
+    public class CustomerConfigResponse
+    {
+        public CustomerConfig? Config { get; set; }
+        public string? HeroUrl { get; set; }
+        public string? IconUrl { get; set; }
+        public string? MenuBackdropUrl { get; set; }
+        public string? FontUrl { get; set; }
+    }
+
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
     public IActionResult GetCustomerConfig([FromQuery] string key)
     {
         var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
@@ -49,14 +59,17 @@ public class CustomerController(
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
 
-        return Ok(new
+        var response = new CustomerConfigResponse
         {
-            config = customerConfig,
-            heroUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/hero.jpg"),
-            iconUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/logo"),
-            menuBackdropUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/menu-backdrop.jpg"),
-            fontUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/font.ttf"),
-        });
+            Config = customerConfig,
+            HeroUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/hero.jpg"),
+            IconUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/logo"),
+            MenuBackdropUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/menu-backdrop.jpg"),
+            FontUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/font.ttf"),
+        };
+
+        return Ok(response);
+
     }
 
     [HttpGet("get-customer-menu")]

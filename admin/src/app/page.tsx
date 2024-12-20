@@ -28,6 +28,7 @@ import { Save } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import hasDomain from "@/components/hasDomain";
+import { useGetCustomerGetCustomerConfig } from "@/generated/endpoints";
 
 const inputSchema = [
   {
@@ -101,6 +102,22 @@ const Site = () => {
     },
   });
 
+  const { data } = useGetCustomerGetCustomerConfig({ key: selectedDomain });
+
+  useEffect(() => {
+    if (!data?.config) return;
+
+    form.reset({
+      SiteName: data.config.siteName ?? "",
+      SiteMetaTitle: data.config.siteMetaTitle ?? "",
+      Logo: data.config.logo ?? "",
+      Theme: data.config.theme ?? "",
+      Adress: data.config.adress ?? "",
+      Phone: data.config.phone ?? "",
+      Email: data.config.email ?? "",
+    });
+  }, [data, form]);
+
   const fetchCustomerConfig = useCallback(async () => {
     return fetch(getURL(selectedDomain, "get-customer-config"))
       .then((r) => r.json())
@@ -117,10 +134,6 @@ const Site = () => {
         });
       });
   }, [form, selectedDomain]);
-
-  useEffect(() => {
-    fetchCustomerConfig();
-  }, [fetchCustomerConfig]);
 
   async function onSubmit(data: UpdateSiteConfigurationRequest) {
     const formData = new FormData();
