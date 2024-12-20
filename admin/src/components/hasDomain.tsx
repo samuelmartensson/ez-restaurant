@@ -1,14 +1,14 @@
 "use client";
-import React, { JSX } from "react";
+import Link from "next/link";
+import { JSX } from "react";
 import { useDataContext } from "./DataContextProvider";
 import { Button } from "./ui/button";
-import Link from "next/link";
 
 const Wrapper = (Component: () => JSX.Element) => {
   return function Export() {
-    const { selectedDomain } = useDataContext();
+    const { configs } = useDataContext();
 
-    if (!selectedDomain) {
+    if (configs.length === 0) {
       return (
         <div className="grid place-items-center h-full w-full">
           <div className="grid place-items-center gap-2">

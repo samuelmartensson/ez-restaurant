@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 //swagger url: http://localhost:5232/swagger/index.html
@@ -92,7 +91,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 
-string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")}" ?? "NO PATH. ERROR";
+string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")};foreign keys=true" ?? "NO PATH. ERROR";
 
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
 builder.Services.AddScoped<MenuService>();

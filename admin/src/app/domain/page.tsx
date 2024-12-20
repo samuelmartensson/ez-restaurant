@@ -2,30 +2,33 @@
 import { useDataContext } from "@/components/DataContextProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getURL } from "@/utils";
-import { useAuth } from "@clerk/nextjs";
-import React, { useCallback, useState } from "react";
+import {
+  useDeleteCustomerDeleteCustomer,
+  usePutCustomerCreateConfig,
+} from "@/generated/endpoints";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const Domain = () => {
+  const router = useRouter();
   const [value, setValue] = useState("");
-  const { getToken } = useAuth();
-  const { selectedDomain } = useDataContext();
+  const { mutateAsync } = usePutCustomerCreateConfig();
+  const { mutateAsync: deleteCustomer } = useDeleteCustomerDeleteCustomer();
+  const { setSelectedDomain } = useDataContext();
 
-  const createConfig = useCallback(async () => {
-    fetch(getURL(selectedDomain, "create-config"), {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${await getToken()}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ domain: value }),
-    });
-  }, [getToken, selectedDomain, value]);
+  const createConfig = async () => {
+    await mutateAsync({ data: { domain: value } });
+    setSelectedDomain(value);
+    router.push("/site");
+  };
 
   return (
     <div className="p-4 grid gap-4">
       <Input value={value} onChange={(e) => setValue(e.target.value)} />
       <Button onClick={() => createConfig()}>Create domain</Button>
+      <Button onClick={() => deleteCustomer({ params: { key: 19 } })}>
+        delete
+      </Button>
     </div>
   );
 };

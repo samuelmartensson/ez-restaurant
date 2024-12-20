@@ -101,47 +101,30 @@ const Site = () => {
     },
   });
 
-  const { data, refetch } = useGetCustomerGetCustomerConfig({
+  const { data: customerConfig, refetch } = useGetCustomerGetCustomerConfig({
     key: selectedDomain,
   });
   const { mutateAsync: uploadSiteConfiguration } =
     usePostCustomerUploadSiteConfiguration();
 
   useEffect(() => {
-    if (!data?.config) return;
+    if (!customerConfig?.config) return;
 
     form.reset({
-      SiteName: data.config.siteName ?? "",
-      SiteMetaTitle: data.config.siteMetaTitle ?? "",
-      Logo: data.config.logo ?? "",
-      Theme: data.config.theme ?? "",
-      Adress: data.config.adress ?? "",
-      Phone: data.config.phone ?? "",
-      Email: data.config.email ?? "",
+      SiteName: customerConfig.config.siteName ?? "",
+      SiteMetaTitle: customerConfig.config.siteMetaTitle ?? "",
+      Logo: customerConfig.config.logo ?? "",
+      Theme: customerConfig.config.theme ?? "",
+      Adress: customerConfig.config.adress ?? "",
+      Phone: customerConfig.config.phone ?? "",
+      Email: customerConfig.config.email ?? "",
     });
-  }, [data, form]);
+  }, [customerConfig, form]);
 
   async function onSubmit(data: UpdateSiteConfigurationRequest) {
-    // const formData = new FormData();
-    // formData.append(
-    //   "siteConfigurationJson",
-    //   JSON.stringify({
-    //     ...data,
-    //     Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
-    //   })
-    // );
-    // formData.append("logo", uploadedImages?.Logo);
-
-    // await fetch(getURL(selectedDomain, "upload-site-configuration"), {
-    //   method: "post",
-    //   body: formData,
-    //   headers: {
-    //     Authorization: `Bearer ${await getToken()}`,
-    //   },
-    // }).then((r) => r.json());
     await uploadSiteConfiguration({
       data: {
-        logo: uploadedImages?.Logo,
+        Logo: uploadedImages?.Logo,
         siteConfigurationJson: JSON.stringify({
           ...data,
           Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",

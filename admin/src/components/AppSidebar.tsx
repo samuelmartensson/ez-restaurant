@@ -42,7 +42,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <VersionSwitcher domains={configs.map((c) => c.domain)} />
+        <VersionSwitcher domains={configs.map((c) => c.domain ?? "")} />
       </SidebarHeader>
 
       <SidebarContent>

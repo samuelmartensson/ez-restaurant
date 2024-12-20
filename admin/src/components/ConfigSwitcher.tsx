@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react";
+import { Check, ChevronsUpDown, Globe } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ export function VersionSwitcher({ domains }: { domains: string[] }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <GalleryVerticalEnd className="size-4" />
+                <Globe className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-semibold">Domains</span>
@@ -39,6 +39,11 @@ export function VersionSwitcher({ domains }: { domains: string[] }) {
             className="w-[--radix-dropdown-menu-trigger-width]"
             align="start"
           >
+            {domains.length === 0 && (
+              <span className="text-muted-foreground text-sm text-center m-auto block p-2">
+                No domains yet
+              </span>
+            )}
             {domains.map((version) => (
               <DropdownMenuItem
                 key={version}

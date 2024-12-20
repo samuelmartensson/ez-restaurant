@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -89,11 +88,15 @@ public class CustomerController(
         return Ok(menuItems);
     }
 
+    public class CustomerResponse
+    {
+        public List<CustomerConfig>? Configs { get; set; }
+    }
 
     [Authorize(Policy = "UserPolicy")]
     [HttpGet("get-customer")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrCreateCustomer()
     {
         var user = await userService.GetUser(User);
@@ -106,13 +109,18 @@ public class CustomerController(
             await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
             await context.SaveChangesAsync();
             return Ok(new { message = "Success" });
-        }
+        };
 
         var configs = await context.CustomerConfigs
             .Where(cf => cf.CustomerId == user.CustomerId)
             .ToListAsync();
 
-        return Ok(new { message = "Success", configs });
+        var response = new CustomerResponse
+        {
+            Configs = configs
+        };
+
+        return Ok(response);
     }
 
     public record CreateConfigRequest(string domain);
@@ -133,6 +141,22 @@ public class CustomerController(
         {
             return BadRequest(new { message = e.Message });
         }
+    }
+
+    [Authorize(Policy = "UserPolicy")]
+    [HttpDelete("delete-customer")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteCustomer(int key)
+    {
+        var customer = await context.Customers.FirstOrDefaultAsync(c => c.Id == key);
+        if (customer == null)
+        {
+            return NotFound();
+        }
+        context.Customers.Remove(customer);
+        await context.SaveChangesAsync();
+        return Ok();
     }
 
     [Authorize(Policy = "KeyPolicy")]

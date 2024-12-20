@@ -19,8 +19,12 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type DeleteCustomerDeleteCustomerParams = {
+  key?: number;
+};
+
 export type PostCustomerUploadSiteConfigurationBody = {
-  logo?: Blob;
+  Logo?: Blob;
   siteConfigurationJson?: string;
 };
 
@@ -70,6 +74,24 @@ export interface TimeSpan {
   readonly totalSeconds?: number;
 }
 
+export interface MenuItem {
+  /** @nullable */
+  category?: string | null;
+  customerConfig?: CustomerConfig;
+  /** @nullable */
+  customerConfigDomain?: string | null;
+  /** @nullable */
+  description?: string | null;
+  id?: number;
+  /** @nullable */
+  image?: string | null;
+  /** @nullable */
+  name?: string | null;
+  price?: number;
+  /** @nullable */
+  tags?: string | null;
+}
+
 export type DayOfWeek = (typeof DayOfWeek)[keyof typeof DayOfWeek];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -82,16 +104,6 @@ export const DayOfWeek = {
   NUMBER_5: 5,
   NUMBER_6: 6,
 } as const;
-
-export interface OpeningHour {
-  closeTime?: TimeSpan;
-  customerConfig?: CustomerConfig;
-  /** @nullable */
-  customerConfigDomain?: string | null;
-  day?: DayOfWeek;
-  id?: number;
-  openTime?: TimeSpan;
-}
 
 export interface Customer {
   /** @nullable */
@@ -129,22 +141,19 @@ export interface CustomerConfig {
   theme?: string | null;
 }
 
-export interface MenuItem {
-  /** @nullable */
-  category?: string | null;
+export interface OpeningHour {
+  closeTime?: TimeSpan;
   customerConfig?: CustomerConfig;
   /** @nullable */
   customerConfigDomain?: string | null;
-  /** @nullable */
-  description?: string | null;
+  day?: DayOfWeek;
   id?: number;
+  openTime?: TimeSpan;
+}
+
+export interface CustomerResponse {
   /** @nullable */
-  image?: string | null;
-  /** @nullable */
-  name?: string | null;
-  price?: number;
-  /** @nullable */
-  tags?: string | null;
+  configs?: CustomerConfig[] | null;
 }
 
 export interface CustomerConfigResponse {
@@ -462,7 +471,7 @@ export function useGetCustomerGetCustomerMenu<
 }
 
 export const getCustomerGetCustomer = (signal?: AbortSignal) => {
-  return authorizedFetch<void>({
+  return authorizedFetch<CustomerResponse>({
     url: `/Customer/get-customer`,
     method: "GET",
     signal,
@@ -768,8 +777,8 @@ export const postCustomerUploadSiteConfiguration = (
       postCustomerUploadSiteConfigurationBody.siteConfigurationJson,
     );
   }
-  if (postCustomerUploadSiteConfigurationBody.logo !== undefined) {
-    formData.append("logo", postCustomerUploadSiteConfigurationBody.logo);
+  if (postCustomerUploadSiteConfigurationBody.Logo !== undefined) {
+    formData.append("Logo", postCustomerUploadSiteConfigurationBody.Logo);
   }
 
   return authorizedFetch<void>({
@@ -852,6 +861,74 @@ export const usePostCustomerUploadSiteConfiguration = <
 > => {
   const mutationOptions =
     getPostCustomerUploadSiteConfigurationMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const deleteCustomerDeleteCustomer = (
+  params?: DeleteCustomerDeleteCustomerParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Customer/delete-customer`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteCustomerDeleteCustomerMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+    TError,
+    { params?: DeleteCustomerDeleteCustomerParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+  TError,
+  { params?: DeleteCustomerDeleteCustomerParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+    { params?: DeleteCustomerDeleteCustomerParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return deleteCustomerDeleteCustomer(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCustomerDeleteCustomerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>
+>;
+
+export type DeleteCustomerDeleteCustomerMutationError = unknown;
+
+export const useDeleteCustomerDeleteCustomer = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+    TError,
+    { params?: DeleteCustomerDeleteCustomerParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
+  TError,
+  { params?: DeleteCustomerDeleteCustomerParams },
+  TContext
+> => {
+  const mutationOptions =
+    getDeleteCustomerDeleteCustomerMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
