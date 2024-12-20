@@ -127,6 +127,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors("Dev");
 }
+else
+{
+    app.UseCors("Prod")
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
