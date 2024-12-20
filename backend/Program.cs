@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 
       options.AddPolicy("Prod",
           builder => builder
-                .WithOrigins("https://*.tidochplats.se")
+                .WithOrigins("https://*.tidochplats.se", "https://ez-restaurant-admin.vercel.app")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
