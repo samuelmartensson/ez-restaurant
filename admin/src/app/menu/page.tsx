@@ -80,7 +80,7 @@ type InternalMenuItem = MenuResponse & {
 const AdminMenu = () => {
   const { selectedDomain } = useDataContext();
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
-  const [selectedField, setSelectedField] = useState<InternalMenuItem>();
+  const [selectedFieldIndex, setSelectedField] = useState<number>();
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
     {}
   );
@@ -95,19 +95,23 @@ const AdminMenu = () => {
     defaultValues: { menu: data },
   });
 
-  const { fields, append, insert, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     name: "menu",
     control: form.control,
     keyName: "formId",
   });
 
+  const selectedField =
+    selectedFieldIndex !== undefined ? fields[selectedFieldIndex] : undefined;
+
   useEffect(() => {
     if (!data) return;
-    form.reset({ menu: data });
+    form.reset({ menu: data.map((d, i) => ({ ...d, index: i })) });
     setCategories(Array.from(new Set(data.map((m) => m.category ?? ""))));
   }, [data, form]);
 
-  const { mutateAsync: updateMenu } = usePostCustomerUploadCustomerMenu();
+  const { mutateAsync: updateMenu, isPending } =
+    usePostCustomerUploadCustomerMenu();
 
   async function onSubmit() {
     remove(deletedItems);
@@ -138,174 +142,173 @@ const AdminMenu = () => {
 
   return (
     <div className="grid p-4 gap-4" style={{ gridTemplateColumns: "3fr 2fr" }}>
-      <Form {...form}>
-        <div className="grid grid-rows-[auto_70vh]">
-          <div className="mb-8">
-            <div className="text-xl mb-2">Categories</div>
-            <div className="flex gap-2 mb-2">
-              <Input
-                placeholder="Add category..."
-                value={addCategory}
-                onChange={(e) => setAddCategory(e.target.value)}
-              />
-              <Button
-                onClick={() => {
-                  setCategories((state) =>
-                    Array.from(new Set([...state, addCategory]))
-                  );
-                  setAddCategory("");
-                }}
-              >
-                Add category
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {categories.filter(Boolean).map((c) => (
-                <Badge
-                  variant={selectedCategory === c ? "default" : "outline"}
-                  onClick={() =>
-                    setSelectedCategory(selectedCategory === c ? "" : c)
-                  }
-                  className="text-base cursor-pointer"
-                  key={c}
-                >
-                  {c}
-                </Badge>
-              ))}
-            </div>
+      <div className="grid grid-rows-[auto_70vh]">
+        <div className="mb-8">
+          <div className="text-xl mb-2">Categories</div>
+          <div className="flex gap-2 mb-2">
+            <Input
+              placeholder="Add category..."
+              value={addCategory}
+              onChange={(e) => setAddCategory(e.target.value)}
+            />
+            <Button
+              onClick={() => {
+                setCategories((state) =>
+                  Array.from(new Set([...state, addCategory]))
+                );
+                setAddCategory("");
+              }}
+            >
+              Add category
+            </Button>
           </div>
-          <div className="flex flex-col gap-2 overflow-auto">
-            {fields.map((field, index) => {
-              const deleteStaged = deletedItems.includes(index);
-              const saveStaged = !data.map((d) => d.id).includes(field.id);
-              const { isDirty } = form.getFieldState(`menu.${index}`);
-
-              if (
-                selectedCategory &&
-                form.watch(`menu.${index}.category`) !== selectedCategory
-              )
-                return null;
-
-              return (
-                <div
-                  key={field.formId}
-                  className={`flex justify-between gap-2 border-b ${selectedField?.id === field.id ? "border-l-4 border-l-primary" : ""}`}
-                >
-                  <Button
-                    onClick={() => {
-                      setSelectedField({ ...field, index });
-                    }}
-                    type="button"
-                    className="block text-left w-full h-auto"
-                    variant={(() => {
-                      if (saveStaged) return "default";
-                      return deleteStaged ? "destructive" : "ghost";
-                    })()}
-                  >
-                    <div className="flex gap-2 items-center">
-                      {uploadedImages?.[resolveImageId(field)] ? (
-                        <FilePreview
-                          file={uploadedImages[resolveImageId(field)]}
-                        />
-                      ) : (
-                        <>
-                          {field.image &&
-                          form.watch(`menu.${index}.image`) !==
-                            ACTIONS.REMOVE ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              className="h-20 w-20 object-contain bg-gray-100 rounded"
-                              src={field.image}
-                              alt=""
-                            />
-                          ) : (
-                            <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
-                              No image
-                            </div>
-                          )}
-                        </>
-                      )}
-                      <div className="grid gap-1 justify-items-start">
-                        <span className="text-base">
-                          {form.watch(`menu.${index}.name`)}
-                        </span>
-                        <Badge>{form.watch(`menu.${index}.category`)}</Badge>
-                      </div>
-                    </div>
-                  </Button>
-                  <div className="grid gap-2">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() => {
-                        if (saveStaged) {
-                          remove(index);
-                          return;
-                        }
-                        setDeletedItems((state) =>
-                          state.includes(index)
-                            ? state.filter((n) => n !== index)
-                            : [...state, index]
-                        );
-                      }}
-                    >
-                      {deleteStaged ? <X /> : <Trash />} Delete
-                    </Button>
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() => {
-                        const item = {
-                          ...field,
-                          tempId: uuidv4(),
-                          id: -1,
-                        };
-                        append({ ...item, index: fields.length });
-                        setSelectedField({ ...item, index: fields.length });
-                      }}
-                    >
-                      <Copy /> Copy
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex flex-wrap gap-1">
+            {categories.filter(Boolean).map((c) => (
+              <Badge
+                variant={selectedCategory === c ? "default" : "outline"}
+                onClick={() =>
+                  setSelectedCategory(selectedCategory === c ? "" : c)
+                }
+                className="text-base cursor-pointer"
+                key={c}
+              >
+                {c}
+              </Badge>
+            ))}
           </div>
         </div>
-        <div className="border-l px-4">
-          <form
-            className="grid gap-4 overflow-auto"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                className="flex-1"
-                onClick={() => {
-                  const item = {
-                    category: categories?.[0] ?? "",
-                    description: "",
-                    image: "",
-                    name: "My Dish",
-                    price: 0,
-                    tags: "",
-                    tempId: uuidv4(),
-                    id: -1,
-                  };
-                  append({ ...item, index: fields.length });
-                  setSelectedField({ ...item, index: fields.length });
-                }}
-                variant="secondary"
-                type="button"
+        <div className="flex flex-col gap-2 overflow-auto p-2">
+          {fields.map((field, index) => {
+            const deleteStaged = deletedItems.includes(index);
+            const saveStaged = !data.map((d) => d.id).includes(field.id);
+
+            if (
+              selectedCategory &&
+              form.watch(`menu.${index}.category`) !== selectedCategory
+            )
+              return null;
+
+            return (
+              <div
+                key={field.formId}
+                className={`relative flex justify-between gap-2 border-b ${selectedField?.id === field.id ? "border-l-4 border-l-primary" : ""}`}
               >
-                <Plus /> Menu item
-              </Button>
-              <Button className="flex-1" type="submit">
-                <Save /> Save
-              </Button>
-            </div>
-          </form>
+                <Button
+                  onClick={() => {
+                    setSelectedField(index);
+                  }}
+                  type="button"
+                  className="block text-left w-full h-auto"
+                  variant={(() => {
+                    if (saveStaged) return "default";
+                    return deleteStaged ? "destructive" : "ghost";
+                  })()}
+                >
+                  <div className="flex gap-2 items-center">
+                    {uploadedImages?.[resolveImageId(field)] ? (
+                      <FilePreview
+                        file={uploadedImages[resolveImageId(field)]}
+                      />
+                    ) : (
+                      <>
+                        {field.image &&
+                        form.watch(`menu.${index}.image`) !== ACTIONS.REMOVE ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            className="h-20 w-20 object-contain bg-gray-100 rounded"
+                            src={field.image}
+                            alt=""
+                          />
+                        ) : (
+                          <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                            No image
+                          </div>
+                        )}
+                      </>
+                    )}
+                    <div className="grid gap-1 justify-items-start">
+                      <span className="text-base">
+                        {form.watch(`menu.${index}.name`)}
+                      </span>
+                      <Badge>{form.watch(`menu.${index}.category`)}</Badge>
+                    </div>
+                  </div>
+                </Button>
+                <div className="grid gap-2">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      if (saveStaged) {
+                        remove(index);
+                        return;
+                      }
+                      setDeletedItems((state) =>
+                        state.includes(index)
+                          ? state.filter((n) => n !== index)
+                          : [...state, index]
+                      );
+                    }}
+                  >
+                    {deleteStaged ? <X /> : <Trash />} Delete
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      const item = {
+                        ...field,
+                        tempId: uuidv4(),
+                        id: -1,
+                      };
+                      append({ ...item, index: fields.length });
+                      setSelectedField(fields.length);
+                    }}
+                  >
+                    <Copy /> Copy
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="border-l px-4">
+        <form
+          className="grid gap-4 overflow-auto"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              className="flex-1"
+              onClick={() => {
+                const item = {
+                  category: categories?.[0] ?? "",
+                  description: "",
+                  image: "",
+                  name: "My Dish",
+                  price: 0,
+                  tags: "",
+                  tempId: uuidv4(),
+                  id: -1,
+                };
+
+                append({ ...item, index: fields.length });
+                setSelectedField(fields.length);
+              }}
+              variant="secondary"
+              type="button"
+            >
+              <Plus /> Menu item
+            </Button>
+            <Button disabled={isPending} className="flex-1" type="submit">
+              <Save /> Save
+            </Button>
+          </div>
+        </form>
+        <Form {...form}>
           {selectedField && (
-            <div className="grid gap-2 p-4" key={selectedField.index}>
+            <div className="grid gap-2 p-4" key={selectedFieldIndex}>
               {inputSchema.map((input) => (
                 <FormField
                   key={input.id}
@@ -393,8 +396,8 @@ const AdminMenu = () => {
               ))}
             </div>
           )}
-        </div>
-      </Form>
+        </Form>
+      </div>
     </div>
   );
 };
