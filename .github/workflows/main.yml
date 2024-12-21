@@ -32,6 +32,8 @@ jobs:
         run: /usr/bin/rsync -rlDvz --delete ./backend/publish/ wilhelm@172.232.147.147:/var/www/restaurantbackend/
 
       - name: Set AWS Environment Variables
+        env:
+          SUDO_PASSWORD: ${{ secrets.SU_PW }}
         run: |
           ssh -o StrictHostKeyChecking=no wilhelm@172.232.147.147 "
             echo $SUDO_PASSWORD | sudo -S bash -c '
