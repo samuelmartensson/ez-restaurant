@@ -4,19 +4,12 @@ import {
   CustomerConfig,
   useGetCustomerGetCustomer,
 } from "@/generated/endpoints";
-import {
-  createContext,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const DataContext = createContext<{
   configs: CustomerConfig[];
   selectedDomain: string;
-  setSelectedDomain: Dispatch<SetStateAction<string>>;
+  setSelectedDomain: (domain: string) => void;
   refetch: () => Promise<void>;
 }>({
   configs: [],
@@ -28,14 +21,22 @@ const DataContext = createContext<{
 export const useDataContext = () => useContext(DataContext);
 
 const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedDomain, setSelectedDomain] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState(
+    sessionStorage.getItem("domain") ?? ""
+  );
 
   const { data = [], isLoading, refetch } = useGetCustomerGetCustomer();
-  console.log(data);
+
+  const setSelectedDomainInternal = (domain: string) => {
+    setSelectedDomain(domain);
+    sessionStorage.setItem("domain", domain);
+  };
 
   useEffect(() => {
-    setSelectedDomain(data?.[0]?.domain ?? "");
-  }, [data]);
+    if (!selectedDomain) {
+      setSelectedDomain(data?.[0]?.domain ?? "");
+    }
+  }, [data, selectedDomain]);
 
   if (isLoading) return null;
 
@@ -43,7 +44,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     <DataContext.Provider
       value={{
         configs: data,
-        setSelectedDomain,
+        setSelectedDomain: setSelectedDomainInternal,
         selectedDomain,
         refetch: async () => {
           await refetch();

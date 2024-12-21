@@ -68,8 +68,8 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             Domain = domain,
             HeroType = 1,
             Logo = "",
-            SiteMetaTitle = "Meta title",
-            SiteName = "Site name 2",
+            SiteMetaTitle = "",
+            SiteName = domain,
             Theme = "rustic",
         };
 

@@ -97,7 +97,9 @@ const AdminMenu = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [addCategory, setAddCategory] = useState("");
-  const { data = [] } = useGetCustomerGetCustomerMenu({ key: selectedDomain });
+  const { data = [], refetch } = useGetCustomerGetCustomerMenu({
+    key: selectedDomain,
+  });
 
   const form = useForm<{ menu: InternalMenuItem[] }>({
     defaultValues: { menu: data },
@@ -112,6 +114,7 @@ const AdminMenu = () => {
   useEffect(() => {
     if (!data) return;
     form.reset({ menu: data });
+    setCategories(Array.from(new Set(data.map((m) => m.category ?? ""))));
   }, [data, form]);
 
   const removeItemsAsync = () => {
@@ -144,6 +147,7 @@ const AdminMenu = () => {
         ),
       },
     });
+    await refetch();
 
     setUploadedImages({});
   }
