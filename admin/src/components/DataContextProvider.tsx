@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  CustomerConfig,
+  CustomerConfigResponse,
   useGetCustomerGetCustomer,
 } from "@/generated/endpoints";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const DataContext = createContext<{
-  configs: CustomerConfig[];
+  configs: CustomerConfigResponse[];
   selectedDomain: string;
   setSelectedDomain: (domain: string) => void;
   refetch: () => Promise<void>;
