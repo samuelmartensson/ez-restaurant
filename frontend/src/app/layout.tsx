@@ -1,4 +1,3 @@
-import AdminTool from "@/components/AdminTool";
 import { Navigation } from "@/components/Navigation";
 import { getCustomerConfig } from "@/mock_db";
 import { CustomerConfig } from "@/types";
@@ -78,9 +77,7 @@ export default async function RootLayout({
       <FontInitializer fontUrl={data.fontUrl} />
       <body className="antialiased relative">
         <Navigation data={data} />
-
         {children}
-        <AdminTool {...data} />
       </body>
     </html>
   );
