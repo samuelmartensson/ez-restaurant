@@ -53,7 +53,7 @@ public class CustomerController(
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
     public IActionResult GetCustomerConfig([FromQuery] string key)
     {
-        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
+        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain.ToLower() == key.ToLower());
         if (string.IsNullOrEmpty(key) || customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });

@@ -130,6 +130,7 @@ const AdminMenu = () => {
     setDeletedItems([]);
 
     await updateMenu({
+      params: { key: selectedDomain },
       data: {
         menuItemsJson: JSON.stringify(
           form.getValues("menu").map((d) => ({
