@@ -89,7 +89,6 @@ type InternalMenuItem = MenuResponse & {
 
 const AdminMenu = () => {
   const { selectedDomain } = useDataContext();
-
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedField, setSelectedField] = useState<InternalMenuItem>();
   const [isOpen, setIsOpen] = useState(false);
@@ -100,7 +99,7 @@ const AdminMenu = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [addCategory, setAddCategory] = useState("");
   const { getToken } = useAuth();
-  const { data = [] } = useGetCustomerGetCustomerMenu();
+  const { data = [] } = useGetCustomerGetCustomerMenu({ key: selectedDomain });
 
   const form = useForm<{ menu: InternalMenuItem[] }>({
     defaultValues: { menu: data },

@@ -9,6 +9,7 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
+  useEffect,
   useState,
 } from "react";
 
@@ -28,6 +29,9 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedDomain, setSelectedDomain] = useState("");
 
   const { data, isLoading } = useGetCustomerGetCustomer();
+  useEffect(() => {
+    setSelectedDomain(data?.[0]?.domain ?? "");
+  }, [data]);
 
   if (isLoading) return null;
 
