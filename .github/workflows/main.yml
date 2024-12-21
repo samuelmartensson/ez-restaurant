@@ -25,7 +25,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
       - name: Change ownership of .aspnet directory
         run: |
-          sudo chown -R wilhelm:wilhelm .aspnet/
+          sudo chown -R wilhelm .aspnet/
 
       - name: Install rsync and Verify Installation
         run: |
