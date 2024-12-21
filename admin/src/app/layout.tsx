@@ -3,10 +3,11 @@
 import { AppSidebar } from "@/components/AppSidebar";
 import DataContextProvider from "@/components/DataContextProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider, SignedIn } from "@clerk/nextjs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import "./globals.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ export default function AdminLayout({
     <html lang="en">
       <body className="antialiased relative">
         <ClerkProvider>
+          <Toaster />
           <QueryClientProvider client={queryClient}>
             <SignedIn>
               <DataContextProvider>

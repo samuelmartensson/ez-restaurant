@@ -1,24 +1,27 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MenuItem as MenuItemType } from "@/types";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { MenuResponse } from "@/generated/endpoints";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-function groupBy<T extends MenuItemType>(
+function groupBy<T extends MenuResponse>(
   list: T[],
   key: keyof T
 ): { group: string; items: T[] }[] {
-  const grouped = list.reduce((result, item) => {
-    const groupKey = item[key] as string;
+  const grouped = list.reduce(
+    (result, item) => {
+      const groupKey = item[key] as string;
 
-    if (!result[groupKey]) {
-      result[groupKey] = [];
-    }
+      if (!result[groupKey]) {
+        result[groupKey] = [];
+      }
 
-    result[groupKey].push(item);
+      result[groupKey].push(item);
 
-    return result;
-  }, {} as { [key: string]: T[] });
+      return result;
+    },
+    {} as { [key: string]: T[] }
+  );
 
   return Object.keys(grouped).map((groupKey) => ({
     group: groupKey,
@@ -26,7 +29,7 @@ function groupBy<T extends MenuItemType>(
   }));
 }
 
-const MenuItem = ({ description, name, price, tags }: MenuItemType) => {
+const MenuItem = ({ description, name, price, tags }: MenuResponse) => {
   return (
     <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-2 justify-between">
       <div className="grid gap-4">
@@ -56,11 +59,11 @@ const MenuItem = ({ description, name, price, tags }: MenuItemType) => {
   );
 };
 
-const MenuRender = ({ data }: { data: MenuItemType[] }) => {
+const MenuRender = ({ data = [] }: { data: MenuResponse[] }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const categories = Array.from(new Set(data.map((m) => m.category)));
+  const categories = Array.from(new Set(data.map((m) => m.category ?? "")));
   const selectedCategory =
     searchParams.get("selectedCategory") || categories?.[0];
 

@@ -7,11 +7,13 @@ public class CustomerConfig
     required public string SiteName { get; set; }
     required public string SiteMetaTitle { get; set; }
     required public string Logo { get; set; }
+    public string? Font { get; set; } = "";
     public string? Adress { get; set; } = "";
     public string? Phone { get; set; } = "";
     public string? Email { get; set; } = "";
 
     public Customer? Customer { get; set; }
+    public SiteSectionHero? SiteSectionHero { get; set; }
     public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
     public ICollection<OpeningHour> OpeningHours { get; set; } = new List<OpeningHour>();
 

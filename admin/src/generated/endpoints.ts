@@ -19,9 +19,33 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
-export type PostCustomerUploadSiteConfigurationBody = {
+export type PostCustomerUploadHeroBody = {
+  Image?: Blob;
+  OrderUrl?: string;
+  removedAssets?: string[];
+};
+
+export type PostCustomerUploadHeroParams = {
+  key?: string;
+};
+
+export type PostCustomerUploadSiteConfigurationAssetsBody = {
+  Font?: Blob;
   Logo?: Blob;
-  siteConfigurationJson?: string;
+};
+
+export type PostCustomerUploadSiteConfigurationAssetsParams = {
+  key?: string;
+};
+
+export type PostCustomerUploadSiteConfigurationBody = {
+  Adress?: string;
+  Email?: string;
+  Logo?: string;
+  Phone?: string;
+  SiteMetaTitle?: string;
+  SiteName?: string;
+  Theme?: string;
 };
 
 export type PostCustomerUploadSiteConfigurationParams = {
@@ -37,10 +61,6 @@ export type PostCustomerUploadCustomerMenuParams = {
   key?: string;
 };
 
-export type DeleteCustomerDeleteCustomerParams = {
-  key?: number;
-};
-
 export type GetCustomerGetCustomerMenuParams = {
   key?: string;
 };
@@ -49,29 +69,15 @@ export type GetCustomerGetCustomerConfigParams = {
   key?: string;
 };
 
-export interface User {
-  customer?: Customer;
-  customerId?: number;
+export interface SiteSectionHeroResponse {
   /** @nullable */
-  id?: string | null;
+  heroImage?: string | null;
+  /** @nullable */
+  orderUrl?: string | null;
 }
 
-export interface TimeSpan {
-  readonly days?: number;
-  readonly hours?: number;
-  readonly microseconds?: number;
-  readonly milliseconds?: number;
-  readonly minutes?: number;
-  readonly nanoseconds?: number;
-  readonly seconds?: number;
-  ticks?: number;
-  readonly totalDays?: number;
-  readonly totalHours?: number;
-  readonly totalMicroseconds?: number;
-  readonly totalMilliseconds?: number;
-  readonly totalMinutes?: number;
-  readonly totalNanoseconds?: number;
-  readonly totalSeconds?: number;
+export interface SectionsResponse {
+  hero?: SiteSectionHeroResponse;
 }
 
 export interface MenuResponse {
@@ -90,19 +96,6 @@ export interface MenuResponse {
   /** @nullable */
   tags?: string | null;
 }
-
-export type DayOfWeek = (typeof DayOfWeek)[keyof typeof DayOfWeek];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const DayOfWeek = {
-  NUMBER_0: 0,
-  NUMBER_1: 1,
-  NUMBER_2: 2,
-  NUMBER_3: 3,
-  NUMBER_4: 4,
-  NUMBER_5: 5,
-  NUMBER_6: 6,
-} as const;
 
 export interface CustomerResponse {
   /** @nullable */
@@ -125,80 +118,27 @@ export interface CustomerResponse {
   theme?: string | null;
 }
 
-export interface Customer {
-  /** @nullable */
-  customerConfigs?: CustomerConfig[] | null;
-  id?: number;
-  /** @nullable */
-  subscription?: string | null;
-  /** @nullable */
-  users?: User[] | null;
-}
-
-export interface CustomerConfig {
+export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
-  customer?: Customer;
-  customerId?: number;
-  /** @nullable */
-  domain?: string | null;
   /** @nullable */
   email?: string | null;
+  /** @nullable */
+  font?: string | null;
   heroType?: number;
   /** @nullable */
   logo?: string | null;
   /** @nullable */
-  menuItems?: MenuItem[] | null;
-  /** @nullable */
-  openingHours?: OpeningHour[] | null;
+  menuBackdropUrl?: string | null;
   /** @nullable */
   phone?: string | null;
+  sections?: SectionsResponse;
   /** @nullable */
   siteMetaTitle?: string | null;
   /** @nullable */
   siteName?: string | null;
   /** @nullable */
   theme?: string | null;
-}
-
-export interface OpeningHour {
-  closeTime?: TimeSpan;
-  customerConfig?: CustomerConfig;
-  /** @nullable */
-  customerConfigDomain?: string | null;
-  day?: DayOfWeek;
-  id?: number;
-  openTime?: TimeSpan;
-}
-
-export interface MenuItem {
-  /** @nullable */
-  category?: string | null;
-  customerConfig?: CustomerConfig;
-  /** @nullable */
-  customerConfigDomain?: string | null;
-  /** @nullable */
-  description?: string | null;
-  id?: number;
-  /** @nullable */
-  image?: string | null;
-  /** @nullable */
-  name?: string | null;
-  price?: number;
-  /** @nullable */
-  tags?: string | null;
-}
-
-export interface CustomerConfigResponse {
-  config?: CustomerConfig;
-  /** @nullable */
-  fontUrl?: string | null;
-  /** @nullable */
-  heroUrl?: string | null;
-  /** @nullable */
-  iconUrl?: string | null;
-  /** @nullable */
-  menuBackdropUrl?: string | null;
 }
 
 export interface CreateConfigRequest {
@@ -694,74 +634,6 @@ export const usePutCustomerCreateConfig = <
   return useMutation(mutationOptions);
 };
 
-export const deleteCustomerDeleteCustomer = (
-  params?: DeleteCustomerDeleteCustomerParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Customer/delete-customer`,
-    method: "DELETE",
-    params,
-  });
-};
-
-export const getDeleteCustomerDeleteCustomerMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-    TError,
-    { params?: DeleteCustomerDeleteCustomerParams },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-  TError,
-  { params?: DeleteCustomerDeleteCustomerParams },
-  TContext
-> => {
-  const { mutation: mutationOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-    { params?: DeleteCustomerDeleteCustomerParams }
-  > = (props) => {
-    const { params } = props ?? {};
-
-    return deleteCustomerDeleteCustomer(params);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type DeleteCustomerDeleteCustomerMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>
->;
-
-export type DeleteCustomerDeleteCustomerMutationError = unknown;
-
-export const useDeleteCustomerDeleteCustomer = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-    TError,
-    { params?: DeleteCustomerDeleteCustomerParams },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteCustomerDeleteCustomer>>,
-  TError,
-  { params?: DeleteCustomerDeleteCustomerParams },
-  TContext
-> => {
-  const mutationOptions =
-    getDeleteCustomerDeleteCustomerMutationOptions(options);
-
-  return useMutation(mutationOptions);
-};
-
 export const postCustomerUploadCustomerMenu = (
   postCustomerUploadCustomerMenuBody: PostCustomerUploadCustomerMenuBody,
   params?: PostCustomerUploadCustomerMenuParams,
@@ -870,16 +742,32 @@ export const postCustomerUploadSiteConfiguration = (
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (
-    postCustomerUploadSiteConfigurationBody.siteConfigurationJson !== undefined
-  ) {
+  if (postCustomerUploadSiteConfigurationBody.SiteName !== undefined) {
     formData.append(
-      "siteConfigurationJson",
-      postCustomerUploadSiteConfigurationBody.siteConfigurationJson,
+      "SiteName",
+      postCustomerUploadSiteConfigurationBody.SiteName,
     );
+  }
+  if (postCustomerUploadSiteConfigurationBody.SiteMetaTitle !== undefined) {
+    formData.append(
+      "SiteMetaTitle",
+      postCustomerUploadSiteConfigurationBody.SiteMetaTitle,
+    );
+  }
+  if (postCustomerUploadSiteConfigurationBody.Theme !== undefined) {
+    formData.append("Theme", postCustomerUploadSiteConfigurationBody.Theme);
   }
   if (postCustomerUploadSiteConfigurationBody.Logo !== undefined) {
     formData.append("Logo", postCustomerUploadSiteConfigurationBody.Logo);
+  }
+  if (postCustomerUploadSiteConfigurationBody.Adress !== undefined) {
+    formData.append("Adress", postCustomerUploadSiteConfigurationBody.Adress);
+  }
+  if (postCustomerUploadSiteConfigurationBody.Phone !== undefined) {
+    formData.append("Phone", postCustomerUploadSiteConfigurationBody.Phone);
+  }
+  if (postCustomerUploadSiteConfigurationBody.Email !== undefined) {
+    formData.append("Email", postCustomerUploadSiteConfigurationBody.Email);
   }
 
   return authorizedFetch<void>({
@@ -962,6 +850,189 @@ export const usePostCustomerUploadSiteConfiguration = <
 > => {
   const mutationOptions =
     getPostCustomerUploadSiteConfigurationMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postCustomerUploadSiteConfigurationAssets = (
+  postCustomerUploadSiteConfigurationAssetsBody: PostCustomerUploadSiteConfigurationAssetsBody,
+  params?: PostCustomerUploadSiteConfigurationAssetsParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postCustomerUploadSiteConfigurationAssetsBody.Logo !== undefined) {
+    formData.append("Logo", postCustomerUploadSiteConfigurationAssetsBody.Logo);
+  }
+  if (postCustomerUploadSiteConfigurationAssetsBody.Font !== undefined) {
+    formData.append("Font", postCustomerUploadSiteConfigurationAssetsBody.Font);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Customer/upload-site-configuration-assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostCustomerUploadSiteConfigurationAssetsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+    TError,
+    {
+      data: PostCustomerUploadSiteConfigurationAssetsBody;
+      params?: PostCustomerUploadSiteConfigurationAssetsParams;
+    },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+  TError,
+  {
+    data: PostCustomerUploadSiteConfigurationAssetsBody;
+    params?: PostCustomerUploadSiteConfigurationAssetsParams;
+  },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+    {
+      data: PostCustomerUploadSiteConfigurationAssetsBody;
+      params?: PostCustomerUploadSiteConfigurationAssetsParams;
+    }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postCustomerUploadSiteConfigurationAssets(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostCustomerUploadSiteConfigurationAssetsMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>
+  >;
+export type PostCustomerUploadSiteConfigurationAssetsMutationBody =
+  PostCustomerUploadSiteConfigurationAssetsBody;
+export type PostCustomerUploadSiteConfigurationAssetsMutationError = unknown;
+
+export const usePostCustomerUploadSiteConfigurationAssets = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+    TError,
+    {
+      data: PostCustomerUploadSiteConfigurationAssetsBody;
+      params?: PostCustomerUploadSiteConfigurationAssetsParams;
+    },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+  TError,
+  {
+    data: PostCustomerUploadSiteConfigurationAssetsBody;
+    params?: PostCustomerUploadSiteConfigurationAssetsParams;
+  },
+  TContext
+> => {
+  const mutationOptions =
+    getPostCustomerUploadSiteConfigurationAssetsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postCustomerUploadHero = (
+  postCustomerUploadHeroBody: PostCustomerUploadHeroBody,
+  params?: PostCustomerUploadHeroParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postCustomerUploadHeroBody.Image !== undefined) {
+    formData.append("Image", postCustomerUploadHeroBody.Image);
+  }
+  if (postCustomerUploadHeroBody.removedAssets !== undefined) {
+    postCustomerUploadHeroBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+  if (postCustomerUploadHeroBody.OrderUrl !== undefined) {
+    formData.append("OrderUrl", postCustomerUploadHeroBody.OrderUrl);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Customer/upload-hero`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostCustomerUploadHeroMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerUploadHero>>,
+    TError,
+    { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postCustomerUploadHero>>,
+  TError,
+  { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postCustomerUploadHero>>,
+    { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postCustomerUploadHero(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostCustomerUploadHeroMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerUploadHero>>
+>;
+export type PostCustomerUploadHeroMutationBody = PostCustomerUploadHeroBody;
+export type PostCustomerUploadHeroMutationError = unknown;
+
+export const usePostCustomerUploadHero = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerUploadHero>>,
+    TError,
+    { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postCustomerUploadHero>>,
+  TError,
+  { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+  TContext
+> => {
+  const mutationOptions = getPostCustomerUploadHeroMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

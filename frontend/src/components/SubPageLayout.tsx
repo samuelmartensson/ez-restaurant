@@ -17,7 +17,7 @@ const SubPageLayout = async ({
       <div className="absolute inset-0 bg-white">
         <Image
           priority
-          src={data.heroUrl}
+          src={data.sections?.hero?.heroImage ?? ""}
           fill
           alt="hero"
           className="object-cover opacity-10"

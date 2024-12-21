@@ -1,44 +1,18 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Models.Requests;
 
 public class SiteConfigurationService(RestaurantContext context, S3Service s3Service)
 {
     private RestaurantContext context = context;
     private readonly S3Service s3Service = s3Service;
 
-    public record UpdateSiteConfigurationRequest
-    (
-        string SiteName,
-        string SiteMetaTitle,
-        string Theme,
-        string? Logo,
-        string? Adress,
-        string? Phone,
-        string? Email
-    );
 
-    public async Task UpdateSiteConfiguration(string siteConfigurationJson, IFormFile? logo, string key)
+    public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, string key)
     {
         var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
-        if (string.IsNullOrEmpty(key) || customerConfig == null)
+        if (customerConfig == null)
         {
             throw new Exception("CustomerConfig not found for the provided key.");
-        }
-
-        var siteConfiguration = JsonSerializer.Deserialize<UpdateSiteConfigurationRequest>(siteConfigurationJson, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        });
-
-        if (siteConfiguration == null)
-        {
-            throw new Exception("Missing input.");
-        }
-
-        if (logo != null)
-        {
-            string imageUrl = await s3Service.UploadFileAsync(logo, $"{key}/logo");
-            customerConfig.Logo = imageUrl;
         }
 
         customerConfig.SiteName = siteConfiguration.SiteName;
@@ -50,12 +24,31 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateSiteConfigurationAssets(UploadSiteConfigurationAssetsRequest assets, string key)
+    {
+        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
+        if (customerConfig == null)
+        {
+            throw new Exception("CustomerConfig not found for the provided key.");
+        }
 
-    public record CreateConfigRequest(string domain);
+        if (assets.Logo != null)
+        {
+            string url = await s3Service.UploadFileAsync(assets.Logo, $"{key}/logo");
+            customerConfig.Logo = url;
+        }
+
+        if (assets.Font != null)
+        {
+            string url = await s3Service.UploadFileAsync(assets.Font, $"{key}/font");
+            customerConfig.Font = url;
+        }
+        await context.SaveChangesAsync();
+    }
 
     public async Task CreateSiteConfiguration(string domain, int customerId)
     {
-        var domainAlreadyExists = await context.CustomerConfigs.AnyAsync(c => c.Domain == domain);
+        var domainAlreadyExists = await context.CustomerConfigs.AnyAsync(c => c.Domain.ToLower() == domain.ToLower());
 
         if (domainAlreadyExists)
         {

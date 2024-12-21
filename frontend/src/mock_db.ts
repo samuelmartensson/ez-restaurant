@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { CUSTOMER_ID_HEADER } from "./middleware";
-import { CustomerConfig } from "./types";
 import { getURL } from "./utils";
+import { CustomerConfigResponse, MenuResponse } from "./generated/endpoints";
 
 export const getCustomerConfig = async () => {
   const headerList = await headers();
@@ -15,5 +15,7 @@ export const getCustomerConfig = async () => {
     r.json()
   );
 
-  return { ...configResponse, menu } as CustomerConfig;
+  return { ...configResponse, menu } as CustomerConfigResponse & {
+    menu: MenuResponse[];
+  };
 };

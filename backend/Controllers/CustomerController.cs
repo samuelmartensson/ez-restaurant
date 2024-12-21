@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Responses;
+using Models.Requests;
 
 namespace webapi.Controllers;
 
@@ -12,6 +13,7 @@ public class CustomerController(
     MenuService menuService,
     S3Service s3Service,
     SiteConfigurationService siteConfigurationService,
+    SectionConfigurationService sectionConfigurationService,
     UserService userService
 ) : ControllerBase
 {
@@ -20,6 +22,7 @@ public class CustomerController(
     private UserService userService = userService;
     private S3Service s3Service = s3Service;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
+    private SectionConfigurationService sectionConfigurationService = sectionConfigurationService;
 
 
     private string ResolveBucketObjectKey(string key)
@@ -39,21 +42,15 @@ public class CustomerController(
     }
 
 
-    public class CustomerConfigResponse
-    {
-        public CustomerConfig? Config { get; set; }
-        public string? HeroUrl { get; set; }
-        public string? IconUrl { get; set; }
-        public string? MenuBackdropUrl { get; set; }
-        public string? FontUrl { get; set; }
-    }
-
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
-    public IActionResult GetCustomerConfig([FromQuery] string key)
+    public async Task<IActionResult> GetCustomerConfig([FromQuery] string key)
     {
-        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain.ToLower() == key.ToLower());
+        var customerConfig = await context.CustomerConfigs
+            .Include(cf => cf.SiteSectionHero)
+            .FirstOrDefaultAsync((x) => x.Domain.ToLower() == key.ToLower());
+
         if (string.IsNullOrEmpty(key) || customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
@@ -61,11 +58,21 @@ public class CustomerController(
 
         var response = new CustomerConfigResponse
         {
-            Config = customerConfig,
-            HeroUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/hero.jpg"),
-            IconUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/logo"),
+            Logo = customerConfig.Logo,
+            Font = customerConfig.Font,
+            Theme = customerConfig.Theme,
+            SiteMetaTitle = customerConfig.SiteMetaTitle,
+            SiteName = customerConfig.SiteName,
+            HeroType = customerConfig.HeroType,
             MenuBackdropUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/menu-backdrop.jpg"),
-            FontUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/font.ttf"),
+            Sections = new SectionsResponse
+            {
+                Hero = new SiteSectionHeroResponse
+                {
+                    HeroImage = customerConfig.SiteSectionHero?.Image ?? "",
+                    OrderUrl = customerConfig.SiteSectionHero?.OrderUrl ?? ""
+                }
+            }
         };
 
         return Ok(response);
@@ -156,51 +163,43 @@ public class CustomerController(
         }
     }
 
-    [Authorize(Policy = "UserPolicy")]
-    [HttpDelete("delete-customer")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteCustomer(int key)
-    {
-        var customer = await context.Customers.FirstOrDefaultAsync(c => c.Id == key);
-        if (customer == null)
-        {
-            return NotFound();
-        }
-        context.Customers.Remove(customer);
-        await context.SaveChangesAsync();
-        return Ok();
-    }
-
     [Authorize(Policy = "KeyPolicy")]
     [HttpPost("upload-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery] string key)
     {
-        if (string.IsNullOrEmpty(key))
-        {
-            return BadRequest("Key is required.");
-        }
-
         await menuService.UploadCustomerMenu(menuItemsJson, files, key);
         return Ok(new { message = "Success" });
     }
-
-    public record ConfigFileUpload(IFormFile? Logo);
 
     [Authorize(Policy = "KeyPolicy")]
     [HttpPost("upload-site-configuration")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadSiteConfiguration([FromForm] string siteConfigurationJson, [FromForm] ConfigFileUpload upload, [FromQuery] string key)
+    public async Task<IActionResult> UploadSiteConfiguration([FromForm] UpdateSiteConfigurationRequest siteConfiguration, [FromQuery] string key)
     {
-        if (string.IsNullOrEmpty(key))
-        {
-            return BadRequest("Key is required.");
-        }
+        await siteConfigurationService.UpdateSiteConfiguration(siteConfiguration, key);
+        return Ok(new { message = "Success" });
+    }
 
-        await siteConfigurationService.UpdateSiteConfiguration(siteConfigurationJson, upload.Logo, key);
+    [Authorize(Policy = "KeyPolicy")]
+    [HttpPost("upload-site-configuration-assets")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery] string key)
+    {
+        await siteConfigurationService.UpdateSiteConfigurationAssets(assets, key);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [HttpPost("upload-hero")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadHero([FromForm] UploadHeroAssetsRequest assets, [FromForm] List<string> removedAssets, [FromForm] UploadHeroRequest fields, [FromQuery] string key)
+    {
+        await sectionConfigurationService.UpdateHero(assets, removedAssets, fields, key);
         return Ok(new { message = "Success" });
     }
 }

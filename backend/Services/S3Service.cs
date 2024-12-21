@@ -55,7 +55,7 @@ public class S3Service
         }
         catch (AmazonS3Exception e)
         {
-            throw new Exception($"Error uploading file to S3: {e.Message}", e);
+            throw new Exception($"Error deleting file from S3: {e.Message}", e);
         }
 
     }

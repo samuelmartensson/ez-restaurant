@@ -15,14 +15,12 @@ export interface CustomerConfig {
   heroUrl: string;
   iconUrl: string;
   domain: string;
-  config: {
-    theme: string;
-    siteName: string;
-    siteMetaTitle: string;
-    logo: string;
-    adress?: string;
-    phone?: string;
-    email?: string;
-  };
+  theme: string;
+  siteName: string;
+  siteMetaTitle: string;
+  logo: string;
+  adress?: string;
+  phone?: string;
+  email?: string;
   menu: MenuItem[];
 }

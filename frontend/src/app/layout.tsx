@@ -1,6 +1,6 @@
 import { Navigation } from "@/components/Navigation";
+import { CustomerConfigResponse } from "@/generated/endpoints";
 import { getCustomerConfig } from "@/mock_db";
-import { CustomerConfig } from "@/types";
 import "./globals.css";
 
 const themes = (font: string) =>
@@ -34,12 +34,12 @@ const themes = (font: string) =>
       "--primary-950": "20 100% 14%",
       "--font-main": font,
     },
-  } as Record<string, React.CSSProperties>);
+  }) as Record<string, React.CSSProperties>;
 
 const FontInitializer = ({
   fontUrl,
 }: {
-  fontUrl: CustomerConfig["fontUrl"];
+  fontUrl: CustomerConfigResponse["font"];
 }) => {
   return fontUrl ? (
     // Load custom
@@ -68,13 +68,14 @@ export default async function RootLayout({
 }>) {
   const data = await getCustomerConfig();
   if (!data) return null;
+  console.log(data);
 
-  const resolvedFont = data.fontUrl ? "Customer" : "Roboto";
+  const resolvedFont = data.font ? "Customer" : "Roboto";
 
   return (
-    <html lang="en" style={themes(resolvedFont)[data.config.theme]}>
-      <title>{data?.domain}</title>
-      <FontInitializer fontUrl={data.fontUrl} />
+    <html lang="en" style={themes(resolvedFont)[data.theme ?? "rustic"]}>
+      <title>{data?.siteName}</title>
+      <FontInitializer fontUrl={data.font} />
       <body className="antialiased relative">
         <Navigation data={data} />
         {children}

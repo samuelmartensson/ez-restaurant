@@ -20,8 +20,7 @@ const Domain = () => {
   };
 
   return (
-    <div className="p-4 grid gap-4">
-      <h1 className="text-2xl font-bold">Create a new domain</h1>
+    <div className="flex gap-2 max-w-lg">
       <Input
         placeholder="MyRestaurant"
         value={value}

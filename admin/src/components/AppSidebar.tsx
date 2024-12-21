@@ -12,10 +12,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { SignOutButton, UserButton } from "@clerk/nextjs";
-import { Globe, Home, Menu } from "lucide-react";
+import { Globe, Home, SquareMenu, Wallpaper } from "lucide-react";
 import Link from "next/link";
-import { VersionSwitcher } from "./ConfigSwitcher";
 import { usePathname } from "next/navigation";
+import { VersionSwitcher } from "./ConfigSwitcher";
 
 const items = [
   {
@@ -29,9 +29,14 @@ const items = [
     icon: Home,
   },
   {
+    title: "Hero",
+    url: "/hero",
+    icon: Wallpaper,
+  },
+  {
     title: "Menu",
     url: "/menu",
-    icon: Menu,
+    icon: SquareMenu,
   },
 ];
 

@@ -25,7 +25,7 @@ public class KeyAuthorizationHandler(RestaurantContext dbContext) : Authorizatio
 
         if (string.IsNullOrEmpty(requestKey))
         {
-            context.Fail();
+            context.Fail(new AuthorizationFailureReason(this, "Key is required"));
             return;
         }
 
