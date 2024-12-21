@@ -50,36 +50,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
         x.Events = new JwtBearerEvents()
         {
-
             // Additional validation for AZP claim
             OnTokenValidated = context =>
             {
                 var azp = context.Principal?.FindFirstValue("azp");
-
-                if (builder.Environment.EnvironmentName == "Development")
-                {
-                    // AuthorizedParty is the base URL of your frontend.
-                    if (string.IsNullOrEmpty(azp) || !azp.Equals("http://localhost:3000"))
-                        context.Fail("AZP Claim is invalid or missing");
-
-                    return Task.CompletedTask;
-                }
-
-                // Check if the AZP claim exists
-                if (string.IsNullOrEmpty(azp))
-                {
+                // AuthorizedParty is the base URL of your frontend.
+                if (string.IsNullOrEmpty(azp) || !azp.Equals(builder.Configuration["AppSettings:authorizedDomain"]))
                     context.Fail("AZP Claim is invalid or missing");
-                    return Task.CompletedTask;
-                }
-
-                // Ensure the AZP matches any subdomain of example.com
-                var authorizedDomain = builder.Configuration["AppSettings:authorizedDomain"]; // Ensure this includes the leading dot
-                if (!Uri.TryCreate(azp, UriKind.Absolute, out var azpUri) ||
-                    !azpUri.Host.EndsWith(authorizedDomain, StringComparison.OrdinalIgnoreCase))
-                {
-                    context.Fail("AZP Claim does not match the allowed domain");
-                    return Task.CompletedTask;
-                }
 
                 return Task.CompletedTask;
             }
