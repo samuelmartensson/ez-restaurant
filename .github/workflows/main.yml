@@ -23,16 +23,13 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
-      - name: Change ownership of .aspnet directory
-        run: |
-          sudo chown -R wilhelm .aspnet/
 
       - name: Install rsync and Verify Installation
         run: |
           sudo apt-get -y install rsync openssh-client
 
       - name: Deploy Dotnet App
-        run: /usr/bin/rsync -rlDvz --delete ./backend/publish/ wilhelm@172.232.147.147:/var/www/restaurantbackend/
+        run: /usr/bin/rsync -rlDvz --delete --chown=wilhelm:wilhelm ./backend/publish/ wilhelm@172.232.147.147:/var/www/restaurantbackend/
 
       - name: Restart service on CentOS server
         env:
