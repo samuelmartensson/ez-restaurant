@@ -17,10 +17,12 @@ const DataContext = createContext<{
   configs: CustomerConfig[];
   selectedDomain: string;
   setSelectedDomain: Dispatch<SetStateAction<string>>;
+  refetch: () => Promise<void>;
 }>({
   configs: [],
   selectedDomain: "",
   setSelectedDomain: () => null,
+  refetch: () => Promise.resolve(),
 });
 
 export const useDataContext = () => useContext(DataContext);
@@ -28,7 +30,9 @@ export const useDataContext = () => useContext(DataContext);
 const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedDomain, setSelectedDomain] = useState("");
 
-  const { data, isLoading } = useGetCustomerGetCustomer();
+  const { data = [], isLoading, refetch } = useGetCustomerGetCustomer();
+  console.log(data);
+
   useEffect(() => {
     setSelectedDomain(data?.[0]?.domain ?? "");
   }, [data]);
@@ -38,9 +42,12 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataContext.Provider
       value={{
-        configs: data ?? [],
+        configs: data,
         setSelectedDomain,
         selectedDomain,
+        refetch: async () => {
+          await refetch();
+        },
       }}
     >
       {children}

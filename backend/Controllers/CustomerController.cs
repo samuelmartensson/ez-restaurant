@@ -114,7 +114,7 @@ public class CustomerController(
             await context.SaveChangesAsync();
             await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
             await context.SaveChangesAsync();
-            return Ok(new { message = "Success" });
+            return Ok(new List<CustomerResponse>());
         };
 
         var configs = await context.CustomerConfigs
