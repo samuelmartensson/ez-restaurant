@@ -30,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getURL } from "@/utils";
 import { Plus, Save, Trash, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -41,8 +40,8 @@ import {
   MenuItem,
   MenuResponse,
   useGetCustomerGetCustomerMenu,
+  usePostCustomerUploadCustomerMenu,
 } from "@/generated/endpoints";
-import { useAuth } from "@clerk/nextjs";
 import { v4 as uuidv4 } from "uuid";
 
 const ACTIONS = {
@@ -98,7 +97,6 @@ const AdminMenu = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [addCategory, setAddCategory] = useState("");
-  const { getToken } = useAuth();
   const { data = [] } = useGetCustomerGetCustomerMenu({ key: selectedDomain });
 
   const form = useForm<{ menu: InternalMenuItem[] }>({
@@ -125,33 +123,26 @@ const AdminMenu = () => {
       res();
     });
   };
+  const { mutateAsync: updateMenu } = usePostCustomerUploadCustomerMenu();
 
   async function onSubmit() {
     await removeItemsAsync();
     setDeletedItems([]);
 
-    const formData = new FormData();
-    Object.entries(uploadedImages).forEach(([key, value]) => {
-      formData.append("files", new File([value], key));
-    });
-    formData.append(
-      "menuItemsJson",
-      JSON.stringify(
-        form.getValues("menu").map((d) => ({
-          ...d,
-          image: d.image === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
-          price: Number(d.price),
-        }))
-      )
-    );
-
-    await fetch(getURL(selectedDomain, "upload-customer-menu"), {
-      method: "post",
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${await getToken()}`,
+    await updateMenu({
+      data: {
+        menuItemsJson: JSON.stringify(
+          form.getValues("menu").map((d) => ({
+            ...d,
+            image: d.image === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
+            price: Number(d.price),
+          }))
+        ),
+        files: Object.entries(uploadedImages).map(
+          ([key, value]) => new File([value], key)
+        ),
       },
-    }).then((r) => r.json());
+    });
 
     setUploadedImages({});
   }
