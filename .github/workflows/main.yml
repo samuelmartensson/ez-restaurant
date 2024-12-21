@@ -31,6 +31,19 @@ jobs:
       - name: Deploy Dotnet App
         run: /usr/bin/rsync -rlDvz --delete ./backend/publish/ wilhelm@172.232.147.147:/var/www/restaurantbackend/
 
+      - name: Set AWS Environment Variables
+        run: |
+          ssh -o StrictHostKeyChecking=no wilhelm@172.232.147.147 "
+            echo $SUDO_PASSWORD | sudo -S bash -c '
+            mkdir -p /etc/systemd/system/restaurantbackend.service.d/
+            echo \"[Service]
+            Environment=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            Environment=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            \" > /etc/systemd/system/restaurantbackend.service.d/aws-env.conf
+            systemctl daemon-reload
+            '
+          "
+
       - name: Restart service on CentOS server
         env:
           SUDO_PASSWORD: ${{ secrets.SU_PW }}
