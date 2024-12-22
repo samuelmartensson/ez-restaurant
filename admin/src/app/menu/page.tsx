@@ -28,16 +28,17 @@ import { useEffect, useState } from "react";
 import { useDataContext } from "@/components/DataContextProvider";
 import FilePreview from "@/components/FilePreview";
 import hasDomain from "@/components/hasDomain";
+import MenuCategories from "@/components/MenuCategories";
 import {
   MenuResponse,
   useGetCustomerGetCustomerMenu,
   usePostMenuCategory,
   usePostMenuItems,
 } from "@/generated/endpoints";
-import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
@@ -151,7 +152,9 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       data: { id: selectedCategory, name: addCategory },
       params: { key: selectedDomain },
     });
-    setAddCategory("");
+    if (selectedCategory === -1) {
+      setAddCategory("");
+    }
     refetch();
   };
 
@@ -202,41 +205,21 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   return (
     <div className="grid p-4 gap-4" style={{ gridTemplateColumns: "3fr 2fr" }}>
       <div className="grid grid-rows-[auto_70vh]">
-        <div className="mb-8">
-          <div className="text-xl mb-2">Categories</div>
-          <div className="flex gap-2 mb-2">
-            <Input
-              placeholder="Add category..."
-              value={addCategory}
-              onChange={(e) => setAddCategory(e.target.value)}
-            />
-            <Button onClick={handleUpdateCategory}>
-              {selectedCategory !== -1 ? "Update category" : "Add category"}
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {categoryList.filter(Boolean).map(({ id, name }) => {
-              const parsedId = Number(id);
-
-              return (
-                <Badge
-                  variant={
-                    selectedCategory === parsedId ? "default" : "outline"
-                  }
-                  onClick={() => {
-                    const isSelected = selectedCategory === parsedId;
-                    setSelectedCategory(isSelected ? -1 : parsedId);
-                    setAddCategory(isSelected ? "" : name);
-                  }}
-                  className="text-base cursor-pointer select-none"
-                  key={parsedId}
-                >
-                  {name}
-                </Badge>
-              );
-            })}
-          </div>
-        </div>
+        <MenuCategories
+          category={addCategory}
+          setCategory={setAddCategory}
+          items={categoryList}
+          onClick={handleUpdateCategory}
+          btnLabel={
+            selectedCategory !== -1 ? "Update category" : "Add category"
+          }
+          selectedCategory={selectedCategory}
+          onBadgeClick={(payload) => {
+            setSelectedCategory(payload.isSelected ? -1 : payload.id);
+            setAddCategory(payload.isSelected ? "" : payload.name);
+          }}
+          setSelectedCategory={setSelectedCategory}
+        />
         <div className="flex flex-col gap-2 overflow-auto p-2">
           {fields.map((field, index) => {
             const deleteStaged = deletedItems.includes(index);

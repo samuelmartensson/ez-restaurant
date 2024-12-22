@@ -64,7 +64,7 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
   const router = useRouter();
   const pathname = usePathname();
   const selectedCategory =
-    searchParams.get("selectedCategory") || data.categories?.[0].id;
+    searchParams.get("selectedCategory") || data.categories?.[0]?.id || "all";
 
   return (
     <div className="relative grid gap-4 p-4 rounded rounded-tr-3xl rounded-bl-3xl shadow-lg bg-white overflow-hidden">
@@ -77,20 +77,22 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
         }}
       />
       <div className="relative z-10 grid gap-8">
-        <Tabs
-          value={String(selectedCategory)}
-          onValueChange={(category) =>
-            router.push(pathname + "?selectedCategory=" + category)
-          }
-        >
-          <TabsList className="w-full">
-            {data.categories.map((c) => (
-              <TabsTrigger value={String(c.id)} key={c.id} className="w-full">
-                {c.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        {data.categories.length > 0 && (
+          <Tabs
+            value={String(selectedCategory)}
+            onValueChange={(category) =>
+              router.push(pathname + "?selectedCategory=" + category)
+            }
+          >
+            <TabsList className="w-full">
+              {data.categories.map((c) => (
+                <TabsTrigger value={String(c.id)} key={c.id} className="w-full">
+                  {c.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
 
         <div>
           {groupBy(
