@@ -122,6 +122,8 @@ export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
   /** @nullable */
+  domain?: string | null;
+  /** @nullable */
   email?: string | null;
   /** @nullable */
   font?: string | null;

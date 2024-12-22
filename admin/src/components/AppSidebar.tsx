@@ -49,7 +49,6 @@ export function AppSidebar() {
       <SidebarHeader>
         <VersionSwitcher domains={configs.map((c) => c.domain ?? "")} />
       </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>User</SidebarGroupLabel>

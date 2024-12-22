@@ -58,6 +58,7 @@ public class CustomerController(
 
         var response = new CustomerConfigResponse
         {
+            Domain = customerConfig.Domain,
             Logo = customerConfig.Logo,
             Font = customerConfig.Font,
             Theme = customerConfig.Theme,

@@ -15,6 +15,7 @@ namespace Models.Responses
     {
         public int HeroType { get; set; }
         public required string Theme { get; set; }
+        public required string Domain { get; set; }
         required public string SiteName { get; set; }
         required public string SiteMetaTitle { get; set; }
         required public string Logo { get; set; }
