@@ -19,6 +19,19 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type PostMenuCategoryParams = {
+  key?: string;
+};
+
+export type PostMenuItemsBody = {
+  files?: Blob[];
+  menuItemsJson?: string;
+};
+
+export type PostMenuItemsParams = {
+  key?: string;
+};
+
 export type PostCustomerUploadHeroBody = {
   Image?: Blob;
   OrderUrl?: string;
@@ -52,15 +65,6 @@ export type PostCustomerUploadSiteConfigurationParams = {
   key?: string;
 };
 
-export type PostCustomerUploadCustomerMenuBody = {
-  files?: Blob[];
-  menuItemsJson?: string;
-};
-
-export type PostCustomerUploadCustomerMenuParams = {
-  key?: string;
-};
-
 export type GetCustomerGetCustomerMenuParams = {
   key?: string;
 };
@@ -70,82 +74,82 @@ export type GetCustomerGetCustomerConfigParams = {
 };
 
 export interface SiteSectionHeroResponse {
-  /** @nullable */
-  heroImage?: string | null;
-  /** @nullable */
-  orderUrl?: string | null;
+  heroImage?: string;
+  orderUrl?: string;
 }
 
 export interface SectionsResponse {
   hero?: SiteSectionHeroResponse;
 }
 
-export interface MenuResponse {
-  /** @nullable */
-  category?: string | null;
-  /** @nullable */
-  customerConfigDomain?: string | null;
+export interface MenuItemResponse {
+  categoryId: number;
   /** @nullable */
   description?: string | null;
-  id?: number;
+  id: number;
   /** @nullable */
   image?: string | null;
-  /** @nullable */
-  name?: string | null;
-  price?: number;
+  /** @minLength 1 */
+  name: string;
+  price: number;
   /** @nullable */
   tags?: string | null;
+}
+
+export interface MenuCategoryResponse {
+  id: number;
+  /** @minLength 1 */
+  name: string;
+}
+
+export interface MenuResponse {
+  categories: MenuCategoryResponse[];
+  menuItems: MenuItemResponse[];
 }
 
 export interface CustomerResponse {
   /** @nullable */
   adress?: string | null;
   customerId?: number;
-  /** @nullable */
-  domain?: string | null;
+  domain?: string;
   /** @nullable */
   email?: string | null;
   heroType?: number;
-  /** @nullable */
-  logo?: string | null;
+  logo?: string;
   /** @nullable */
   phone?: string | null;
-  /** @nullable */
-  siteMetaTitle?: string | null;
-  /** @nullable */
-  siteName?: string | null;
-  /** @nullable */
-  theme?: string | null;
+  siteMetaTitle?: string;
+  siteName?: string;
+  theme?: string;
 }
 
 export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
-  /** @nullable */
-  domain?: string | null;
+  domain?: string;
   /** @nullable */
   email?: string | null;
   /** @nullable */
   font?: string | null;
   heroType?: number;
-  /** @nullable */
-  logo?: string | null;
+  logo?: string;
   /** @nullable */
   menuBackdropUrl?: string | null;
   /** @nullable */
   phone?: string | null;
   sections?: SectionsResponse;
-  /** @nullable */
-  siteMetaTitle?: string | null;
-  /** @nullable */
-  siteName?: string | null;
-  /** @nullable */
-  theme?: string | null;
+  siteMetaTitle?: string;
+  siteName?: string;
+  theme?: string;
 }
 
 export interface CreateConfigRequest {
-  /** @nullable */
-  domain?: string | null;
+  domain?: string;
+}
+
+export interface AddCategoryRequest {
+  id?: number;
+  name?: string;
 }
 
 export const getCustomerGetCustomerConfig = (
@@ -302,7 +306,7 @@ export const getCustomerGetCustomerMenu = (
   params?: GetCustomerGetCustomerMenuParams,
   signal?: AbortSignal,
 ) => {
-  return authorizedFetch<MenuResponse[]>({
+  return authorizedFetch<MenuResponse>({
     url: `/Customer/get-customer-menu`,
     method: "GET",
     params,
@@ -636,108 +640,6 @@ export const usePutCustomerCreateConfig = <
   return useMutation(mutationOptions);
 };
 
-export const postCustomerUploadCustomerMenu = (
-  postCustomerUploadCustomerMenuBody: PostCustomerUploadCustomerMenuBody,
-  params?: PostCustomerUploadCustomerMenuParams,
-  signal?: AbortSignal,
-) => {
-  const formData = new FormData();
-  if (postCustomerUploadCustomerMenuBody.menuItemsJson !== undefined) {
-    formData.append(
-      "menuItemsJson",
-      postCustomerUploadCustomerMenuBody.menuItemsJson,
-    );
-  }
-  if (postCustomerUploadCustomerMenuBody.files !== undefined) {
-    postCustomerUploadCustomerMenuBody.files.forEach((value) =>
-      formData.append("files", value),
-    );
-  }
-
-  return authorizedFetch<void>({
-    url: `/Customer/upload-customer-menu`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-    signal,
-  });
-};
-
-export const getPostCustomerUploadCustomerMenuMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadCustomerMenu>>,
-    TError,
-    {
-      data: PostCustomerUploadCustomerMenuBody;
-      params?: PostCustomerUploadCustomerMenuParams;
-    },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postCustomerUploadCustomerMenu>>,
-  TError,
-  {
-    data: PostCustomerUploadCustomerMenuBody;
-    params?: PostCustomerUploadCustomerMenuParams;
-  },
-  TContext
-> => {
-  const { mutation: mutationOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCustomerUploadCustomerMenu>>,
-    {
-      data: PostCustomerUploadCustomerMenuBody;
-      params?: PostCustomerUploadCustomerMenuParams;
-    }
-  > = (props) => {
-    const { data, params } = props ?? {};
-
-    return postCustomerUploadCustomerMenu(data, params);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PostCustomerUploadCustomerMenuMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerUploadCustomerMenu>>
->;
-export type PostCustomerUploadCustomerMenuMutationBody =
-  PostCustomerUploadCustomerMenuBody;
-export type PostCustomerUploadCustomerMenuMutationError = unknown;
-
-export const usePostCustomerUploadCustomerMenu = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadCustomerMenu>>,
-    TError,
-    {
-      data: PostCustomerUploadCustomerMenuBody;
-      params?: PostCustomerUploadCustomerMenuParams;
-    },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postCustomerUploadCustomerMenu>>,
-  TError,
-  {
-    data: PostCustomerUploadCustomerMenuBody;
-    params?: PostCustomerUploadCustomerMenuParams;
-  },
-  TContext
-> => {
-  const mutationOptions =
-    getPostCustomerUploadCustomerMenuMutationOptions(options);
-
-  return useMutation(mutationOptions);
-};
-
 export const postCustomerUploadSiteConfiguration = (
   postCustomerUploadSiteConfigurationBody: PostCustomerUploadSiteConfigurationBody,
   params?: PostCustomerUploadSiteConfigurationParams,
@@ -1035,6 +937,158 @@ export const usePostCustomerUploadHero = <
   TContext
 > => {
   const mutationOptions = getPostCustomerUploadHeroMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postMenuItems = (
+  postMenuItemsBody: PostMenuItemsBody,
+  params?: PostMenuItemsParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postMenuItemsBody.menuItemsJson !== undefined) {
+    formData.append("menuItemsJson", postMenuItemsBody.menuItemsJson);
+  }
+  if (postMenuItemsBody.files !== undefined) {
+    postMenuItemsBody.files.forEach((value) => formData.append("files", value));
+  }
+
+  return authorizedFetch<void>({
+    url: `/Menu/items`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostMenuItemsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuItems>>,
+    TError,
+    { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postMenuItems>>,
+  TError,
+  { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postMenuItems>>,
+    { data: PostMenuItemsBody; params?: PostMenuItemsParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postMenuItems(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostMenuItemsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuItems>>
+>;
+export type PostMenuItemsMutationBody = PostMenuItemsBody;
+export type PostMenuItemsMutationError = unknown;
+
+export const usePostMenuItems = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuItems>>,
+    TError,
+    { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postMenuItems>>,
+  TError,
+  { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+  TContext
+> => {
+  const mutationOptions = getPostMenuItemsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postMenuCategory = (
+  addCategoryRequest: AddCategoryRequest,
+  params?: PostMenuCategoryParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/Menu/category`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addCategoryRequest,
+    params,
+    signal,
+  });
+};
+
+export const getPostMenuCategoryMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuCategory>>,
+    TError,
+    { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postMenuCategory>>,
+  TError,
+  { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postMenuCategory>>,
+    { data: AddCategoryRequest; params?: PostMenuCategoryParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postMenuCategory(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostMenuCategoryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuCategory>>
+>;
+export type PostMenuCategoryMutationBody = AddCategoryRequest;
+export type PostMenuCategoryMutationError = unknown;
+
+export const usePostMenuCategory = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuCategory>>,
+    TError,
+    { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postMenuCategory>>,
+  TError,
+  { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+  TContext
+> => {
+  const mutationOptions = getPostMenuCategoryMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

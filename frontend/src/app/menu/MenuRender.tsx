@@ -1,10 +1,10 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MenuResponse } from "@/generated/endpoints";
+import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-function groupBy<T extends MenuResponse>(
+function groupBy<T extends MenuItemResponse>(
   list: T[],
   key: keyof T
 ): { group: string; items: T[] }[] {
@@ -29,7 +29,7 @@ function groupBy<T extends MenuResponse>(
   }));
 }
 
-const MenuItem = ({ description, name, price, tags }: MenuResponse) => {
+const MenuItem = ({ description, name, price, tags }: MenuItemResponse) => {
   return (
     <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-2 justify-between">
       <div className="grid gap-4">
@@ -59,13 +59,12 @@ const MenuItem = ({ description, name, price, tags }: MenuResponse) => {
   );
 };
 
-const MenuRender = ({ data = [] }: { data: MenuResponse[] }) => {
+const MenuRender = ({ data }: { data: MenuResponse }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const categories = Array.from(new Set(data.map((m) => m.category ?? "")));
   const selectedCategory =
-    searchParams.get("selectedCategory") || categories?.[0];
+    searchParams.get("selectedCategory") || data.categories?.[0].id;
 
   return (
     <div className="relative grid gap-4 p-4 rounded rounded-tr-3xl rounded-bl-3xl shadow-lg bg-white overflow-hidden">
@@ -79,15 +78,15 @@ const MenuRender = ({ data = [] }: { data: MenuResponse[] }) => {
       />
       <div className="relative z-10 grid gap-8">
         <Tabs
-          value={selectedCategory}
+          value={String(selectedCategory)}
           onValueChange={(category) =>
             router.push(pathname + "?selectedCategory=" + category)
           }
         >
           <TabsList className="w-full">
-            {categories.map((c) => (
-              <TabsTrigger value={c} key={c} className="w-full">
-                {c}
+            {data.categories.map((c) => (
+              <TabsTrigger value={String(c.id)} key={c.id} className="w-full">
+                {c.name}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -95,14 +94,20 @@ const MenuRender = ({ data = [] }: { data: MenuResponse[] }) => {
 
         <div>
           {groupBy(
-            data.filter(
+            data.menuItems?.filter(
               (item) =>
-                selectedCategory === "all" || item.category === selectedCategory
+                selectedCategory === "all" ||
+                item.categoryId === Number(selectedCategory)
             ),
-            "category"
+            "categoryId"
           ).map((item) => (
             <div key={item.group}>
-              <div className="text-2xl">{item.group}</div>
+              <div className="text-2xl">
+                {
+                  data.categories.find((c) => c.id.toString() === item.group)
+                    ?.name
+                }
+              </div>
               {item.items.map((x, i) => (
                 <MenuItem key={i} {...x} />
               ))}

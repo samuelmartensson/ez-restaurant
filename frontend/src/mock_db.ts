@@ -16,6 +16,6 @@ export const getCustomerConfig = async () => {
   );
 
   return { ...configResponse, menu } as CustomerConfigResponse & {
-    menu: MenuResponse[];
+    menu: MenuResponse;
   };
 };

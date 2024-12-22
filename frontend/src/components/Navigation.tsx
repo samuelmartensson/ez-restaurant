@@ -19,7 +19,7 @@ export function Navigation({ data }: { data: CustomerConfigResponse }) {
               <img
                 src={data.logo}
                 alt=""
-                className="h-12 sm:h-16 rounded-lg mr-4 sm:mr-8"
+                className="h-12 max-w-[140px] sm:h-16 rounded-lg mr-4 sm:mr-8 object-contain"
               />
             </Link>
           )}

@@ -10,7 +10,6 @@ namespace webapi.Controllers;
 [Route("[controller]")]
 public class CustomerController(
     RestaurantContext context,
-    MenuService menuService,
     S3Service s3Service,
     SiteConfigurationService siteConfigurationService,
     SectionConfigurationService sectionConfigurationService,
@@ -18,7 +17,6 @@ public class CustomerController(
 ) : ControllerBase
 {
     private RestaurantContext context = context;
-    private MenuService menuService = menuService;
     private UserService userService = userService;
     private S3Service s3Service = s3Service;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
@@ -82,29 +80,47 @@ public class CustomerController(
 
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(List<MenuResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
     {
-        var menuItems = await context.MenuItems
-            .Where(m => m.CustomerConfigDomain == key)
+        var menuCategories = await context.MenuCategorys
+            .Include(mc => mc.MenuItems)
+            .Where(mc => mc.CustomerConfigDomain == key)
             .ToListAsync();
 
-        if (string.IsNullOrEmpty(key) || menuItems == null)
+
+        if (string.IsNullOrEmpty(key) || menuCategories == null)
         {
             return NotFound(new { message = "Menu not found for the provided key." });
         }
 
-        return Ok(menuItems.Select(m => new MenuResponse
+        var menuCategoriesResponse = menuCategories.Select(mc => new MenuCategoryResponse
         {
-            Id = m.Id,
-            CustomerConfigDomain = m.CustomerConfigDomain,
-            Name = m.Name,
-            Category = m.Category,
-            Price = m.Price,
-            Description = m.Description,
-            Tags = m.Tags,
-            Image = m.Image,
-        }));
+            Id = mc.Id,
+            Name = mc.Name
+        })
+        .ToList();
+
+        var menuItemsResponse = menuCategories
+            .SelectMany(mc => mc.MenuItems)
+            .ToList()
+            .Select(m => new MenuItemResponse
+            {
+                Id = m.Id,
+                Name = m.Name,
+                CategoryId = m.MenuCategoryId,
+                Price = m.Price,
+                Description = m.Description,
+                Tags = m.Tags,
+                Image = m.Image,
+            })
+            .ToList();
+
+        return Ok(new MenuResponse
+        {
+            Categories = menuCategoriesResponse,
+            MenuItems = menuItemsResponse
+        });
     }
 
     [Authorize(Policy = "UserPolicy")]
@@ -162,16 +178,6 @@ public class CustomerController(
         {
             return BadRequest(new { message = e.Message });
         }
-    }
-
-    [Authorize(Policy = "KeyPolicy")]
-    [HttpPost("upload-customer-menu")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery] string key)
-    {
-        await menuService.UploadCustomerMenu(menuItemsJson, files, key);
-        return Ok(new { message = "Success" });
     }
 
     [Authorize(Policy = "KeyPolicy")]

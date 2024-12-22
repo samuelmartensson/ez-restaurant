@@ -4,7 +4,8 @@ import MenuRender from "./MenuRender";
 const MenuPage = async () => {
   const data = await getCustomerConfig();
 
-  return <MenuRender data={data?.menu ?? []} />;
+  if (!data?.menu) return null;
+  return <MenuRender data={data?.menu} />;
 };
 
 export default MenuPage;

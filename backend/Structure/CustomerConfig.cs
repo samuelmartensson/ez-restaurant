@@ -14,7 +14,7 @@ public class CustomerConfig
 
     public Customer? Customer { get; set; }
     public SiteSectionHero? SiteSectionHero { get; set; }
-    public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
+    public ICollection<MenuCategory> MenuCategorys { get; set; } = new List<MenuCategory>();
     public ICollection<OpeningHour> OpeningHours { get; set; } = new List<OpeningHour>();
 
 }

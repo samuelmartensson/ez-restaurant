@@ -31,13 +31,32 @@ import hasDomain from "@/components/hasDomain";
 import {
   MenuResponse,
   useGetCustomerGetCustomerMenu,
-  usePostCustomerUploadCustomerMenu,
+  usePostMenuCategory,
+  usePostMenuItems,
 } from "@/generated/endpoints";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
 };
+
+const menuItemSchema = z.object({
+  categoryId: z.union([z.string(), z.number()]),
+  id: z.number(),
+  name: z.string().min(1),
+  price: z.number(),
+  index: z.number(),
+  tempId: z.string().optional(),
+  description: z.string().nullable().optional(),
+  image: z.string().nullable().optional(),
+  tags: z.string().nullable().optional(),
+});
+const formSchema = z.object({
+  menu: z.array(menuItemSchema),
+});
 
 const inputSchema = [
   {
@@ -46,14 +65,14 @@ const inputSchema = [
     type: "text",
   },
   {
-    id: "category",
+    id: "categoryId",
     label: "Category",
     type: "select",
   },
   {
     id: "price",
     label: "Price",
-    type: "text",
+    type: "number",
   },
   {
     id: "description",
@@ -72,27 +91,41 @@ const inputSchema = [
   },
 ] as const;
 
-type InternalMenuItem = MenuResponse & {
-  index: number;
-  tempId: string;
+const DataLayer = () => {
+  const { selectedDomain } = useDataContext();
+
+  const { data = { categories: [], menuItems: [] }, isLoading } =
+    useGetCustomerGetCustomerMenu({
+      key: selectedDomain,
+    });
+
+  if (isLoading) return <></>;
+
+  return <AdminMenu data={data} />;
 };
 
-const AdminMenu = () => {
+const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const { selectedDomain } = useDataContext();
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedFieldIndex, setSelectedField] = useState<number>();
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
     {}
   );
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
+
+  const [selectedCategory, setSelectedCategory] = useState<number>(-1);
   const [addCategory, setAddCategory] = useState("");
-  const { data = [], refetch } = useGetCustomerGetCustomerMenu({
+  const { refetch } = useGetCustomerGetCustomerMenu({
     key: selectedDomain,
   });
 
-  const form = useForm<{ menu: InternalMenuItem[] }>({
-    defaultValues: { menu: data },
+  const categoryList = data.categories;
+  const categories = Object.fromEntries(
+    categoryList.map((item) => [item.id, item.name])
+  );
+  const form = useForm<z.infer<typeof formSchema>>({
+    defaultValues: { menu: data.menuItems },
+    mode: "onChange",
+    resolver: zodResolver(formSchema),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -106,12 +139,21 @@ const AdminMenu = () => {
 
   useEffect(() => {
     if (!data) return;
-    form.reset({ menu: data.map((d, i) => ({ ...d, index: i })) });
-    setCategories(Array.from(new Set(data.map((m) => m.category ?? ""))));
+    form.reset({ menu: data.menuItems?.map((d, i) => ({ ...d, index: i })) });
   }, [data, form]);
 
-  const { mutateAsync: updateMenu, isPending } =
-    usePostCustomerUploadCustomerMenu();
+  const { mutateAsync: updateMenu, isPending } = usePostMenuItems();
+  const { mutateAsync: updateCategory } = usePostMenuCategory();
+
+  const handleUpdateCategory = async () => {
+    if (!addCategory.trim()) return;
+    await updateCategory({
+      data: { id: selectedCategory, name: addCategory },
+      params: { key: selectedDomain },
+    });
+    setAddCategory("");
+    refetch();
+  };
 
   async function onSubmit() {
     remove(deletedItems);
@@ -125,6 +167,7 @@ const AdminMenu = () => {
             ...d,
             image: d.image === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
             price: Number(d.price),
+            categoryId: Number(d.categoryId),
           }))
         ),
         files: Object.entries(uploadedImages).map(
@@ -133,12 +176,28 @@ const AdminMenu = () => {
       },
     });
     await refetch();
-
+    toast("Updated menu.");
     setUploadedImages({});
   }
 
-  const resolveImageId = (field: MenuResponse & { tempId: string }) =>
-    field.id === -1 ? field.tempId : (field.id ?? "");
+  const handleAddMenuItem = () => {
+    append({
+      categoryId:
+        selectedCategory !== -1 ? selectedCategory : categoryList[0].id,
+      description: "",
+      image: "",
+      name: "My Dish",
+      price: 0,
+      tags: "",
+      tempId: uuidv4(),
+      id: -1,
+      index: fields.length,
+    });
+    setSelectedField(fields.length);
+  };
+
+  const resolveImageId = (field?: z.infer<typeof menuItemSchema>) =>
+    field?.id === -1 ? (field?.tempId ?? "") : (field?.id ?? "");
 
   return (
     <div className="grid p-4 gap-4" style={{ gridTemplateColumns: "3fr 2fr" }}>
@@ -151,47 +210,51 @@ const AdminMenu = () => {
               value={addCategory}
               onChange={(e) => setAddCategory(e.target.value)}
             />
-            <Button
-              onClick={() => {
-                setCategories((state) =>
-                  Array.from(new Set([...state, addCategory]))
-                );
-                setAddCategory("");
-              }}
-            >
-              Add category
+            <Button onClick={handleUpdateCategory}>
+              {selectedCategory !== -1 ? "Update category" : "Add category"}
             </Button>
           </div>
           <div className="flex flex-wrap gap-1">
-            {categories.filter(Boolean).map((c) => (
-              <Badge
-                variant={selectedCategory === c ? "default" : "outline"}
-                onClick={() =>
-                  setSelectedCategory(selectedCategory === c ? "" : c)
-                }
-                className="text-base cursor-pointer"
-                key={c}
-              >
-                {c}
-              </Badge>
-            ))}
+            {categoryList.filter(Boolean).map(({ id, name }) => {
+              const parsedId = Number(id);
+
+              return (
+                <Badge
+                  variant={
+                    selectedCategory === parsedId ? "default" : "outline"
+                  }
+                  onClick={() => {
+                    const isSelected = selectedCategory === parsedId;
+                    setSelectedCategory(isSelected ? -1 : parsedId);
+                    setAddCategory(isSelected ? "" : name);
+                  }}
+                  className="text-base cursor-pointer select-none"
+                  key={parsedId}
+                >
+                  {name}
+                </Badge>
+              );
+            })}
           </div>
         </div>
         <div className="flex flex-col gap-2 overflow-auto p-2">
           {fields.map((field, index) => {
             const deleteStaged = deletedItems.includes(index);
-            const saveStaged = !data.map((d) => d.id).includes(field.id);
+            const saveStaged = !data?.menuItems
+              ?.map((d) => d.id)
+              .includes(field.id);
 
             if (
-              selectedCategory &&
-              form.watch(`menu.${index}.category`) !== selectedCategory
+              selectedCategory !== -1 &&
+              form.watch(`menu.${index}.categoryId`)?.toString() !==
+                selectedCategory.toString()
             )
               return null;
 
             return (
               <div
                 key={field.formId}
-                className={`relative flex justify-between gap-2 border-b ${selectedField?.id === field.id ? "border-l-4 border-l-primary" : ""}`}
+                className={`relative flex justify-between gap-2 border-b ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
               >
                 <Button
                   onClick={() => {
@@ -230,7 +293,9 @@ const AdminMenu = () => {
                       <span className="text-base">
                         {form.watch(`menu.${index}.name`)}
                       </span>
-                      <Badge>{form.watch(`menu.${index}.category`)}</Badge>
+                      <Badge>
+                        {categories[form.watch(`menu.${index}.categoryId`)]}
+                      </Badge>
                     </div>
                   </div>
                 </Button>
@@ -271,6 +336,9 @@ const AdminMenu = () => {
               </div>
             );
           })}
+          <Button onClick={handleAddMenuItem} variant="secondary" type="button">
+            <Plus /> Menu item
+          </Button>
         </div>
       </div>
       <div className="border-l px-4">
@@ -281,21 +349,7 @@ const AdminMenu = () => {
           <div className="flex gap-2 flex-wrap">
             <Button
               className="flex-1"
-              onClick={() => {
-                const item = {
-                  category: categories?.[0] ?? "",
-                  description: "",
-                  image: "",
-                  name: "My Dish",
-                  price: 0,
-                  tags: "",
-                  tempId: uuidv4(),
-                  id: -1,
-                };
-
-                append({ ...item, index: fields.length });
-                setSelectedField(fields.length);
-              }}
+              onClick={handleAddMenuItem}
               variant="secondary"
               type="button"
             >
@@ -316,6 +370,19 @@ const AdminMenu = () => {
                   name={`menu.${selectedField.index}.${input.id}` as const}
                   render={({ field }) => {
                     let render = <Input {...field} value={field.value ?? ""} />;
+
+                    if (input.type === "number") {
+                      render = (
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          type={input.type}
+                        />
+                      );
+                    }
 
                     if (input.type === "file") {
                       render =
@@ -373,9 +440,9 @@ const AdminMenu = () => {
                           <SelectContent>
                             <SelectGroup>
                               <SelectLabel>{input.label}</SelectLabel>
-                              {categories.filter(Boolean).map((c) => (
-                                <SelectItem key={c} value={c}>
-                                  {c}
+                              {categoryList.filter(Boolean).map((c) => (
+                                <SelectItem key={c.id} value={c.id.toString()}>
+                                  {c.name}
                                 </SelectItem>
                               ))}
                             </SelectGroup>
@@ -402,4 +469,4 @@ const AdminMenu = () => {
   );
 };
 
-export default hasDomain(AdminMenu);
+export default hasDomain(DataLayer);

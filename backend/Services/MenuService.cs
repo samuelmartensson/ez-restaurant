@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Models.Requests;
 using System.Text.Json;
 
 public class MenuService(RestaurantContext context, S3Service s3Service)
@@ -6,17 +7,17 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
     private RestaurantContext context = context;
     private readonly S3Service s3Service = s3Service;
 
-    public record AddNewMenuItemInput
-    (
-        int Id,
-        string TempId,
-        string Name,
-        string Category,
-        decimal Price,
-        string? Image,
-        string? Description,
-        string? Tags
-    );
+    public class AddNewMenuItemInput
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public int CategoryId { get; set; }
+        public decimal Price { get; set; }
+        public string? TempId { get; set; }
+        public string? Image { get; set; }
+        public string? Description { get; set; }
+        public string? Tags { get; set; }
+    }
 
 
     public async Task UploadCustomerMenu(string menuItemsJson, List<IFormFile> files, string key)
@@ -41,9 +42,12 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
 
     private async Task<List<MenuItem>> GetExistingMenuItems(string key)
     {
-        return await context.MenuItems
-            .Where(m => m.CustomerConfigDomain == key)
-            .ToListAsync();
+        return (await context.MenuCategorys
+            .Include(mc => mc.MenuItems)
+            .Where(mc => mc.CustomerConfigDomain == key)
+            .ToListAsync())
+            .SelectMany(mc => mc.MenuItems)
+            .ToList();
     }
 
 
@@ -60,6 +64,25 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
             string imageUrlKey = $"{key}/{item.Id}";
             await s3Service.DeleteFileAsync(imageUrlKey);
         }
+    }
+
+    public async Task UpdateOrCreateCategory(AddCategoryRequest request, string key)
+    {
+        var existingCategories = await context.MenuCategorys
+                .Where(mc => mc.CustomerConfigDomain == key)
+                .ToListAsync();
+
+        var existingCategory = existingCategories.FirstOrDefault(c => c.Id == request.Id);
+        if (existingCategory != null)
+        {
+            existingCategory.Name = request.Name;
+        }
+        else
+        {
+            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name });
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private async Task ProcessMenuItems(List<AddNewMenuItemInput> menuItems, List<MenuItem> existingMenuItems, List<IFormFile> files, string key)
@@ -80,11 +103,12 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
 
     private async Task UpdateExistingMenuItem(MenuItem existingItem, AddNewMenuItemInput menuItem, List<IFormFile> files, string key)
     {
+
         existingItem.Name = menuItem.Name;
         existingItem.Description = menuItem.Description;
         existingItem.Price = menuItem.Price;
         existingItem.Tags = menuItem.Tags;
-        existingItem.Category = menuItem.Category;
+        existingItem.MenuCategoryId = menuItem.CategoryId;
         existingItem.Id = menuItem.Id;
 
         var file = files.FirstOrDefault(f => f.FileName == menuItem.Id.ToString());
@@ -107,12 +131,11 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
     {
         var newMenuItem = new MenuItem
         {
-            CustomerConfigDomain = key,
             Name = menuItem.Name,
             Description = menuItem.Description,
             Price = menuItem.Price,
             Tags = menuItem.Tags,
-            Category = menuItem.Category,
+            MenuCategoryId = menuItem.CategoryId,
         };
 
         context.MenuItems.Add(newMenuItem);
