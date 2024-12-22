@@ -40,6 +40,42 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateOrCreateCategory(AddCategoryRequest request, string key)
+    {
+        var existingCategory = await GetCategoryById(request.Id, key);
+        if (existingCategory != null)
+        {
+            existingCategory.Name = request.Name;
+        }
+        else
+        {
+            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteCategory(int id, string key)
+    {
+        var existingCategory = await GetCategoryById(id, key);
+        if (existingCategory == null)
+        {
+            throw new Exception("Category not found.");
+        }
+        context.MenuCategorys.Remove(existingCategory);
+        await context.SaveChangesAsync();
+    }
+
+    private async Task<MenuCategory?> GetCategoryById(int id, string key)
+    {
+        var existingCategories = await context.MenuCategorys
+            .Where(mc => mc.CustomerConfigDomain == key)
+            .ToListAsync();
+        var existingCategory = existingCategories.FirstOrDefault(c => c.Id == id);
+
+        return existingCategory;
+    }
+
     private async Task<List<MenuItem>> GetExistingMenuItems(string key)
     {
         return (await context.MenuCategorys
@@ -64,25 +100,6 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
             string imageUrlKey = $"{key}/{item.Id}";
             await s3Service.DeleteFileAsync(imageUrlKey);
         }
-    }
-
-    public async Task UpdateOrCreateCategory(AddCategoryRequest request, string key)
-    {
-        var existingCategories = await context.MenuCategorys
-                .Where(mc => mc.CustomerConfigDomain == key)
-                .ToListAsync();
-
-        var existingCategory = existingCategories.FirstOrDefault(c => c.Id == request.Id);
-        if (existingCategory != null)
-        {
-            existingCategory.Name = request.Name;
-        }
-        else
-        {
-            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name });
-        }
-
-        await context.SaveChangesAsync();
     }
 
     private async Task ProcessMenuItems(List<AddNewMenuItemInput> menuItems, List<MenuItem> existingMenuItems, List<IFormFile> files, string key)

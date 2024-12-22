@@ -41,7 +41,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { configs } = useDataContext();
+  const { configs, selectedDomain } = useDataContext();
   const pathname = usePathname();
 
   return (
@@ -91,10 +91,13 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <Link href="/">
+                    <a
+                      target="_blank"
+                      href={`https://${selectedDomain}.tidochplats.se`}
+                    >
                       <Globe />
                       <span>My site</span>
-                    </Link>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

@@ -2,6 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { CustomerConfigResponse } from "@/generated/endpoints";
 import { getCustomerConfig } from "@/mock_db";
 import "./globals.css";
+import DomainNotFound from "@/components/DomainNotFound";
 
 const themes = (font: string) =>
   ({
@@ -67,7 +68,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const data = await getCustomerConfig();
-  if (!data) return null;
+  if (!data) return <DomainNotFound />;
   console.log(data);
 
   const resolvedFont = data.font ? "Customer" : "Roboto";

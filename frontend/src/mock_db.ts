@@ -7,9 +7,11 @@ export const getCustomerConfig = async () => {
   const headerList = await headers();
   const customerId = headerList.get(CUSTOMER_ID_HEADER);
   if (!customerId) return null;
-  const configResponse = await fetch(
-    getURL(customerId, "get-customer-config")
-  ).then((r) => r.json());
+  const configRequest = await fetch(getURL(customerId, "get-customer-config"));
+
+  if (!configRequest.ok) return false;
+
+  const configResponse = await configRequest.json();
 
   const menu = await fetch(getURL(customerId, "get-customer-menu")).then((r) =>
     r.json()

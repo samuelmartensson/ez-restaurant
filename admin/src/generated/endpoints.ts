@@ -19,6 +19,11 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type DeleteMenuCategoryParams = {
+  id?: number;
+  key?: string;
+};
+
 export type PostMenuCategoryParams = {
   key?: string;
 };
@@ -1089,6 +1094,71 @@ export const usePostMenuCategory = <
   TContext
 > => {
   const mutationOptions = getPostMenuCategoryMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const deleteMenuCategory = (params?: DeleteMenuCategoryParams) => {
+  return authorizedFetch<void>({
+    url: `/Menu/category`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteMenuCategoryMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteMenuCategory>>,
+    TError,
+    { params?: DeleteMenuCategoryParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteMenuCategory>>,
+  TError,
+  { params?: DeleteMenuCategoryParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteMenuCategory>>,
+    { params?: DeleteMenuCategoryParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return deleteMenuCategory(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteMenuCategoryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteMenuCategory>>
+>;
+
+export type DeleteMenuCategoryMutationError = unknown;
+
+export const useDeleteMenuCategory = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteMenuCategory>>,
+    TError,
+    { params?: DeleteMenuCategoryParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteMenuCategory>>,
+  TError,
+  { params?: DeleteMenuCategoryParams },
+  TContext
+> => {
+  const mutationOptions = getDeleteMenuCategoryMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

@@ -31,5 +31,15 @@ public class MenuController(
         await menuService.UpdateOrCreateCategory(request, key);
         return Ok(new { message = "Success" });
     }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [HttpDelete("category")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteCategory([FromQuery] int id, [FromQuery] string key)
+    {
+        await menuService.DeleteCategory(id, key);
+        return Ok(new { message = "Success" });
+    }
 }
 

@@ -31,6 +31,7 @@ import hasDomain from "@/components/hasDomain";
 import MenuCategories from "@/components/MenuCategories";
 import {
   MenuResponse,
+  useDeleteMenuCategory,
   useGetCustomerGetCustomerMenu,
   usePostMenuCategory,
   usePostMenuItems,
@@ -145,6 +146,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
   const { mutateAsync: updateMenu, isPending } = usePostMenuItems();
   const { mutateAsync: updateCategory } = usePostMenuCategory();
+  const { mutateAsync: deleteCategory } = useDeleteMenuCategory();
 
   const handleUpdateCategory = async () => {
     if (!addCategory.trim()) return;
@@ -156,6 +158,14 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       setAddCategory("");
     }
     refetch();
+  };
+  const handleDeleteCategory = async () => {
+    await deleteCategory({
+      params: { id: selectedCategory, key: selectedDomain },
+    });
+    refetch();
+    setSelectedCategory(-1);
+    setAddCategory("");
   };
 
   async function onSubmit() {
@@ -209,16 +219,15 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
           category={addCategory}
           setCategory={setAddCategory}
           items={categoryList}
-          onClick={handleUpdateCategory}
-          btnLabel={
-            selectedCategory !== -1 ? "Update category" : "Add category"
-          }
+          isSelected={selectedCategory !== -1}
           selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          onClick={handleUpdateCategory}
+          onDelete={handleDeleteCategory}
           onBadgeClick={(payload) => {
             setSelectedCategory(payload.isSelected ? -1 : payload.id);
             setAddCategory(payload.isSelected ? "" : payload.name);
           }}
-          setSelectedCategory={setSelectedCategory}
         />
         <div className="flex flex-col gap-2 overflow-auto p-2">
           {fields.map((field, index) => {
