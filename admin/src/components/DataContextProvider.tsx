@@ -43,7 +43,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataContext.Provider
       value={{
-        configs: data,
+        configs: data ?? [],
         setSelectedDomain: setSelectedDomainInternal,
         selectedDomain,
         refetch: async () => {
