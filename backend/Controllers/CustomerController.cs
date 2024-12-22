@@ -131,7 +131,12 @@ public class CustomerController(
     {
         var user = await userService.GetUser(User);
 
-        if (user == null && User.Identity?.Name != null)
+        if (User.Identity?.Name == null)
+        {
+            return BadRequest(new { message = "User identity not found." });
+        }
+
+        if (user == null)
         {
             var newCustomer = new Customer { Subscription = "free" };
             await context.Customers.AddAsync(newCustomer);
@@ -139,11 +144,11 @@ public class CustomerController(
             await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
             await context.SaveChangesAsync();
             return Ok(new List<CustomerResponse>());
-        };
+        }
 
         var configs = await context.CustomerConfigs
-            .Where(cf => cf.CustomerId == user.CustomerId)
-            .ToListAsync();
+        .Where(cf => cf.CustomerId == user.CustomerId)
+        .ToListAsync();
 
         return Ok(configs.Select(c => new CustomerResponse
         {
