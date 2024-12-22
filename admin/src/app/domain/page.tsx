@@ -9,7 +9,7 @@ import { useState } from "react";
 const Domain = () => {
   const router = useRouter();
   const [value, setValue] = useState("");
-  const { mutateAsync } = usePutCustomerCreateConfig();
+  const { mutateAsync, isError } = usePutCustomerCreateConfig();
   const { setSelectedDomain, refetch } = useDataContext();
 
   const createConfig = async () => {
@@ -24,6 +24,7 @@ const Domain = () => {
       <Input
         placeholder="MyRestaurant"
         value={value}
+        className={isError ? "border border-red-500" : ""}
         onChange={(e) => setValue(e.target.value)}
       />
       <Button onClick={() => createConfig()}>Create domain</Button>

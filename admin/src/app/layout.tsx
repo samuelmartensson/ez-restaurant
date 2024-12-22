@@ -8,8 +8,17 @@ import { ClerkProvider, SignedIn } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import "./globals.css";
+import { toast } from "sonner";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    mutations: {
+      onError: (e) => {
+        toast.error(e?.message ?? "Something went wrong");
+      },
+    },
+  },
+});
 
 export default function AdminLayout({
   children,
