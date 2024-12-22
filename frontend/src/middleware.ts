@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   const parts = hostname.split(".");
 
   if (hostname === "localhost") {
-    headers.set(CUSTOMER_ID_HEADER, "te");
+    headers.set(CUSTOMER_ID_HEADER, "xte");
     return NextResponse.next({ headers });
   }
 

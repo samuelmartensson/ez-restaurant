@@ -1,7 +1,12 @@
 import { headers } from "next/headers";
+import { CustomerConfigResponse, MenuResponse } from "./generated/endpoints";
 import { CUSTOMER_ID_HEADER } from "./middleware";
 import { getURL } from "./utils";
-import { CustomerConfigResponse, MenuResponse } from "./generated/endpoints";
+
+type SiteConfig = CustomerConfigResponse & {
+  menu: MenuResponse;
+  ok: boolean;
+};
 
 export const getCustomerConfig = async () => {
   const headerList = await headers();
@@ -9,7 +14,10 @@ export const getCustomerConfig = async () => {
   if (!customerId) return null;
   const configRequest = await fetch(getURL(customerId, "get-customer-config"));
 
-  if (!configRequest.ok) return false;
+  if (!configRequest.ok)
+    return {
+      ok: false,
+    } as SiteConfig;
 
   const configResponse = await configRequest.json();
 
@@ -17,7 +25,5 @@ export const getCustomerConfig = async () => {
     r.json()
   );
 
-  return { ...configResponse, menu } as CustomerConfigResponse & {
-    menu: MenuResponse;
-  };
+  return { ...configResponse, menu, ok: true } as SiteConfig;
 };
