@@ -10,7 +10,7 @@ const DomainNotFound = () => {
           <div className="grid gap-2">
             <span>Domain not found. Sign up now at</span>
             <Button
-              onClick={() => (window.location.href = "https://www.ezrest.com")}
+              onClick={() => (window.location.href = "https://www.ezrest.se")}
             >
               EZ Rest
             </Button>
