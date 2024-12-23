@@ -85,7 +85,7 @@ public class CustomerController(
     {
         var menuCategories = await context.MenuCategorys
             .Include(mc => mc.MenuItems)
-            .Where(mc => mc.CustomerConfigDomain == key)
+            .Where(mc => mc.CustomerConfigDomain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower())
             .ToListAsync();
 
 
