@@ -40,6 +40,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import MobileDrawer from "@/components/MobileDrawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
@@ -61,36 +63,46 @@ const formSchema = z.object({
 });
 
 const inputSchema = [
-  {
-    id: "name",
-    label: "Name",
-    type: "text",
-  },
-  {
-    id: "categoryId",
-    label: "Category",
-    type: "select",
-  },
-  {
-    id: "price",
-    label: "Price",
-    type: "number",
-  },
-  {
-    id: "description",
-    label: "Description",
-    type: "text",
-  },
-  {
-    id: "image",
-    label: "Image",
-    type: "file",
-  },
-  {
-    id: "tags",
-    label: "Tags",
-    type: "text",
-  },
+  [
+    {
+      id: "name",
+      label: "Name",
+      type: "text",
+    },
+    {
+      id: "price",
+      label: "Price",
+      type: "number",
+    },
+  ],
+  [
+    {
+      id: "categoryId",
+      label: "Category",
+      type: "select",
+    },
+  ],
+  [
+    {
+      id: "description",
+      label: "Description",
+      type: "text",
+    },
+  ],
+  [
+    {
+      id: "image",
+      label: "Image",
+      type: "file",
+    },
+  ],
+  [
+    {
+      id: "tags",
+      label: "Tags",
+      type: "text",
+    },
+  ],
 ] as const;
 
 const DataLayer = () => {
@@ -108,6 +120,7 @@ const DataLayer = () => {
 
 const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const { selectedDomain } = useDataContext();
+  const isMobile = useIsMobile();
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedFieldIndex, setSelectedField] = useState<number>();
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
@@ -157,6 +170,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     if (selectedCategory === -1) {
       setAddCategory("");
     }
+    toast.success("Category added.");
     refetch();
   };
   const handleDeleteCategory = async () => {
@@ -166,6 +180,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     refetch();
     setSelectedCategory(-1);
     setAddCategory("");
+    toast.success("Category deleted.");
   };
 
   async function onSubmit() {
@@ -212,8 +227,33 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const resolveImageId = (field?: z.infer<typeof menuItemSchema>) =>
     field?.id === -1 ? (field?.tempId ?? "") : (field?.id ?? "");
 
+  if (categoryList.length === 0) {
+    return (
+      <div>
+        <h2 className="mb-4">To get started with your menu, add a category.</h2>
+        <MenuCategories
+          category={addCategory}
+          setCategory={setAddCategory}
+          items={categoryList}
+          isSelected={selectedCategory !== -1}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          onClick={handleUpdateCategory}
+          onDelete={handleDeleteCategory}
+          onBadgeClick={(payload) => {
+            setSelectedCategory(payload.isSelected ? -1 : payload.id);
+            setAddCategory(payload.isSelected ? "" : payload.name);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="grid p-4 gap-4" style={{ gridTemplateColumns: "3fr 2fr" }}>
+    <div
+      className="grid p-4 gap-4"
+      style={{ gridTemplateColumns: isMobile ? "1fr" : "3fr 2fr" }}
+    >
       <div className="grid grid-rows-[auto_70vh]">
         <MenuCategories
           category={addCategory}
@@ -246,11 +286,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
             return (
               <div
                 key={field.formId}
-                className={`relative flex justify-between gap-2 border-b ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
+                className={`relative flex flex-col md:flex-row justify-between gap-2 border-b ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
               >
                 <Button
                   onClick={() => {
-                    setSelectedField(index);
+                    setSelectedField((state) => (state === index ? -1 : index));
                   }}
                   type="button"
                   className="block text-left w-full h-auto"
@@ -293,6 +333,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                 </Button>
                 <div className="grid gap-2">
                   <Button
+                    size={isMobile ? "sm" : "default"}
                     variant="outline"
                     type="button"
                     onClick={() => {
@@ -310,14 +351,17 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                     {deleteStaged ? <X /> : <Trash />} Delete
                   </Button>
                   <Button
+                    size={isMobile ? "sm" : "default"}
                     variant="outline"
                     type="button"
                     onClick={() => {
                       const item = {
-                        ...field,
+                        ...form.watch(`menu.${index}`),
                         tempId: uuidv4(),
                         id: -1,
                       };
+                      console.log(form.watch(`menu.${index}`));
+
                       append({ ...item, index: fields.length });
                       setSelectedField(fields.length);
                     }}
@@ -334,128 +378,151 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         </div>
       </div>
       <div className="border-l px-4">
-        <form
-          className="grid gap-4 overflow-auto"
-          onSubmit={form.handleSubmit(onSubmit)}
+        <MobileDrawer
+          title={`Edit menu item - "${selectedField?.name}"`}
+          open={!!selectedField}
+          setIsOpen={(open) => !open && setSelectedField(-1)}
         >
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              className="flex-1"
-              onClick={handleAddMenuItem}
-              variant="secondary"
-              type="button"
-            >
-              <Plus /> Menu item
-            </Button>
-            <Button disabled={isPending} className="flex-1" type="submit">
-              <Save /> Save
-            </Button>
-          </div>
-        </form>
-        <Form {...form}>
-          {selectedField && (
-            <div className="grid gap-2 p-4" key={selectedFieldIndex}>
-              {inputSchema.map((input) => (
-                <FormField
-                  key={input.id}
-                  control={form.control}
-                  name={`menu.${selectedField.index}.${input.id}` as const}
-                  render={({ field }) => {
-                    let render = <Input {...field} value={field.value ?? ""} />;
-
-                    if (input.type === "number") {
-                      render = (
-                        <Input
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                          type={input.type}
-                        />
-                      );
-                    }
-
-                    if (input.type === "file") {
-                      render =
-                        field.value && field.value !== ACTIONS.REMOVE ? (
-                          <Button
-                            className="block"
-                            variant="destructive"
-                            type="button"
-                            onClick={() => {
-                              form.setValue(
-                                `menu.${selectedField.index}.${input.id}` as const,
-                                selectedField.image ? ACTIONS.REMOVE : ""
-                              );
-
-                              setUploadedImages((state) => {
-                                const newState = { ...state };
-                                delete newState[resolveImageId(selectedField)];
-
-                                return newState;
-                              });
-                            }}
-                          >
-                            Remove file
-                          </Button>
-                        ) : (
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => {
-                              const file = event.target.files?.[0];
-                              if (file) {
-                                setUploadedImages((state) => ({
-                                  ...state,
-                                  [resolveImageId(selectedField)]: file,
-                                }));
-                                form.setValue(
-                                  `menu.${selectedField.index}.${input.id}` as const,
-                                  file as unknown as string
-                                );
-                              }
-                            }}
-                          />
-                        );
-                    }
-
-                    if (input.type === "select") {
-                      render = (
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={String(field.value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="-" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>{input.label}</SelectLabel>
-                              {categoryList.filter(Boolean).map((c) => (
-                                <SelectItem key={c.id} value={c.id.toString()}>
-                                  {c.name}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      );
-                    }
-
-                    return (
-                      <FormItem>
-                        <FormLabel>{input.label}</FormLabel>
-                        <FormControl>{render}</FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-              ))}
+          <form
+            className="grid gap-4 overflow-auto"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                className="flex-1"
+                onClick={handleAddMenuItem}
+                variant="secondary"
+                type="button"
+              >
+                <Plus /> Menu item
+              </Button>
+              <Button disabled={isPending} className="flex-1" type="submit">
+                <Save /> Save
+              </Button>
             </div>
-          )}
-        </Form>
+          </form>
+
+          <Form {...form}>
+            {selectedField && (
+              <div
+                className="grid gap-4 p-4 animate-in fade-in"
+                key={selectedFieldIndex}
+              >
+                {inputSchema.map((inputRow) => (
+                  <div key={inputRow[0].id} className="flex gap-2">
+                    {inputRow.map((input) => (
+                      <FormField
+                        key={input.id}
+                        control={form.control}
+                        name={
+                          `menu.${selectedField.index}.${input.id}` as const
+                        }
+                        render={({ field }) => {
+                          let render = (
+                            <Input {...field} value={field.value ?? ""} />
+                          );
+
+                          if (input.type === "number") {
+                            render = (
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                                type={input.type}
+                              />
+                            );
+                          }
+
+                          if (input.type === "file") {
+                            render =
+                              field.value && field.value !== ACTIONS.REMOVE ? (
+                                <Button
+                                  className="block"
+                                  variant="destructive"
+                                  type="button"
+                                  onClick={() => {
+                                    form.setValue(
+                                      `menu.${selectedField.index}.${input.id}` as const,
+                                      selectedField.image ? ACTIONS.REMOVE : ""
+                                    );
+
+                                    setUploadedImages((state) => {
+                                      const newState = { ...state };
+                                      delete newState[
+                                        resolveImageId(selectedField)
+                                      ];
+
+                                      return newState;
+                                    });
+                                  }}
+                                >
+                                  Remove file
+                                </Button>
+                              ) : (
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(event) => {
+                                    const file = event.target.files?.[0];
+                                    if (file) {
+                                      setUploadedImages((state) => ({
+                                        ...state,
+                                        [resolveImageId(selectedField)]: file,
+                                      }));
+                                      form.setValue(
+                                        `menu.${selectedField.index}.${input.id}` as const,
+                                        file as unknown as string
+                                      );
+                                    }
+                                  }}
+                                />
+                              );
+                          }
+
+                          if (input.type === "select") {
+                            render = (
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={String(field.value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="-" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>{input.label}</SelectLabel>
+                                    {categoryList.filter(Boolean).map((c) => (
+                                      <SelectItem
+                                        key={c.id}
+                                        value={c.id.toString()}
+                                      >
+                                        {c.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            );
+                          }
+
+                          return (
+                            <FormItem className="grid flex-1">
+                              <FormLabel>{input.label}</FormLabel>
+                              <FormControl>{render}</FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Form>
+        </MobileDrawer>
       </div>
     </div>
   );

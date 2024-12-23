@@ -11,7 +11,10 @@ export function middleware(request: NextRequest) {
   const parts = hostname.split(".");
 
   if (hostname === "localhost") {
-    headers.set(CUSTOMER_ID_HEADER, "xte");
+    const key =
+      url.searchParams.get("key") ?? process.env.TEST_CUSTOMER ?? "test";
+    headers.set(CUSTOMER_ID_HEADER, key);
+
     return NextResponse.next({ headers });
   }
 

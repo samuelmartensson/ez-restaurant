@@ -21,6 +21,7 @@ import {
 import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const inputSchema = [
   {
@@ -77,7 +78,7 @@ const Hero = () => {
       },
       params: { key: selectedDomain },
     });
-
+    toast("Hero saved.");
     refetch();
   }
 

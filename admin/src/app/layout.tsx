@@ -2,7 +2,7 @@
 
 import { AppSidebar } from "@/components/AppSidebar";
 import DataContextProvider from "@/components/DataContextProvider";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider, SignedIn } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -35,7 +35,10 @@ export default function AdminLayout({
               <DataContextProvider>
                 <SidebarProvider>
                   <AppSidebar />
-                  <main className="w-full">{children}</main>
+                  <main className="w-full">
+                    <SidebarTrigger className="ml-1 mt-4" />
+                    {children}
+                  </main>
                 </SidebarProvider>
               </DataContextProvider>
             </SignedIn>

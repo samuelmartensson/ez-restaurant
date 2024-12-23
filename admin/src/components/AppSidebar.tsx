@@ -10,12 +10,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { SignOutButton, UserButton } from "@clerk/nextjs";
 import { Globe, Home, SquareMenu, Wallpaper } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { VersionSwitcher } from "./ConfigSwitcher";
+import { useEffect } from "react";
 
 const items = [
   {
@@ -43,9 +45,14 @@ const items = [
 export function AppSidebar() {
   const { configs, selectedDomain } = useDataContext();
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    setOpenMobile(true);
+  }, [setOpenMobile]);
 
   return (
-    <Sidebar>
+    <Sidebar variant="floating">
       <SidebarHeader>
         <VersionSwitcher domains={configs.map((c) => c.domain ?? "")} />
       </SidebarHeader>
@@ -71,7 +78,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={item.url === pathname}>
+                  <SidebarMenuButton
+                    onClick={() => setOpenMobile(false)}
+                    asChild
+                    isActive={item.url === pathname}
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -93,7 +104,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <a
                       target="_blank"
-                      href={`https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`}
+                      href={
+                        process.env.NODE_ENV === "production"
+                          ? `https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`
+                          : `http://localhost:3001?key=${selectedDomain}`
+                      }
                     >
                       <Globe />
                       <span>My site</span>

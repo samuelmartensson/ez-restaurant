@@ -41,7 +41,6 @@ const MenuCategories = ({
 }: Props) => {
   return (
     <div className="mb-8">
-      <div className="text-xl mb-2">Categories</div>
       <div className="flex flex-wrap gap-2 mb-2">
         <Input
           className="max-w-[250px]"
@@ -61,8 +60,9 @@ const MenuCategories = ({
               <DialogHeader>
                 <DialogTitle>Are you absolutely sure?</DialogTitle>
                 <DialogDescription>
-                  This action cannot be undone. This will permanently delete{" "}
-                  <span className="font-bold">{category}</span>.
+                  This action cannot be undone. This will permanently delete the{" "}
+                  <span className="font-bold">{category}</span> category and all
+                  its items.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
