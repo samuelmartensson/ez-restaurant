@@ -19,6 +19,10 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type PostMenuCategoryOrderParams = {
+  key?: string;
+};
+
 export type DeleteMenuCategoryParams = {
   id?: number;
   key?: string;
@@ -89,8 +93,8 @@ export interface SectionsResponse {
 
 export interface MenuItemResponse {
   categoryId: number;
-  /** @nullable */
-  description?: string | null;
+  /** @minLength 1 */
+  description: string;
   id: number;
   /** @nullable */
   image?: string | null;
@@ -105,6 +109,7 @@ export interface MenuCategoryResponse {
   id: number;
   /** @minLength 1 */
   name: string;
+  order: number;
 }
 
 export interface MenuResponse {
@@ -155,6 +160,7 @@ export interface CreateConfigRequest {
 export interface AddCategoryRequest {
   id?: number;
   name?: string;
+  order?: number;
 }
 
 export const getCustomerGetCustomerConfig = (
@@ -1159,6 +1165,78 @@ export const useDeleteMenuCategory = <
   TContext
 > => {
   const mutationOptions = getDeleteMenuCategoryMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postMenuCategoryOrder = (
+  addCategoryRequest: AddCategoryRequest[],
+  params?: PostMenuCategoryOrderParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/Menu/category/order`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addCategoryRequest,
+    params,
+    signal,
+  });
+};
+
+export const getPostMenuCategoryOrderMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuCategoryOrder>>,
+    TError,
+    { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postMenuCategoryOrder>>,
+  TError,
+  { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postMenuCategoryOrder>>,
+    { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postMenuCategoryOrder(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostMenuCategoryOrderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuCategoryOrder>>
+>;
+export type PostMenuCategoryOrderMutationBody = AddCategoryRequest[];
+export type PostMenuCategoryOrderMutationError = unknown;
+
+export const usePostMenuCategoryOrder = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuCategoryOrder>>,
+    TError,
+    { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postMenuCategoryOrder>>,
+  TError,
+  { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+  TContext
+> => {
+  const mutationOptions = getPostMenuCategoryOrderMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

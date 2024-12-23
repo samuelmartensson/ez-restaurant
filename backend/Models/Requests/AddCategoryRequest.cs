@@ -4,5 +4,6 @@ namespace Models.Requests
     {
         public required string Name { get; set; }
         public required int Id { get; set; }
+        public int? Order { get; set; }
     };
 }

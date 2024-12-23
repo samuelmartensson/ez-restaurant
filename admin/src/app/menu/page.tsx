@@ -34,6 +34,7 @@ import {
   useDeleteMenuCategory,
   useGetCustomerGetCustomerMenu,
   usePostMenuCategory,
+  usePostMenuCategoryOrder,
   usePostMenuItems,
 } from "@/generated/endpoints";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -133,7 +134,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     key: selectedDomain,
   });
 
-  const categoryList = data.categories;
+  const [categoryList, setCategoryList] = useState(data.categories);
   const categories = Object.fromEntries(
     categoryList.map((item) => [item.id, item.name])
   );
@@ -160,24 +161,33 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const { mutateAsync: updateMenu, isPending } = usePostMenuItems();
   const { mutateAsync: updateCategory } = usePostMenuCategory();
   const { mutateAsync: deleteCategory } = useDeleteMenuCategory();
+  const { mutateAsync: updateCategoryOrder } = usePostMenuCategoryOrder();
+
+  const refetchAndSync = async () => {
+    const newMenu = await refetch();
+    setCategoryList(newMenu.data?.categories ?? []);
+  };
 
   const handleUpdateCategory = async () => {
     if (!addCategory.trim()) return;
     await updateCategory({
-      data: { id: selectedCategory, name: addCategory },
+      data: {
+        id: selectedCategory,
+        name: addCategory,
+      },
       params: { key: selectedDomain },
     });
     if (selectedCategory === -1) {
       setAddCategory("");
     }
-    toast.success("Category added.");
-    refetch();
+    toast.success("Categories updated.");
+    refetchAndSync();
   };
   const handleDeleteCategory = async () => {
     await deleteCategory({
       params: { id: selectedCategory, key: selectedDomain },
     });
-    refetch();
+    refetchAndSync();
     setSelectedCategory(-1);
     setAddCategory("");
     toast.success("Category deleted.");
@@ -203,7 +213,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         ),
       },
     });
-    await refetch();
+    await updateCategoryOrder({
+      data: categoryList.map((item, index) => ({ ...item, order: index + 1 })),
+      params: { key: selectedDomain },
+    });
+    refetchAndSync();
     toast("Updated menu.");
     setUploadedImages({});
   }
@@ -227,6 +241,8 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const resolveImageId = (field?: z.infer<typeof menuItemSchema>) =>
     field?.id === -1 ? (field?.tempId ?? "") : (field?.id ?? "");
 
+  console.log(categoryList);
+
   if (categoryList.length === 0) {
     return (
       <div>
@@ -235,6 +251,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
           category={addCategory}
           setCategory={setAddCategory}
           items={categoryList}
+          setItems={setCategoryList}
           isSelected={selectedCategory !== -1}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
@@ -244,286 +261,299 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
             setSelectedCategory(payload.isSelected ? -1 : payload.id);
             setAddCategory(payload.isSelected ? "" : payload.name);
           }}
+          onOrderChange={(items) => setCategoryList(items)}
         />
       </div>
     );
   }
 
   return (
-    <div
-      className="grid p-4 gap-4"
-      style={{ gridTemplateColumns: isMobile ? "1fr" : "3fr 2fr" }}
-    >
-      <div className="grid grid-rows-[auto_70vh]">
-        <MenuCategories
-          category={addCategory}
-          setCategory={setAddCategory}
-          items={categoryList}
-          isSelected={selectedCategory !== -1}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          onClick={handleUpdateCategory}
-          onDelete={handleDeleteCategory}
-          onBadgeClick={(payload) => {
-            setSelectedCategory(payload.isSelected ? -1 : payload.id);
-            setAddCategory(payload.isSelected ? "" : payload.name);
-          }}
-        />
-        <div className="flex flex-col gap-2 overflow-auto p-2">
-          {fields.map((field, index) => {
-            const deleteStaged = deletedItems.includes(index);
-            const saveStaged = !data?.menuItems
-              ?.map((d) => d.id)
-              .includes(field.id);
+    <div>
+      <div
+        className="grid gap-4"
+        style={{
+          gridTemplateColumns: isMobile || !selectedField ? "1fr" : "3fr 2fr",
+        }}
+      >
+        <div className="grid grid-rows-[auto_70vh]">
+          <MenuCategories
+            category={addCategory}
+            setCategory={setAddCategory}
+            items={categoryList}
+            setItems={setCategoryList}
+            isSelected={selectedCategory !== -1}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            onClick={handleUpdateCategory}
+            onDelete={handleDeleteCategory}
+            onBadgeClick={(payload) => {
+              setSelectedCategory(payload.isSelected ? -1 : payload.id);
+              setAddCategory(payload.isSelected ? "" : payload.name);
+            }}
+            onOrderChange={(items) => setCategoryList(items)}
+          />
+          <div className="flex flex-col gap-2 overflow-auto p-2">
+            {fields.map((field, index) => {
+              const deleteStaged = deletedItems.includes(index);
+              const saveStaged = !data?.menuItems
+                ?.map((d) => d.id)
+                .includes(field.id);
 
-            if (
-              selectedCategory !== -1 &&
-              form.watch(`menu.${index}.categoryId`)?.toString() !==
-                selectedCategory.toString()
-            )
-              return null;
+              if (
+                selectedCategory !== -1 &&
+                form.watch(`menu.${index}.categoryId`)?.toString() !==
+                  selectedCategory.toString()
+              )
+                return null;
 
-            return (
-              <div
-                key={field.formId}
-                className={`relative flex flex-col md:flex-row justify-between gap-2 border-b ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
-              >
-                <Button
-                  onClick={() => {
-                    setSelectedField((state) => (state === index ? -1 : index));
-                  }}
-                  type="button"
-                  className="block text-left w-full h-auto"
-                  variant={(() => {
-                    if (saveStaged) return "default";
-                    return deleteStaged ? "destructive" : "ghost";
-                  })()}
+              return (
+                <div
+                  key={field.formId}
+                  className={`relative flex flex-col md:flex-row justify-between gap-2 border-b ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
                 >
-                  <div className="flex gap-2 items-center">
-                    {uploadedImages?.[resolveImageId(field)] ? (
-                      <FilePreview
-                        file={uploadedImages[resolveImageId(field)]}
-                      />
-                    ) : (
-                      <>
-                        {field.image &&
-                        form.watch(`menu.${index}.image`) !== ACTIONS.REMOVE ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            className="h-20 w-20 object-contain bg-gray-100 rounded"
-                            src={field.image}
-                            alt=""
-                          />
-                        ) : (
-                          <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
-                            No image
-                          </div>
-                        )}
-                      </>
-                    )}
-                    <div className="grid gap-1 justify-items-start">
-                      <span className="text-base">
-                        {form.watch(`menu.${index}.name`)}
-                      </span>
-                      <Badge>
-                        {categories[form.watch(`menu.${index}.categoryId`)]}
-                      </Badge>
-                    </div>
-                  </div>
-                </Button>
-                <div className="grid gap-2">
                   <Button
-                    size={isMobile ? "sm" : "default"}
-                    variant="outline"
-                    type="button"
                     onClick={() => {
-                      if (saveStaged) {
-                        remove(index);
-                        return;
-                      }
-                      setDeletedItems((state) =>
-                        state.includes(index)
-                          ? state.filter((n) => n !== index)
-                          : [...state, index]
+                      setSelectedField((state) =>
+                        state === index ? -1 : index
                       );
                     }}
-                  >
-                    {deleteStaged ? <X /> : <Trash />} Delete
-                  </Button>
-                  <Button
-                    size={isMobile ? "sm" : "default"}
-                    variant="outline"
                     type="button"
-                    onClick={() => {
-                      const item = {
-                        ...form.watch(`menu.${index}`),
-                        tempId: uuidv4(),
-                        id: -1,
-                      };
-                      console.log(form.watch(`menu.${index}`));
-
-                      append({ ...item, index: fields.length });
-                      setSelectedField(fields.length);
-                    }}
+                    className="block text-left w-full h-auto"
+                    variant={(() => {
+                      if (saveStaged) return "default";
+                      return deleteStaged ? "destructive" : "ghost";
+                    })()}
                   >
-                    <Copy /> Copy
+                    <div className="flex gap-2 items-center">
+                      {uploadedImages?.[resolveImageId(field)] ? (
+                        <FilePreview
+                          file={uploadedImages[resolveImageId(field)]}
+                        />
+                      ) : (
+                        <>
+                          {field.image &&
+                          form.watch(`menu.${index}.image`) !==
+                            ACTIONS.REMOVE ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              className="h-20 w-20 object-contain bg-gray-100 rounded"
+                              src={field.image}
+                              alt=""
+                            />
+                          ) : (
+                            <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                              No image
+                            </div>
+                          )}
+                        </>
+                      )}
+                      <div className="grid gap-1 justify-items-start">
+                        <span className="text-base">
+                          {form.watch(`menu.${index}.name`)}
+                        </span>
+                        <Badge>
+                          {categories[form.watch(`menu.${index}.categoryId`)]}
+                        </Badge>
+                      </div>
+                    </div>
                   </Button>
-                </div>
-              </div>
-            );
-          })}
-          <Button onClick={handleAddMenuItem} variant="secondary" type="button">
-            <Plus /> Menu item
-          </Button>
-        </div>
-      </div>
-      <div className="border-l px-4">
-        <MobileDrawer
-          title={`Edit menu item - "${selectedField?.name}"`}
-          open={!!selectedField}
-          setIsOpen={(open) => !open && setSelectedField(-1)}
-        >
-          <form
-            className="grid gap-4 overflow-auto"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                className="flex-1"
-                onClick={handleAddMenuItem}
-                variant="secondary"
-                type="button"
-              >
-                <Plus /> Menu item
-              </Button>
-              <Button disabled={isPending} className="flex-1" type="submit">
-                <Save /> Save
-              </Button>
-            </div>
-          </form>
-
-          <Form {...form}>
-            {selectedField && (
-              <div
-                className="grid gap-4 p-4 animate-in fade-in"
-                key={selectedFieldIndex}
-              >
-                {inputSchema.map((inputRow) => (
-                  <div key={inputRow[0].id} className="flex gap-2">
-                    {inputRow.map((input) => (
-                      <FormField
-                        key={input.id}
-                        control={form.control}
-                        name={
-                          `menu.${selectedField.index}.${input.id}` as const
+                  <div className="grid gap-2 content-start">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        if (saveStaged) {
+                          remove(index);
+                          return;
                         }
-                        render={({ field }) => {
-                          let render = (
-                            <Input {...field} value={field.value ?? ""} />
-                          );
+                        setDeletedItems((state) =>
+                          state.includes(index)
+                            ? state.filter((n) => n !== index)
+                            : [...state, index]
+                        );
+                      }}
+                    >
+                      {deleteStaged ? <X /> : <Trash />} Delete
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        const item = {
+                          ...form.watch(`menu.${index}`),
+                          tempId: uuidv4(),
+                          id: -1,
+                        };
+                        console.log(form.watch(`menu.${index}`));
 
-                          if (input.type === "number") {
-                            render = (
-                              <Input
-                                {...field}
-                                value={field.value ?? ""}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                type={input.type}
-                              />
-                            );
+                        append({ ...item, index: fields.length });
+                        setSelectedField(fields.length);
+                      }}
+                    >
+                      <Copy /> Copy
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            <Button
+              onClick={handleAddMenuItem}
+              variant="secondary"
+              type="button"
+            >
+              <Plus /> Menu item
+            </Button>
+          </div>
+        </div>
+        <div className="border-l px-4">
+          <MobileDrawer
+            title={`Edit menu item - "${selectedField?.name}"`}
+            open={!!selectedField}
+            setIsOpen={(open) => !open && setSelectedField(-1)}
+          >
+            <Form {...form}>
+              {selectedField && (
+                <div
+                  className="grid gap-4 p-4 animate-in fade-in"
+                  key={selectedFieldIndex}
+                >
+                  {inputSchema.map((inputRow) => (
+                    <div key={inputRow[0].id} className="flex gap-2">
+                      {inputRow.map((input) => (
+                        <FormField
+                          key={input.id}
+                          control={form.control}
+                          name={
+                            `menu.${selectedField.index}.${input.id}` as const
                           }
+                          render={({ field }) => {
+                            let render = (
+                              <Input {...field} value={field.value ?? ""} />
+                            );
 
-                          if (input.type === "file") {
-                            render =
-                              field.value && field.value !== ACTIONS.REMOVE ? (
-                                <Button
-                                  className="block"
-                                  variant="destructive"
-                                  type="button"
-                                  onClick={() => {
-                                    form.setValue(
-                                      `menu.${selectedField.index}.${input.id}` as const,
-                                      selectedField.image ? ACTIONS.REMOVE : ""
-                                    );
-
-                                    setUploadedImages((state) => {
-                                      const newState = { ...state };
-                                      delete newState[
-                                        resolveImageId(selectedField)
-                                      ];
-
-                                      return newState;
-                                    });
-                                  }}
-                                >
-                                  Remove file
-                                </Button>
-                              ) : (
+                            if (input.type === "number") {
+                              render = (
                                 <Input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(event) => {
-                                    const file = event.target.files?.[0];
-                                    if (file) {
-                                      setUploadedImages((state) => ({
-                                        ...state,
-                                        [resolveImageId(selectedField)]: file,
-                                      }));
-                                      form.setValue(
-                                        `menu.${selectedField.index}.${input.id}` as const,
-                                        file as unknown as string
-                                      );
-                                    }
-                                  }}
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  type={input.type}
                                 />
                               );
-                          }
+                            }
 
-                          if (input.type === "select") {
-                            render = (
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={String(field.value)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="-" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    <SelectLabel>{input.label}</SelectLabel>
-                                    {categoryList.filter(Boolean).map((c) => (
-                                      <SelectItem
-                                        key={c.id}
-                                        value={c.id.toString()}
-                                      >
-                                        {c.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
+                            if (input.type === "file") {
+                              render =
+                                field.value &&
+                                field.value !== ACTIONS.REMOVE ? (
+                                  <Button
+                                    className="block"
+                                    variant="destructive"
+                                    type="button"
+                                    onClick={() => {
+                                      form.setValue(
+                                        `menu.${selectedField.index}.${input.id}` as const,
+                                        selectedField.image
+                                          ? ACTIONS.REMOVE
+                                          : ""
+                                      );
+
+                                      setUploadedImages((state) => {
+                                        const newState = { ...state };
+                                        delete newState[
+                                          resolveImageId(selectedField)
+                                        ];
+
+                                        return newState;
+                                      });
+                                    }}
+                                  >
+                                    Remove file
+                                  </Button>
+                                ) : (
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(event) => {
+                                      const file = event.target.files?.[0];
+                                      if (file) {
+                                        setUploadedImages((state) => ({
+                                          ...state,
+                                          [resolveImageId(selectedField)]: file,
+                                        }));
+                                        form.setValue(
+                                          `menu.${selectedField.index}.${input.id}` as const,
+                                          file as unknown as string
+                                        );
+                                      }
+                                    }}
+                                  />
+                                );
+                            }
+
+                            if (input.type === "select") {
+                              render = (
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={String(field.value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="-" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectGroup>
+                                      <SelectLabel>{input.label}</SelectLabel>
+                                      {categoryList.filter(Boolean).map((c) => (
+                                        <SelectItem
+                                          key={c.id}
+                                          value={c.id.toString()}
+                                        >
+                                          {c.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                              );
+                            }
+
+                            return (
+                              <FormItem className="grid flex-1">
+                                <FormLabel>{input.label}</FormLabel>
+                                <FormControl>{render}</FormControl>
+                                <FormMessage />
+                              </FormItem>
                             );
-                          }
-
-                          return (
-                            <FormItem className="grid flex-1">
-                              <FormLabel>{input.label}</FormLabel>
-                              <FormControl>{render}</FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </Form>
-        </MobileDrawer>
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Form>
+          </MobileDrawer>
+        </div>
       </div>
+      <form className="grid gap-4 mt-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            className="flex-1"
+            onClick={handleAddMenuItem}
+            variant="secondary"
+            type="button"
+          >
+            <Plus /> Menu item
+          </Button>
+          <Button disabled={isPending} className="flex-1" type="submit">
+            <Save /> Save
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

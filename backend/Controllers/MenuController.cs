@@ -33,6 +33,16 @@ public class MenuController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [HttpPost("category/order")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateCategoryOrder(List<AddCategoryRequest> request, [FromQuery] string key)
+    {
+        await menuService.UpdateCategoryOrder(request, key);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
     [HttpDelete("category")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

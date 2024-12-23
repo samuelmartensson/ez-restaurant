@@ -6,6 +6,11 @@
  */
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
+export type DeleteMenuCategoryParams = {
+  id?: number;
+  key?: string;
+};
+
 export type PostMenuCategoryParams = {
   key?: string;
 };
@@ -293,6 +298,16 @@ export const postMenuCategory = <TData = AxiosResponse<void>>(
   });
 };
 
+export const deleteMenuCategory = <TData = AxiosResponse<void>>(
+  params?: DeleteMenuCategoryParams,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.delete(`/Menu/category`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
+};
+
 export type GetCustomerGetCustomerConfigResult =
   AxiosResponse<CustomerConfigResponse>;
 export type GetCustomerGetCustomerMenuResult = AxiosResponse<MenuResponse>;
@@ -304,3 +319,4 @@ export type PostCustomerUploadSiteConfigurationAssetsResult =
 export type PostCustomerUploadHeroResult = AxiosResponse<void>;
 export type PostMenuItemsResult = AxiosResponse<void>;
 export type PostMenuCategoryResult = AxiosResponse<void>;
+export type DeleteMenuCategoryResult = AxiosResponse<void>;

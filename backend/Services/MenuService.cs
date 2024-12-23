@@ -40,6 +40,22 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateCategoryOrder(List<AddCategoryRequest> request, string key)
+    {
+        var existingCategories = await context.MenuCategorys
+            .Where(mc => mc.CustomerConfigDomain == key)
+            .ToListAsync();
+
+        foreach (AddCategoryRequest item in request)
+        {
+            var existingCategory = existingCategories.First(c => c.Id == item.Id);
+            existingCategory.Name = item.Name;
+            existingCategory.Order = item.Order ?? 0;
+        }
+
+        await context.SaveChangesAsync();
+    }
+
     public async Task UpdateOrCreateCategory(AddCategoryRequest request, string key)
     {
         var existingCategory = await GetCategoryById(request.Id, key);
@@ -49,7 +65,7 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
         }
         else
         {
-            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name });
+            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name, Order = request.Order ?? 0 });
         }
 
         await context.SaveChangesAsync();

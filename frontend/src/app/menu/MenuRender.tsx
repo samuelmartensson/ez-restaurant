@@ -1,7 +1,10 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
+import { Image } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 function groupBy<T extends MenuItemResponse>(
@@ -29,32 +32,53 @@ function groupBy<T extends MenuItemResponse>(
   }));
 }
 
-const MenuItem = ({ description, name, price, tags }: MenuItemResponse) => {
+const MenuItem = ({
+  description,
+  name,
+  price,
+  tags,
+  image,
+}: MenuItemResponse) => {
   return (
-    <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-2 justify-between">
-      <div className="grid gap-4">
-        <div className="grid gap-1">
-          <span className="text-lg">{name}</span>
-          {description && (
-            <span className="text-muted-foreground text-sm">{description}</span>
+    <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-4">
+      {image ? (
+        <img
+          src={image}
+          alt=""
+          className="w-28 h-28 bg-gray-200 object-cover rounded-xl"
+        />
+      ) : (
+        <div className="grid place-items-center min-w-28 max-w-28 h-28 bg-gray-200 object-cover rounded-xl">
+          <Image className="text-gray-400" />
+        </div>
+      )}
+      <div className="grid gap-2 w-full">
+        <div className="grid gap-4">
+          <div className="grid gap-1">
+            <span className="text-lg">{name}</span>
+            {description && (
+              <span className="text-muted-foreground text-sm">
+                {description}
+              </span>
+            )}
+          </div>
+          {tags && (
+            <div className="flex flex-wrap gap-1">
+              {tags
+                .split(",")
+                .filter(Boolean)
+                .map((tag) => (
+                  <Badge variant="secondary" className="capitalize" key={tag}>
+                    {tag}
+                  </Badge>
+                ))}
+            </div>
           )}
         </div>
-        {tags && (
-          <div className="flex flex-wrap gap-1">
-            {tags
-              .split(",")
-              .filter(Boolean)
-              .map((tag) => (
-                <Badge variant="secondary" className="capitalize" key={tag}>
-                  {tag}
-                </Badge>
-              ))}
-          </div>
-        )}
+        <span className="text-primary font-bold self-end whitespace-nowrap">
+          {price} SEK
+        </span>
       </div>
-      <span className="text-primary font-bold self-end whitespace-nowrap">
-        {price} SEK
-      </span>
     </div>
   );
 };
@@ -76,7 +100,7 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
             "url(https://ez-rest.s3.eu-north-1.amazonaws.com/adflow.se/menu-backdrop.jpg)",
         }}
       />
-      <div className="relative z-10 grid gap-8">
+      <div className="relative z-10 grid gap-4">
         {data.categories.length > 0 && (
           <Tabs
             value={String(selectedCategory)}
@@ -94,7 +118,7 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
           </Tabs>
         )}
 
-        <div>
+        <div className="max-h-[65svh] overflow-auto">
           {groupBy(
             data.menuItems?.filter(
               (item) =>
@@ -104,12 +128,6 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
             "categoryId"
           ).map((item) => (
             <div key={item.group}>
-              <div className="text-2xl">
-                {
-                  data.categories.find((c) => c.id.toString() === item.group)
-                    ?.name
-                }
-              </div>
               {item.items.map((x, i) => (
                 <MenuItem key={i} {...x} />
               ))}

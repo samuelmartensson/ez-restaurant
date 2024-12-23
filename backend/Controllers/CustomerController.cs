@@ -94,10 +94,11 @@ public class CustomerController(
             return NotFound(new { message = "Menu not found for the provided key." });
         }
 
-        var menuCategoriesResponse = menuCategories.Select(mc => new MenuCategoryResponse
+        var menuCategoriesResponse = menuCategories.OrderBy(x => x.Order).Select(mc => new MenuCategoryResponse
         {
             Id = mc.Id,
-            Name = mc.Name
+            Name = mc.Name,
+            Order = mc.Order
         })
         .ToList();
 
