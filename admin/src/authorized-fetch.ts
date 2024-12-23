@@ -59,13 +59,13 @@ export const authorizedFetch = async <T>({
     ...(data ? { body: isFormData ? data : JSON.stringify(data) } : {}),
   });
 
+  if (response.status >= 400) {
+    throw await response.json();
+  }
+
   if (!response.headers.get("Content-Type")?.includes("application/json")) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return response.blob() as any;
-  }
-
-  if (response.status >= 400) {
-    throw await response.json();
   }
 
   return response.json();

@@ -93,7 +93,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <a
                       target="_blank"
-                      href={`https://${selectedDomain}.tidochplats.se`}
+                      href={`https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`}
                     >
                       <Globe />
                       <span>My site</span>

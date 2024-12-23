@@ -48,7 +48,8 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
 
     public async Task CreateSiteConfiguration(string domain, int customerId)
     {
-        var domainAlreadyExists = await context.CustomerConfigs.AnyAsync(c => c.Domain.ToLower() == domain.ToLower());
+        var domainAlreadyExists = await context.CustomerConfigs
+            .AnyAsync(c => c.Domain.ToLower() == domain.ToLower());
 
         if (domainAlreadyExists)
         {

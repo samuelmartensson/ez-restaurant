@@ -47,7 +47,7 @@ public class CustomerController(
     {
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
-            .FirstOrDefaultAsync((x) => x.Domain.ToLower() == key.ToLower());
+            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
 
         if (string.IsNullOrEmpty(key) || customerConfig == null)
         {
