@@ -6,14 +6,14 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import {
   ClerkProvider,
+  RedirectToSignUp,
   SignedIn,
   SignedOut,
-  SignInButton,
 } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
-import "./globals.css";
 import { toast } from "sonner";
+import "./globals.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,7 +48,7 @@ export default function AdminLayout({
               </DataContextProvider>
             </SignedIn>
             <SignedOut>
-              <SignInButton />
+              <RedirectToSignUp />
             </SignedOut>
           </QueryClientProvider>
         </ClerkProvider>
