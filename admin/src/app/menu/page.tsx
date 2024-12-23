@@ -55,7 +55,7 @@ const menuItemSchema = z.object({
   index: z.number(),
   tempId: z.string().optional(),
   description: z.string().nullable().optional(),
-  image: z.string().nullable().optional(),
+  image: z.any(),
   tags: z.string().nullable().optional(),
 });
 const formSchema = z.object({

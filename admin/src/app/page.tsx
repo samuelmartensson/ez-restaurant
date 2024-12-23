@@ -88,6 +88,8 @@ const ACTIONS = {
   REMOVE: "REMOVE",
 };
 
+const Wrapper = () => <FormLayout title="Site">{hasDomain(Site)()}</FormLayout>;
+
 const Site = () => {
   const { selectedDomain } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
@@ -156,149 +158,145 @@ const Site = () => {
   }
 
   return (
-    <FormLayout title="Site">
-      <Form {...form}>
-        <form
-          className="grid gap-4 overflow-auto p-4 max-w-lg"
-          onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
-        >
-          {inputSchema.map((input) => (
-            <FormField
-              key={input.id}
-              control={form.control}
-              name={input.id}
-              render={({ field }) => {
-                let render = <Input {...field} />;
+    <Form {...form}>
+      <form
+        className="grid gap-4 overflow-auto p-4 max-w-lg"
+        onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
+      >
+        {inputSchema.map((input) => (
+          <FormField
+            key={input.id}
+            control={form.control}
+            name={input.id}
+            render={({ field }) => {
+              let render = <Input {...field} />;
 
-                if (input.type === "select") {
-                  render = (
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={String(field.value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={field.value} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>{input.label}</SelectLabel>
-                          {THEMES.filter(Boolean).map((c) => (
-                            <SelectItem key={c} value={c}>
-                              {c}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  );
-                }
-
-                return (
-                  <FormItem>
-                    <FormLabel>{input.label}</FormLabel>
-                    <FormControl>{render}</FormControl>
-                    <FormMessage />
-                  </FormItem>
+              if (input.type === "select") {
+                render = (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={String(field.value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={field.value} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>{input.label}</SelectLabel>
+                        {THEMES.filter(Boolean).map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 );
-              }}
-            />
-          ))}
-          {assetsInputSchema.map((input) => (
-            <FormField
-              key={input.id}
-              control={form.control}
-              name={input.id}
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel>{input.label}</FormLabel>
-                    <FormControl>
-                      {field.value && field.value !== ACTIONS.REMOVE ? (
-                        <div className="grid gap-2 justify-start">
-                          {input.type === "image" && (
-                            <>
-                              {uploadedAssets?.[field.name] ? (
-                                <FilePreview
-                                  file={uploadedAssets[field.name]}
-                                />
-                              ) : (
-                                <>
-                                  {field.value &&
-                                  form.watch(field.name) !== ACTIONS.REMOVE ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                      className="h-20 w-20 object-contain bg-gray-100 rounded"
-                                      src={field.value as string}
-                                      alt=""
-                                    />
-                                  ) : (
-                                    <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
-                                      No image
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </>
-                          )}
-                          {input.type === "file" && (
-                            <>
-                              <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
-                                {(field.value as File).name}
-                              </div>
-                            </>
-                          )}
-                          <Button
-                            className="block"
-                            variant="destructive"
-                            type="button"
-                            onClick={() => {
-                              if (field.value) {
-                                form.setValue(
-                                  field.name,
-                                  ACTIONS.REMOVE as unknown as Blob
-                                );
-                              }
-                              setUploadedAssets((state) => {
-                                const newState = { ...state };
-                                delete newState[field.name];
+              }
 
-                                return newState;
-                              });
-                            }}
-                          >
-                            Remove file
-                          </Button>
-                        </div>
-                      ) : (
-                        <Input
-                          type="file"
-                          accept={input.type === "image" ? "image/*" : ""}
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            if (file) {
-                              setUploadedAssets((state) => ({
-                                ...state,
-                                [field.name]: file,
-                              }));
-                              form.setValue(field.name, file);
+              return (
+                <FormItem>
+                  <FormLabel>{input.label}</FormLabel>
+                  <FormControl>{render}</FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        ))}
+        {assetsInputSchema.map((input) => (
+          <FormField
+            key={input.id}
+            control={form.control}
+            name={input.id}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>{input.label}</FormLabel>
+                  <FormControl>
+                    {field.value && field.value !== ACTIONS.REMOVE ? (
+                      <div className="grid gap-2 justify-start">
+                        {input.type === "image" && (
+                          <>
+                            {uploadedAssets?.[field.name] ? (
+                              <FilePreview file={uploadedAssets[field.name]} />
+                            ) : (
+                              <>
+                                {field.value &&
+                                form.watch(field.name) !== ACTIONS.REMOVE ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    className="h-20 w-20 object-contain bg-gray-100 rounded"
+                                    src={field.value as string}
+                                    alt=""
+                                  />
+                                ) : (
+                                  <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                                    No image
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </>
+                        )}
+                        {input.type === "file" && (
+                          <>
+                            <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                              {(field.value as File).name}
+                            </div>
+                          </>
+                        )}
+                        <Button
+                          className="block"
+                          variant="destructive"
+                          type="button"
+                          onClick={() => {
+                            if (field.value) {
+                              form.setValue(
+                                field.name,
+                                ACTIONS.REMOVE as unknown as Blob
+                              );
                             }
+                            setUploadedAssets((state) => {
+                              const newState = { ...state };
+                              delete newState[field.name];
+
+                              return newState;
+                            });
                           }}
-                        />
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-          ))}
-          <Button disabled={isPending} type="submit">
-            <Save /> Save
-          </Button>
-        </form>
-      </Form>
-    </FormLayout>
+                        >
+                          Remove file
+                        </Button>
+                      </div>
+                    ) : (
+                      <Input
+                        type="file"
+                        accept={input.type === "image" ? "image/*" : ""}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            setUploadedAssets((state) => ({
+                              ...state,
+                              [field.name]: file,
+                            }));
+                            form.setValue(field.name, file);
+                          }
+                        }}
+                      />
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        ))}
+        <Button disabled={isPending} type="submit">
+          <Save /> Save
+        </Button>
+      </form>
+    </Form>
   );
 };
 
-export default hasDomain(Site);
+export default Wrapper;

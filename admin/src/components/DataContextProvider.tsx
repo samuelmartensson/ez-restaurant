@@ -4,6 +4,7 @@ import {
   CustomerConfigResponse,
   useGetCustomerGetCustomer,
 } from "@/generated/endpoints";
+import { useUser } from "@clerk/nextjs";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const DataContext = createContext<{
@@ -20,16 +21,20 @@ const DataContext = createContext<{
 
 export const useDataContext = () => useContext(DataContext);
 
+const domain_key = (userId: string) => `${userId}_domain`;
+
 const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUser();
+  const domainKey = domain_key(user?.id ?? "");
   const [selectedDomain, setSelectedDomain] = useState(
-    sessionStorage.getItem("domain") ?? ""
+    sessionStorage.getItem(domainKey) ?? ""
   );
 
   const { data = [], isLoading, refetch } = useGetCustomerGetCustomer();
 
   const setSelectedDomainInternal = (domain: string) => {
     setSelectedDomain(domain);
-    sessionStorage.setItem("domain", domain);
+    sessionStorage.setItem(domainKey, domain);
   };
 
   useEffect(() => {
