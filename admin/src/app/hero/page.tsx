@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   PostCustomerUploadHeroMutationBody,
-  useGetCustomerGetCustomerConfig,
+  useGetPublicGetCustomerConfig,
   usePostCustomerUploadHero,
 } from "@/generated/endpoints";
 import { Save } from "lucide-react";
@@ -54,7 +54,7 @@ const Hero = () => {
     },
   });
 
-  const { data: customerConfig, refetch } = useGetCustomerGetCustomerConfig({
+  const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
     key: selectedDomain,
   });
 

@@ -10,7 +10,6 @@ namespace webapi.Controllers;
 [Route("[controller]")]
 public class CustomerController(
     RestaurantContext context,
-    S3Service s3Service,
     SiteConfigurationService siteConfigurationService,
     SectionConfigurationService sectionConfigurationService,
     UserService userService
@@ -18,15 +17,8 @@ public class CustomerController(
 {
     private RestaurantContext context = context;
     private UserService userService = userService;
-    private S3Service s3Service = s3Service;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
     private SectionConfigurationService sectionConfigurationService = sectionConfigurationService;
-
-
-    private string ResolveBucketObjectKey(string key)
-    {
-        return s3Service._bucketURL + key;
-    }
 
     private async Task<Database.Models.User> assertUser()
     {
@@ -39,122 +31,43 @@ public class CustomerController(
         return user;
     }
 
-
-    [HttpGet("get-customer-config")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerConfig([FromQuery] string key)
-    {
-        var customerConfig = await context.CustomerConfigs
-            .Include(cf => cf.SiteSectionHero)
-            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
-
-        if (string.IsNullOrEmpty(key) || customerConfig == null)
-        {
-            return NotFound(new { message = "CustomerConfig not found for the provided key." });
-        }
-
-        var response = new CustomerConfigResponse
-        {
-            Domain = customerConfig.Domain,
-            Logo = customerConfig.Logo,
-            Font = customerConfig.Font,
-            Theme = customerConfig.Theme,
-            SiteMetaTitle = customerConfig.SiteMetaTitle,
-            SiteName = customerConfig.SiteName,
-            HeroType = customerConfig.HeroType,
-            MenuBackdropUrl = ResolveBucketObjectKey($"{customerConfig.Domain}/menu-backdrop.jpg"),
-            Sections = new SectionsResponse
-            {
-                Hero = new SiteSectionHeroResponse
-                {
-                    HeroImage = customerConfig.SiteSectionHero?.Image ?? "",
-                    OrderUrl = customerConfig.SiteSectionHero?.OrderUrl ?? ""
-                }
-            }
-        };
-
-        return Ok(response);
-
-    }
-
-    [HttpGet("get-customer-menu")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
-    {
-        var menuCategories = await context.MenuCategorys
-            .Include(mc => mc.MenuItems)
-            .Where(mc => mc.CustomerConfigDomain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower())
-            .ToListAsync();
-
-
-        if (string.IsNullOrEmpty(key) || menuCategories == null)
-        {
-            return NotFound(new { message = "Menu not found for the provided key." });
-        }
-
-        var menuCategoriesResponse = menuCategories.OrderBy(x => x.Order).Select(mc => new MenuCategoryResponse
-        {
-            Id = mc.Id,
-            Name = mc.Name,
-            Order = mc.Order
-        })
-        .ToList();
-
-        var menuItemsResponse = menuCategories
-            .SelectMany(mc => mc.MenuItems)
-            .ToList()
-            .Select(m => new MenuItemResponse
-            {
-                Id = m.Id,
-                Name = m.Name,
-                CategoryId = m.MenuCategoryId,
-                Price = m.Price,
-                Description = m.Description,
-                Tags = m.Tags,
-                Image = m.Image,
-            })
-            .ToList();
-
-        return Ok(new MenuResponse
-        {
-            Categories = menuCategoriesResponse,
-            MenuItems = menuItemsResponse
-        });
-    }
-
     [Authorize(Policy = "UserPolicy")]
     [HttpGet("get-customer")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(List<CustomerResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrCreateCustomer()
     {
-        var user = await userService.GetUser(User);
-
         if (User.Identity?.Name == null)
         {
             return BadRequest(new { message = "User identity not found." });
         }
 
+        var user = await userService.GetUser(User);
+
         if (user == null)
         {
-            var newCustomer = new Customer { Subscription = "free" };
-            await context.Customers.AddAsync(newCustomer);
-            await context.SaveChangesAsync();
-            await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
-            await context.SaveChangesAsync();
+            var newCustomer = new Customer { Subscription = SubscriptionState.Free };
+            try
+            {
+                await context.Customers.AddAsync(newCustomer);
+                await context.SaveChangesAsync();
+                await context.Users.AddAsync(new Database.Models.User { Id = User.Identity.Name, CustomerId = newCustomer.Id });
+                await context.SaveChangesAsync();
+            }
+            catch
+            {
+                context.Customers.Remove(newCustomer);
+                await context.SaveChangesAsync();
+            }
             return Ok(new List<CustomerResponse>());
         }
 
-        var configs = await context.CustomerConfigs
-        .Where(cf => cf.CustomerId == user.CustomerId)
-        .ToListAsync();
-
-        return Ok(configs.Select(c => new CustomerResponse
+        var customer = await context.Customers
+        .Include(c => c.CustomerConfigs)
+        .FirstOrDefaultAsync(c => c.Id == user.CustomerId);
+        var customerConfigs = customer?.CustomerConfigs.Select(c => new CustomerConfigResponse
         {
             Domain = c.Domain,
-            CustomerId = c.CustomerId,
             HeroType = c.HeroType,
             Theme = c.Theme,
             SiteName = c.SiteName,
@@ -163,12 +76,18 @@ public class CustomerController(
             Adress = c.Adress,
             Phone = c.Phone,
             Email = c.Email,
-        }));
+        }).ToList();
+
+        return Ok(
+            new CustomerResponse
+            {
+                Subscription = customer?.Subscription ?? SubscriptionState.Free,
+                CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>()
+            }
+            );
     }
 
     public record CreateConfigRequest(string domain);
-
-    [Authorize(Policy = "UserPolicy")]
     [HttpPut("create-config")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -176,7 +95,26 @@ public class CustomerController(
     {
         try
         {
+            if (config.domain.Trim() == "")
+            {
+                throw new Exception("Domain can't be empty");
+            }
             var user = await assertUser();
+
+            var customer = await context.Customers.Include(c => c.CustomerConfigs).FirstOrDefaultAsync(c => c.Id == user.CustomerId);
+            if (customer?.Subscription == SubscriptionState.Free && customer.CustomerConfigs.Count() > 0)
+            {
+                throw new Exception("Can only create 1 domain on Free plan.");
+            }
+
+            var domainAlreadyExists = await context.CustomerConfigs
+                .AnyAsync(c => c.Domain.ToLower() == config.domain.ToLower());
+
+            if (domainAlreadyExists)
+            {
+                throw new Exception("Domain already exists");
+            }
+
             await siteConfigurationService.CreateSiteConfiguration(config.domain, user.CustomerId);
             return Ok(new { message = "Success" });
         }
@@ -187,6 +125,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("upload-site-configuration")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -197,6 +136,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("upload-site-configuration-assets")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -207,6 +147,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("upload-hero")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

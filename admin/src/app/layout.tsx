@@ -9,11 +9,13 @@ import {
   RedirectToSignUp,
   SignedIn,
   SignedOut,
+  ClerkLoading,
 } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { toast } from "sonner";
 import "./globals.css";
+import { LoaderPinwheel } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +49,14 @@ export default function AdminLayout({
                 </SidebarProvider>
               </DataContextProvider>
             </SignedIn>
+            <ClerkLoading>
+              <div className="grid place-items-center h-svh w-svw">
+                <div className="grid place-items-center">
+                  <LoaderPinwheel size={48} className="animate-spin" />
+                  <h1 className="text-3xl">EZ Rest</h1>
+                </div>
+              </div>
+            </ClerkLoading>
             <SignedOut>
               <RedirectToSignUp />
             </SignedOut>

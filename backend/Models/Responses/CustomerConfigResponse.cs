@@ -23,8 +23,6 @@ namespace Models.Responses
         public string? Adress { get; set; } = "";
         public string? Phone { get; set; } = "";
         public string? Email { get; set; } = "";
-        public string? MenuBackdropUrl { get; set; }
-
-        public required SectionsResponse Sections { get; set; }
+        public SectionsResponse? Sections { get; set; }
     }
 }

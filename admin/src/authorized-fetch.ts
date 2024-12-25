@@ -59,6 +59,10 @@ export const authorizedFetch = async <T>({
     ...(data ? { body: isFormData ? data : JSON.stringify(data) } : {}),
   });
 
+  if (response.status === 403) {
+    throw new Error("Forbidden.");
+  }
+
   if (response.status >= 400) {
     throw await response.json();
   }

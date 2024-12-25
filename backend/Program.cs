@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Clerk.Net.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 //swagger url: http://localhost:5232/swagger/index.html
@@ -17,6 +18,11 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SupportNonNullableReferenceTypes();
 });
+builder.Services.AddClerkApiClient(config =>
+{
+    config.SecretKey = Environment.GetEnvironmentVariable("CLERK_SECRET_KEY") ?? "";
+});
+
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
   {
@@ -82,6 +88,7 @@ builder.Services.AddScoped<SectionConfigurationService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, SubscriptionAuthorizationHandler>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -89,6 +96,11 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new UserRequirement()));
     options.AddPolicy("KeyPolicy", policy =>
         policy.Requirements.Add(new KeyRequirement()));
+    options.AddPolicy("SubscriptionState-Free", policy =>
+        policy.Requirements.Add(new SubscriptionRequirement(SubscriptionState.Free)));
+    options.AddPolicy("SubscriptionState-Premium", policy =>
+        policy.Requirements.Add(new SubscriptionRequirement(SubscriptionState.Premium)));
+
 });
 
 

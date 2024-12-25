@@ -26,7 +26,7 @@ import {
 import {
   PostCustomerUploadSiteConfigurationAssetsBody,
   PostCustomerUploadSiteConfigurationBody,
-  useGetCustomerGetCustomerConfig,
+  useGetPublicGetCustomerConfig,
   usePostCustomerUploadSiteConfiguration,
   usePostCustomerUploadSiteConfigurationAssets,
 } from "@/generated/endpoints";
@@ -110,7 +110,7 @@ const Site = () => {
     },
   });
 
-  const { data: customerConfig, refetch } = useGetCustomerGetCustomerConfig({
+  const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
     key: selectedDomain,
   });
 

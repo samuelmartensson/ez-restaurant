@@ -32,7 +32,7 @@ import MenuCategories from "@/components/MenuCategories";
 import {
   MenuResponse,
   useDeleteMenuCategory,
-  useGetCustomerGetCustomerMenu,
+  useGetPublicGetCustomerMenu,
   usePostMenuCategory,
   usePostMenuCategoryOrder,
   usePostMenuItems,
@@ -110,7 +110,7 @@ const DataLayer = () => {
   const { selectedDomain } = useDataContext();
 
   const { data = { categories: [], menuItems: [] }, isLoading } =
-    useGetCustomerGetCustomerMenu({
+    useGetPublicGetCustomerMenu({
       key: selectedDomain,
     });
 
@@ -130,7 +130,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
   const [selectedCategory, setSelectedCategory] = useState<number>(-1);
   const [addCategory, setAddCategory] = useState("");
-  const { refetch } = useGetCustomerGetCustomerMenu({
+  const { refetch } = useGetPublicGetCustomerMenu({
     key: selectedDomain,
   });
 
@@ -240,8 +240,6 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
   const resolveImageId = (field?: z.infer<typeof menuItemSchema>) =>
     field?.id === -1 ? (field?.tempId ?? "") : (field?.id ?? "");
-
-  console.log(categoryList);
 
   if (categoryList.length === 0) {
     return (

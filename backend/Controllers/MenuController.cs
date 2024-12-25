@@ -13,6 +13,7 @@ public class MenuController(
     private MenuService menuService = menuService;
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("items")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -23,6 +24,7 @@ public class MenuController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("category")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -33,6 +35,7 @@ public class MenuController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("category/order")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -43,6 +46,7 @@ public class MenuController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpDelete("category")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

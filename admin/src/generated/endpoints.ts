@@ -19,6 +19,14 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type GetPublicGetCustomerMenuParams = {
+  key?: string;
+};
+
+export type GetPublicGetCustomerConfigParams = {
+  key?: string;
+};
+
 export type PostMenuCategoryOrderParams = {
   key?: string;
 };
@@ -74,13 +82,14 @@ export type PostCustomerUploadSiteConfigurationParams = {
   key?: string;
 };
 
-export type GetCustomerGetCustomerMenuParams = {
-  key?: string;
-};
+export type SubscriptionState =
+  (typeof SubscriptionState)[keyof typeof SubscriptionState];
 
-export type GetCustomerGetCustomerConfigParams = {
-  key?: string;
-};
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SubscriptionState = {
+  NUMBER_0: 0,
+  NUMBER_1: 1,
+} as const;
 
 export interface SiteSectionHeroResponse {
   heroImage?: string;
@@ -117,22 +126,6 @@ export interface MenuResponse {
   menuItems: MenuItemResponse[];
 }
 
-export interface CustomerResponse {
-  /** @nullable */
-  adress?: string | null;
-  customerId?: number;
-  domain?: string;
-  /** @nullable */
-  email?: string | null;
-  heroType?: number;
-  logo?: string;
-  /** @nullable */
-  phone?: string | null;
-  siteMetaTitle?: string;
-  siteName?: string;
-  theme?: string;
-}
-
 export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
@@ -144,13 +137,17 @@ export interface CustomerConfigResponse {
   heroType?: number;
   logo?: string;
   /** @nullable */
-  menuBackdropUrl?: string | null;
-  /** @nullable */
   phone?: string | null;
   sections?: SectionsResponse;
   siteMetaTitle?: string;
   siteName?: string;
   theme?: string;
+}
+
+export interface CustomerResponse {
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  subscription?: SubscriptionState;
 }
 
 export interface CreateConfigRequest {
@@ -160,308 +157,12 @@ export interface CreateConfigRequest {
 export interface AddCategoryRequest {
   id?: number;
   name?: string;
-  order?: number;
-}
-
-export const getCustomerGetCustomerConfig = (
-  params?: GetCustomerGetCustomerConfigParams,
-  signal?: AbortSignal,
-) => {
-  return authorizedFetch<CustomerConfigResponse>({
-    url: `/Customer/get-customer-config`,
-    method: "GET",
-    params,
-    signal,
-  });
-};
-
-export const getGetCustomerGetCustomerConfigQueryKey = (
-  params?: GetCustomerGetCustomerConfigParams,
-) => {
-  return [
-    `/Customer/get-customer-config`,
-    ...(params ? [params] : []),
-  ] as const;
-};
-
-export const getGetCustomerGetCustomerConfigQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerConfigParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-        TError,
-        TData
-      >
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetCustomerGetCustomerConfigQueryKey(params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>
-  > = ({ signal }) => getCustomerGetCustomerConfig(params, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData> };
-};
-
-export type GetCustomerGetCustomerConfigQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>
->;
-export type GetCustomerGetCustomerConfigQueryError = unknown;
-
-export function useGetCustomerGetCustomerConfig<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-  TError = unknown,
->(
-  params: undefined | GetCustomerGetCustomerConfigParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-          TError,
-          TData
-        >,
-        "initialData"
-      >;
-  },
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData>;
-};
-export function useGetCustomerGetCustomerConfig<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerConfigParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-          TError,
-          TData
-        >,
-        "initialData"
-      >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-export function useGetCustomerGetCustomerConfig<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerConfigParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-        TError,
-        TData
-      >
-    >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-
-export function useGetCustomerGetCustomerConfig<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerConfigParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerConfig>>,
-        TError,
-        TData
-      >
-    >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
-  const queryOptions = getGetCustomerGetCustomerConfigQueryOptions(
-    params,
-    options,
-  );
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData>;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export const getCustomerGetCustomerMenu = (
-  params?: GetCustomerGetCustomerMenuParams,
-  signal?: AbortSignal,
-) => {
-  return authorizedFetch<MenuResponse>({
-    url: `/Customer/get-customer-menu`,
-    method: "GET",
-    params,
-    signal,
-  });
-};
-
-export const getGetCustomerGetCustomerMenuQueryKey = (
-  params?: GetCustomerGetCustomerMenuParams,
-) => {
-  return [`/Customer/get-customer-menu`, ...(params ? [params] : [])] as const;
-};
-
-export const getGetCustomerGetCustomerMenuQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerMenuParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-        TError,
-        TData
-      >
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetCustomerGetCustomerMenuQueryKey(params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>
-  > = ({ signal }) => getCustomerGetCustomerMenu(params, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData> };
-};
-
-export type GetCustomerGetCustomerMenuQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>
->;
-export type GetCustomerGetCustomerMenuQueryError = unknown;
-
-export function useGetCustomerGetCustomerMenu<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-  TError = unknown,
->(
-  params: undefined | GetCustomerGetCustomerMenuParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-          TError,
-          TData
-        >,
-        "initialData"
-      >;
-  },
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData>;
-};
-export function useGetCustomerGetCustomerMenu<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerMenuParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-          TError,
-          TData
-        >,
-        "initialData"
-      >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-export function useGetCustomerGetCustomerMenu<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerMenuParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-        TError,
-        TData
-      >
-    >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-
-export function useGetCustomerGetCustomerMenu<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-  TError = unknown,
->(
-  params?: GetCustomerGetCustomerMenuParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomerMenu>>,
-        TError,
-        TData
-      >
-    >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
-  const queryOptions = getGetCustomerGetCustomerMenuQueryOptions(
-    params,
-    options,
-  );
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData>;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
+  /** @nullable */
+  order?: number | null;
 }
 
 export const getCustomerGetCustomer = (signal?: AbortSignal) => {
-  return authorizedFetch<CustomerResponse[]>({
+  return authorizedFetch<CustomerResponse>({
     url: `/Customer/get-customer`,
     method: "GET",
     signal,
@@ -1237,6 +938,353 @@ export const usePostMenuCategoryOrder = <
   TContext
 > => {
   const mutationOptions = getPostMenuCategoryOrderMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getPublicGetCustomerConfig = (
+  params?: GetPublicGetCustomerConfigParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<CustomerConfigResponse>({
+    url: `/Public/get-customer-config`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetPublicGetCustomerConfigQueryKey = (
+  params?: GetPublicGetCustomerConfigParams,
+) => {
+  return [`/Public/get-customer-config`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetPublicGetCustomerConfigQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerConfigParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetPublicGetCustomerConfigQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicGetCustomerConfig>>
+  > = ({ signal }) => getPublicGetCustomerConfig(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetPublicGetCustomerConfigQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerConfig>>
+>;
+export type GetPublicGetCustomerConfigQueryError = unknown;
+
+export function useGetPublicGetCustomerConfig<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+  TError = unknown,
+>(
+  params: undefined | GetPublicGetCustomerConfigParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetPublicGetCustomerConfig<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerConfigParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetPublicGetCustomerConfig<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerConfigParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetPublicGetCustomerConfig<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerConfigParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetPublicGetCustomerConfigQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getPublicGetCustomerMenu = (
+  params?: GetPublicGetCustomerMenuParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<MenuResponse>({
+    url: `/Public/get-customer-menu`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetPublicGetCustomerMenuQueryKey = (
+  params?: GetPublicGetCustomerMenuParams,
+) => {
+  return [`/Public/get-customer-menu`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetPublicGetCustomerMenuQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerMenuParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetPublicGetCustomerMenuQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicGetCustomerMenu>>
+  > = ({ signal }) => getPublicGetCustomerMenu(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetPublicGetCustomerMenuQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerMenu>>
+>;
+export type GetPublicGetCustomerMenuQueryError = unknown;
+
+export function useGetPublicGetCustomerMenu<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+  TError = unknown,
+>(
+  params: undefined | GetPublicGetCustomerMenuParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetPublicGetCustomerMenu<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerMenuParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetPublicGetCustomerMenu<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerMenuParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetPublicGetCustomerMenu<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+  TError = unknown,
+>(
+  params?: GetPublicGetCustomerMenuParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetPublicGetCustomerMenuQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const postWebhook = (signal?: AbortSignal) => {
+  return authorizedFetch<void>({ url: `/webhook`, method: "POST", signal });
+};
+
+export const getPostWebhookMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postWebhook>>,
+    void
+  > = () => {
+    return postWebhook();
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postWebhook>>
+>;
+
+export type PostWebhookMutationError = unknown;
+
+export const usePostWebhook = <TError = unknown, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions = getPostWebhookMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

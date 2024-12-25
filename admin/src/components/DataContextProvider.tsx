@@ -30,7 +30,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.getItem(domainKey) ?? ""
   );
 
-  const { data = [], isLoading, refetch } = useGetCustomerGetCustomer();
+  const { data, isLoading, refetch } = useGetCustomerGetCustomer();
 
   const setSelectedDomainInternal = (domain: string) => {
     setSelectedDomain(domain);
@@ -39,7 +39,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!selectedDomain) {
-      setSelectedDomain(data?.[0]?.domain ?? "");
+      setSelectedDomain(data?.customerConfigs?.[0]?.domain ?? "");
     }
   }, [data, selectedDomain]);
 
@@ -48,7 +48,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataContext.Provider
       value={{
-        configs: data ?? [],
+        configs: data?.customerConfigs ?? [],
         setSelectedDomain: setSelectedDomainInternal,
         selectedDomain,
         refetch: async () => {
