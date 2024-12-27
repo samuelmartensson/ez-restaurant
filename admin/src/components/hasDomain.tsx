@@ -12,7 +12,7 @@ const Wrapper = (Component: () => JSX.Element) => {
       return (
         <div className="grid place-items-center h-full w-full">
           <div className="grid place-items-center gap-2">
-            <div>Create a domain first</div>
+            <div>Create a domain to get started.</div>
             <Link href="/domain">
               <Button>Go to Domains</Button>
             </Link>

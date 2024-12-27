@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  PostCustomerUploadSiteConfigurationAssetsBody,
   PostCustomerUploadSiteConfigurationBody,
   useGetPublicGetCustomerConfig,
   usePostCustomerUploadSiteConfiguration,
@@ -95,10 +94,7 @@ const Site = () => {
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {}
   );
-  const form = useForm<
-    PostCustomerUploadSiteConfigurationBody &
-      PostCustomerUploadSiteConfigurationAssetsBody
-  >({
+  const form = useForm<PostCustomerUploadSiteConfigurationBody>({
     defaultValues: {
       SiteName: "",
       SiteMetaTitle: "",
@@ -150,11 +146,12 @@ const Site = () => {
       data: {
         ...data,
         Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
+        Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
       },
       params: { key: selectedDomain },
     });
     refetch();
-    toast("Site information saved.");
+    toast.success("Site information saved.");
   }
 
   return (
@@ -242,7 +239,7 @@ const Site = () => {
                         {input.type === "file" && (
                           <>
                             <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
-                              {(field.value as File).name}
+                              {(field.value as unknown as File).name}
                             </div>
                           </>
                         )}
@@ -252,10 +249,7 @@ const Site = () => {
                           type="button"
                           onClick={() => {
                             if (field.value) {
-                              form.setValue(
-                                field.name,
-                                ACTIONS.REMOVE as unknown as Blob
-                              );
+                              form.setValue(field.name, ACTIONS.REMOVE);
                             }
                             setUploadedAssets((state) => {
                               const newState = { ...state };
@@ -279,7 +273,10 @@ const Site = () => {
                               ...state,
                               [field.name]: file,
                             }));
-                            form.setValue(field.name, file);
+                            form.setValue(
+                              field.name,
+                              file as unknown as string
+                            );
                           }
                         }}
                       />

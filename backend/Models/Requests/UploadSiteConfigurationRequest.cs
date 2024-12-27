@@ -12,6 +12,7 @@ namespace Models.Requests
         string SiteMetaTitle,
         string Theme,
         string? Logo,
+        string? Font,
         string? Adress,
         string? Phone,
         string? Email

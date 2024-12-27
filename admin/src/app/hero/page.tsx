@@ -78,7 +78,7 @@ const Hero = () => {
       },
       params: { key: selectedDomain },
     });
-    toast("Hero saved.");
+    toast.success("Hero saved.");
     refetch();
   }
 

@@ -36,7 +36,7 @@ export default function AdminLayout({
     <html lang="en">
       <body className="antialiased relative">
         <ClerkProvider>
-          <Toaster />
+          <Toaster position="bottom-center" />
           <QueryClientProvider client={queryClient}>
             <SignedIn>
               <DataContextProvider>

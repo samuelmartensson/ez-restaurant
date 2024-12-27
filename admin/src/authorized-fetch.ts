@@ -60,7 +60,7 @@ export const authorizedFetch = async <T>({
   });
 
   if (response.status === 403) {
-    throw new Error("Forbidden.");
+    throw new Error("Failed. Subscription required.");
   }
 
   if (response.status >= 400) {

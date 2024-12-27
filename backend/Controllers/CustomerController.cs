@@ -5,7 +5,6 @@ using Models.Responses;
 using Models.Requests;
 using Stripe;
 using Clerk.Net.Client;
-using Microsoft.Kiota.Abstractions;
 
 namespace webapi.Controllers;
 
@@ -146,7 +145,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("upload-site-configuration")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -157,7 +156,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("upload-site-configuration-assets")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

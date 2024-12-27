@@ -75,6 +75,7 @@ export type PostCustomerUploadSiteConfigurationAssetsParams = {
 export type PostCustomerUploadSiteConfigurationBody = {
   Adress?: string;
   Email?: string;
+  Font?: string;
   Logo?: string;
   Phone?: string;
   SiteMetaTitle?: string;
@@ -387,6 +388,9 @@ export const postCustomerUploadSiteConfiguration = (
   }
   if (postCustomerUploadSiteConfigurationBody.Logo !== undefined) {
     formData.append("Logo", postCustomerUploadSiteConfigurationBody.Logo);
+  }
+  if (postCustomerUploadSiteConfigurationBody.Font !== undefined) {
+    formData.append("Font", postCustomerUploadSiteConfigurationBody.Font);
   }
   if (postCustomerUploadSiteConfigurationBody.Adress !== undefined) {
     formData.append("Adress", postCustomerUploadSiteConfigurationBody.Adress);

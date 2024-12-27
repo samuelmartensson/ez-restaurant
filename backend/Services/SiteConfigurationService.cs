@@ -21,6 +21,17 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Adress = siteConfiguration.Adress;
         customerConfig.Email = siteConfiguration.Email;
         customerConfig.Phone = siteConfiguration.Phone;
+
+        if (siteConfiguration.Logo == "REMOVE")
+        {
+            await s3Service.DeleteFileAsync($"{key}/logo");
+            customerConfig.Logo = "";
+        }
+        if (siteConfiguration.Font == "REMOVE")
+        {
+            await s3Service.DeleteFileAsync($"{key}/font");
+            customerConfig.Font = "";
+        }
         await context.SaveChangesAsync();
     }
 

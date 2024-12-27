@@ -218,7 +218,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       params: { key: selectedDomain },
     });
     refetchAndSync();
-    toast("Updated menu.");
+    toast.success("Updated menu.");
     setUploadedImages({});
   }
 
