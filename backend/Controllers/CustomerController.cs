@@ -37,7 +37,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "UserPolicy")]
-    [HttpGet("get-customer")]
+    [HttpGet("customer")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrCreateCustomer()
@@ -108,7 +108,7 @@ public class CustomerController(
     }
 
     public record CreateConfigRequest(string domain);
-    [HttpPut("create-config")]
+    [HttpPut("config")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateConfig([FromBody] CreateConfigRequest config)
@@ -144,9 +144,26 @@ public class CustomerController(
         }
     }
 
+    [HttpDelete("config")]
+    [Authorize(Policy = "KeyPolicy")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> RemoveConfig([FromQuery] string key)
+    {
+        try
+        {
+            await siteConfigurationService.RemoveSiteConfiguration(key);
+            return Ok(new { message = "Success" });
+        }
+        catch (Exception e)
+        {
+            return BadRequest(new { message = e.Message });
+        }
+    }
+
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
-    [HttpPost("upload-site-configuration")]
+    [HttpPost("site-configuration")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadSiteConfiguration([FromForm] UpdateSiteConfigurationRequest siteConfiguration, [FromQuery] string key)
@@ -157,7 +174,7 @@ public class CustomerController(
 
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
-    [HttpPost("upload-site-configuration-assets")]
+    [HttpPost("site-configuration-assets")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery] string key)
@@ -168,7 +185,7 @@ public class CustomerController(
 
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
-    [HttpPost("upload-hero")]
+    [HttpPost("hero")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadHero([FromForm] UploadHeroAssetsRequest assets, [FromForm] List<string> removedAssets, [FromForm] UploadHeroRequest fields, [FromQuery] string key)

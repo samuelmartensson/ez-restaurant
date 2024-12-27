@@ -73,4 +73,16 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         await context.CustomerConfigs.AddAsync(newConfig);
         await context.SaveChangesAsync();
     }
+
+    public async Task RemoveSiteConfiguration(string domain)
+    {
+        var config = await context.CustomerConfigs.FirstOrDefaultAsync(c => c.Domain == domain);
+        if (config == null)
+        {
+            throw new Exception("CustomerConfig not found");
+        }
+        context.CustomerConfigs.Remove(config);
+        await s3Service.DeleteAllFilesAsync(domain);
+        await context.SaveChangesAsync();
+    }
 }

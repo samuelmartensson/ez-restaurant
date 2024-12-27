@@ -12,8 +12,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { SignOutButton, UserButton } from "@clerk/nextjs";
-import { CreditCard, Globe, Home, SquareMenu, Wallpaper } from "lucide-react";
+import { SignOutButton, UserButton, useUser } from "@clerk/nextjs";
+import {
+  CreditCard,
+  Globe,
+  Home,
+  LogOut,
+  SquareMenu,
+  Wallpaper,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { VersionSwitcher } from "./ConfigSwitcher";
@@ -21,8 +28,8 @@ import { useEffect } from "react";
 
 const items = [
   {
-    title: "Domain",
-    url: "/domain",
+    title: "Domains",
+    url: "/domains",
     icon: Globe,
   },
   {
@@ -46,6 +53,7 @@ export function AppSidebar() {
   const { configs, selectedDomain } = useDataContext();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const { user } = useUser();
 
   useEffect(() => {
     setOpenMobile(true);
@@ -62,10 +70,12 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => {
-                      window.location.href =
+                      window.open(
                         process.env.NODE_ENV === "production"
                           ? `https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`
-                          : `http://localhost:3001?key=${selectedDomain}`;
+                          : `http://localhost:3001?key=${selectedDomain}`,
+                        "_blank",
+                      );
                     }}
                     disabled={!selectedDomain}
                   >
@@ -104,7 +114,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Customer</SidebarGroupLabel>
+            <SidebarGroupLabel>{user?.fullName}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -119,25 +129,12 @@ export function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>User</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <UserButton
-                      showName
-                      appearance={{ layout: { logoPlacement: "none" } }}
-                    />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <SignOutButton />
-                  </SidebarMenuButton>
+                  <SignOutButton>
+                    <SidebarMenuButton>
+                      <LogOut /> Sign out
+                    </SidebarMenuButton>
+                  </SignOutButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

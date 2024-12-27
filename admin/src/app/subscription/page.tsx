@@ -2,24 +2,27 @@
 import { Button } from "@/components/ui/button";
 import {
   SubscriptionState,
-  useGetCustomerGetCustomer,
+  useGetCustomerCustomer,
 } from "@/generated/endpoints";
 import { useUser } from "@clerk/nextjs";
 import React from "react";
 
 const StripeBuyButton = ({ email }: { email: string }) => {
   return (
-    <stripe-buy-button
-      customer-email={email}
-      buy-button-id="buy_btn_1QZuC6LE1413aFek7ANlspq4"
-      publishable-key="pk_test_51QZu6NLE1413aFeksHEv00qCjoMnnWN8W4oamT6oTMuKE8cmxtGOVASe3DB84Dp1rF0UeoYMezHthHm9to3IwdlG00d6CwJ3cH"
-    />
+    <>
+      <script async src="https://js.stripe.com/v3/buy-button.js" />
+      <stripe-buy-button
+        customer-email={email}
+        buy-button-id="buy_btn_1QZuC6LE1413aFek7ANlspq4"
+        publishable-key="pk_test_51QZu6NLE1413aFeksHEv00qCjoMnnWN8W4oamT6oTMuKE8cmxtGOVASe3DB84Dp1rF0UeoYMezHthHm9to3IwdlG00d6CwJ3cH"
+      />
+    </>
   );
 };
 
 const Subscription = () => {
   const { user } = useUser();
-  const { data } = useGetCustomerGetCustomer();
+  const { data } = useGetCustomerCustomer();
 
   const periodEnd =
     data?.cancelInfo?.periodEnd &&
@@ -27,8 +30,7 @@ const Subscription = () => {
 
   if (data?.subscription === SubscriptionState.NUMBER_0) {
     return (
-      <div className="p-4 max-w-lg">
-        <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+      <div className="grid h-svh place-items-center p-4 md:h-auto">
         <StripeBuyButton
           email={user?.primaryEmailAddress?.emailAddress ?? ""}
         />
@@ -37,7 +39,7 @@ const Subscription = () => {
   }
 
   return (
-    <div className="grid p-4 max-w-lg">
+    <div className="grid place-items-center p-4">
       {data?.cancelInfo?.isExpired ? (
         <>
           <div className="mb-4 text-pretty">
@@ -45,18 +47,16 @@ const Subscription = () => {
             <span className="font-bold">{periodEnd}</span>. Re-subscribe to
             active your account.
           </div>
-          <script async src="https://js.stripe.com/v3/buy-button.js"></script>
           <StripeBuyButton
             email={user?.primaryEmailAddress?.emailAddress ?? ""}
           />
-
           <Button
-            className="mt-4 justify-self-start"
+            className="mt-4"
             variant="outline"
             onClick={() =>
               window.open(
                 process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_URL,
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -72,12 +72,12 @@ const Subscription = () => {
             <span className="font-semibold">{periodEnd}</span>
           </div>
           <Button
-            className="mt-4 justify-self-start"
+            className="mt-4"
             variant="outline"
             onClick={() =>
               window.open(
                 process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_URL,
-                "_blank"
+                "_blank",
               )
             }
           >

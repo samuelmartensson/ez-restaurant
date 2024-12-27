@@ -53,26 +53,26 @@ export type PostMenuItemsParams = {
   key?: string;
 };
 
-export type PostCustomerUploadHeroBody = {
+export type PostCustomerHeroBody = {
   Image?: Blob;
   OrderUrl?: string;
   removedAssets?: string[];
 };
 
-export type PostCustomerUploadHeroParams = {
+export type PostCustomerHeroParams = {
   key?: string;
 };
 
-export type PostCustomerUploadSiteConfigurationAssetsBody = {
+export type PostCustomerSiteConfigurationAssetsBody = {
   Font?: Blob;
   Logo?: Blob;
 };
 
-export type PostCustomerUploadSiteConfigurationAssetsParams = {
+export type PostCustomerSiteConfigurationAssetsParams = {
   key?: string;
 };
 
-export type PostCustomerUploadSiteConfigurationBody = {
+export type PostCustomerSiteConfigurationBody = {
   Adress?: string;
   Email?: string;
   Font?: string;
@@ -83,7 +83,11 @@ export type PostCustomerUploadSiteConfigurationBody = {
   Theme?: string;
 };
 
-export type PostCustomerUploadSiteConfigurationParams = {
+export type PostCustomerSiteConfigurationParams = {
+  key?: string;
+};
+
+export type DeleteCustomerConfigParams = {
   key?: string;
 };
 
@@ -174,25 +178,25 @@ export interface AddCategoryRequest {
   order?: number | null;
 }
 
-export const getCustomerGetCustomer = (signal?: AbortSignal) => {
+export const getCustomerCustomer = (signal?: AbortSignal) => {
   return authorizedFetch<CustomerResponse>({
-    url: `/Customer/get-customer`,
+    url: `/Customer/customer`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetCustomerGetCustomerQueryKey = () => {
-  return [`/Customer/get-customer`] as const;
+export const getGetCustomerCustomerQueryKey = () => {
+  return [`/Customer/customer`] as const;
 };
 
-export const getGetCustomerGetCustomerQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+export const getGetCustomerCustomerQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCustomerCustomer>>,
   TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+      Awaited<ReturnType<typeof getCustomerCustomer>>,
       TError,
       TData
     >
@@ -200,39 +204,38 @@ export const getGetCustomerGetCustomerQueryOptions = <
 }) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetCustomerGetCustomerQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetCustomerCustomerQueryKey();
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getCustomerGetCustomer>>
-  > = ({ signal }) => getCustomerGetCustomer(signal);
+    Awaited<ReturnType<typeof getCustomerCustomer>>
+  > = ({ signal }) => getCustomerCustomer(signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+    Awaited<ReturnType<typeof getCustomerCustomer>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData> };
 };
 
-export type GetCustomerGetCustomerQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCustomerGetCustomer>>
+export type GetCustomerCustomerQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCustomerCustomer>>
 >;
-export type GetCustomerGetCustomerQueryError = unknown;
+export type GetCustomerCustomerQueryError = unknown;
 
-export function useGetCustomerGetCustomer<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+export function useGetCustomerCustomer<
+  TData = Awaited<ReturnType<typeof getCustomerCustomer>>,
   TError = unknown,
 >(options: {
   query: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+      Awaited<ReturnType<typeof getCustomerCustomer>>,
       TError,
       TData
     >
   > &
     Pick<
       DefinedInitialDataOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+        Awaited<ReturnType<typeof getCustomerCustomer>>,
         TError,
         TData
       >,
@@ -241,52 +244,52 @@ export function useGetCustomerGetCustomer<
 }): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData>;
 };
-export function useGetCustomerGetCustomer<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+export function useGetCustomerCustomer<
+  TData = Awaited<ReturnType<typeof getCustomerCustomer>>,
   TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+      Awaited<ReturnType<typeof getCustomerCustomer>>,
       TError,
       TData
     >
   > &
     Pick<
       UndefinedInitialDataOptions<
-        Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+        Awaited<ReturnType<typeof getCustomerCustomer>>,
         TError,
         TData
       >,
       "initialData"
     >;
 }): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-export function useGetCustomerGetCustomer<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+export function useGetCustomerCustomer<
+  TData = Awaited<ReturnType<typeof getCustomerCustomer>>,
   TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+      Awaited<ReturnType<typeof getCustomerCustomer>>,
       TError,
       TData
     >
   >;
 }): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 
-export function useGetCustomerGetCustomer<
-  TData = Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+export function useGetCustomerCustomer<
+  TData = Awaited<ReturnType<typeof getCustomerCustomer>>,
   TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getCustomerGetCustomer>>,
+      Awaited<ReturnType<typeof getCustomerCustomer>>,
       TError,
       TData
     >
   >;
 }): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
-  const queryOptions = getGetCustomerGetCustomerQueryOptions(options);
+  const queryOptions = getGetCustomerCustomerQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData>;
@@ -297,29 +300,27 @@ export function useGetCustomerGetCustomer<
   return query;
 }
 
-export const putCustomerCreateConfig = (
-  createConfigRequest: CreateConfigRequest,
-) => {
+export const putCustomerConfig = (createConfigRequest: CreateConfigRequest) => {
   return authorizedFetch<void>({
-    url: `/Customer/create-config`,
+    url: `/Customer/config`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     data: createConfigRequest,
   });
 };
 
-export const getPutCustomerCreateConfigMutationOptions = <
+export const getPutCustomerConfigMutationOptions = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putCustomerCreateConfig>>,
+    Awaited<ReturnType<typeof putCustomerConfig>>,
     TError,
     { data: CreateConfigRequest },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof putCustomerCreateConfig>>,
+  Awaited<ReturnType<typeof putCustomerConfig>>,
   TError,
   { data: CreateConfigRequest },
   TContext
@@ -327,83 +328,145 @@ export const getPutCustomerCreateConfigMutationOptions = <
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof putCustomerCreateConfig>>,
+    Awaited<ReturnType<typeof putCustomerConfig>>,
     { data: CreateConfigRequest }
   > = (props) => {
     const { data } = props ?? {};
 
-    return putCustomerCreateConfig(data);
+    return putCustomerConfig(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PutCustomerCreateConfigMutationResult = NonNullable<
-  Awaited<ReturnType<typeof putCustomerCreateConfig>>
+export type PutCustomerConfigMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putCustomerConfig>>
 >;
-export type PutCustomerCreateConfigMutationBody = CreateConfigRequest;
-export type PutCustomerCreateConfigMutationError = unknown;
+export type PutCustomerConfigMutationBody = CreateConfigRequest;
+export type PutCustomerConfigMutationError = unknown;
 
-export const usePutCustomerCreateConfig = <
+export const usePutCustomerConfig = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putCustomerCreateConfig>>,
+    Awaited<ReturnType<typeof putCustomerConfig>>,
     TError,
     { data: CreateConfigRequest },
     TContext
   >;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof putCustomerCreateConfig>>,
+  Awaited<ReturnType<typeof putCustomerConfig>>,
   TError,
   { data: CreateConfigRequest },
   TContext
 > => {
-  const mutationOptions = getPutCustomerCreateConfigMutationOptions(options);
+  const mutationOptions = getPutCustomerConfigMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
 
-export const postCustomerUploadSiteConfiguration = (
-  postCustomerUploadSiteConfigurationBody: PostCustomerUploadSiteConfigurationBody,
-  params?: PostCustomerUploadSiteConfigurationParams,
+export const deleteCustomerConfig = (params?: DeleteCustomerConfigParams) => {
+  return authorizedFetch<void>({
+    url: `/Customer/config`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteCustomerConfigMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerConfig>>,
+    TError,
+    { params?: DeleteCustomerConfigParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCustomerConfig>>,
+  TError,
+  { params?: DeleteCustomerConfigParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCustomerConfig>>,
+    { params?: DeleteCustomerConfigParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return deleteCustomerConfig(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCustomerConfigMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerConfig>>
+>;
+
+export type DeleteCustomerConfigMutationError = unknown;
+
+export const useDeleteCustomerConfig = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerConfig>>,
+    TError,
+    { params?: DeleteCustomerConfigParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCustomerConfig>>,
+  TError,
+  { params?: DeleteCustomerConfigParams },
+  TContext
+> => {
+  const mutationOptions = getDeleteCustomerConfigMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postCustomerSiteConfiguration = (
+  postCustomerSiteConfigurationBody: PostCustomerSiteConfigurationBody,
+  params?: PostCustomerSiteConfigurationParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (postCustomerUploadSiteConfigurationBody.SiteName !== undefined) {
-    formData.append(
-      "SiteName",
-      postCustomerUploadSiteConfigurationBody.SiteName,
-    );
+  if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
+    formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
   }
-  if (postCustomerUploadSiteConfigurationBody.SiteMetaTitle !== undefined) {
+  if (postCustomerSiteConfigurationBody.SiteMetaTitle !== undefined) {
     formData.append(
       "SiteMetaTitle",
-      postCustomerUploadSiteConfigurationBody.SiteMetaTitle,
+      postCustomerSiteConfigurationBody.SiteMetaTitle,
     );
   }
-  if (postCustomerUploadSiteConfigurationBody.Theme !== undefined) {
-    formData.append("Theme", postCustomerUploadSiteConfigurationBody.Theme);
+  if (postCustomerSiteConfigurationBody.Theme !== undefined) {
+    formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
-  if (postCustomerUploadSiteConfigurationBody.Logo !== undefined) {
-    formData.append("Logo", postCustomerUploadSiteConfigurationBody.Logo);
+  if (postCustomerSiteConfigurationBody.Logo !== undefined) {
+    formData.append("Logo", postCustomerSiteConfigurationBody.Logo);
   }
-  if (postCustomerUploadSiteConfigurationBody.Font !== undefined) {
-    formData.append("Font", postCustomerUploadSiteConfigurationBody.Font);
+  if (postCustomerSiteConfigurationBody.Font !== undefined) {
+    formData.append("Font", postCustomerSiteConfigurationBody.Font);
   }
-  if (postCustomerUploadSiteConfigurationBody.Adress !== undefined) {
-    formData.append("Adress", postCustomerUploadSiteConfigurationBody.Adress);
+  if (postCustomerSiteConfigurationBody.Adress !== undefined) {
+    formData.append("Adress", postCustomerSiteConfigurationBody.Adress);
   }
-  if (postCustomerUploadSiteConfigurationBody.Phone !== undefined) {
-    formData.append("Phone", postCustomerUploadSiteConfigurationBody.Phone);
+  if (postCustomerSiteConfigurationBody.Phone !== undefined) {
+    formData.append("Phone", postCustomerSiteConfigurationBody.Phone);
   }
-  if (postCustomerUploadSiteConfigurationBody.Email !== undefined) {
-    formData.append("Email", postCustomerUploadSiteConfigurationBody.Email);
+  if (postCustomerSiteConfigurationBody.Email !== undefined) {
+    formData.append("Email", postCustomerSiteConfigurationBody.Email);
   }
 
   return authorizedFetch<void>({
-    url: `/Customer/upload-site-configuration`,
+    url: `/Customer/site-configuration`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -412,95 +475,95 @@ export const postCustomerUploadSiteConfiguration = (
   });
 };
 
-export const getPostCustomerUploadSiteConfigurationMutationOptions = <
+export const getPostCustomerSiteConfigurationMutationOptions = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>,
+    Awaited<ReturnType<typeof postCustomerSiteConfiguration>>,
     TError,
     {
-      data: PostCustomerUploadSiteConfigurationBody;
-      params?: PostCustomerUploadSiteConfigurationParams;
+      data: PostCustomerSiteConfigurationBody;
+      params?: PostCustomerSiteConfigurationParams;
     },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>,
+  Awaited<ReturnType<typeof postCustomerSiteConfiguration>>,
   TError,
   {
-    data: PostCustomerUploadSiteConfigurationBody;
-    params?: PostCustomerUploadSiteConfigurationParams;
+    data: PostCustomerSiteConfigurationBody;
+    params?: PostCustomerSiteConfigurationParams;
   },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>,
+    Awaited<ReturnType<typeof postCustomerSiteConfiguration>>,
     {
-      data: PostCustomerUploadSiteConfigurationBody;
-      params?: PostCustomerUploadSiteConfigurationParams;
+      data: PostCustomerSiteConfigurationBody;
+      params?: PostCustomerSiteConfigurationParams;
     }
   > = (props) => {
     const { data, params } = props ?? {};
 
-    return postCustomerUploadSiteConfiguration(data, params);
+    return postCustomerSiteConfiguration(data, params);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostCustomerUploadSiteConfigurationMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>
+export type PostCustomerSiteConfigurationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerSiteConfiguration>>
 >;
-export type PostCustomerUploadSiteConfigurationMutationBody =
-  PostCustomerUploadSiteConfigurationBody;
-export type PostCustomerUploadSiteConfigurationMutationError = unknown;
+export type PostCustomerSiteConfigurationMutationBody =
+  PostCustomerSiteConfigurationBody;
+export type PostCustomerSiteConfigurationMutationError = unknown;
 
-export const usePostCustomerUploadSiteConfiguration = <
+export const usePostCustomerSiteConfiguration = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>,
+    Awaited<ReturnType<typeof postCustomerSiteConfiguration>>,
     TError,
     {
-      data: PostCustomerUploadSiteConfigurationBody;
-      params?: PostCustomerUploadSiteConfigurationParams;
+      data: PostCustomerSiteConfigurationBody;
+      params?: PostCustomerSiteConfigurationParams;
     },
     TContext
   >;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>,
+  Awaited<ReturnType<typeof postCustomerSiteConfiguration>>,
   TError,
   {
-    data: PostCustomerUploadSiteConfigurationBody;
-    params?: PostCustomerUploadSiteConfigurationParams;
+    data: PostCustomerSiteConfigurationBody;
+    params?: PostCustomerSiteConfigurationParams;
   },
   TContext
 > => {
   const mutationOptions =
-    getPostCustomerUploadSiteConfigurationMutationOptions(options);
+    getPostCustomerSiteConfigurationMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
 
-export const postCustomerUploadSiteConfigurationAssets = (
-  postCustomerUploadSiteConfigurationAssetsBody: PostCustomerUploadSiteConfigurationAssetsBody,
-  params?: PostCustomerUploadSiteConfigurationAssetsParams,
+export const postCustomerSiteConfigurationAssets = (
+  postCustomerSiteConfigurationAssetsBody: PostCustomerSiteConfigurationAssetsBody,
+  params?: PostCustomerSiteConfigurationAssetsParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (postCustomerUploadSiteConfigurationAssetsBody.Logo !== undefined) {
-    formData.append("Logo", postCustomerUploadSiteConfigurationAssetsBody.Logo);
+  if (postCustomerSiteConfigurationAssetsBody.Logo !== undefined) {
+    formData.append("Logo", postCustomerSiteConfigurationAssetsBody.Logo);
   }
-  if (postCustomerUploadSiteConfigurationAssetsBody.Font !== undefined) {
-    formData.append("Font", postCustomerUploadSiteConfigurationAssetsBody.Font);
+  if (postCustomerSiteConfigurationAssetsBody.Font !== undefined) {
+    formData.append("Font", postCustomerSiteConfigurationAssetsBody.Font);
   }
 
   return authorizedFetch<void>({
-    url: `/Customer/upload-site-configuration-assets`,
+    url: `/Customer/site-configuration-assets`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -509,101 +572,100 @@ export const postCustomerUploadSiteConfigurationAssets = (
   });
 };
 
-export const getPostCustomerUploadSiteConfigurationAssetsMutationOptions = <
+export const getPostCustomerSiteConfigurationAssetsMutationOptions = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+    Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>,
     TError,
     {
-      data: PostCustomerUploadSiteConfigurationAssetsBody;
-      params?: PostCustomerUploadSiteConfigurationAssetsParams;
+      data: PostCustomerSiteConfigurationAssetsBody;
+      params?: PostCustomerSiteConfigurationAssetsParams;
     },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+  Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>,
   TError,
   {
-    data: PostCustomerUploadSiteConfigurationAssetsBody;
-    params?: PostCustomerUploadSiteConfigurationAssetsParams;
+    data: PostCustomerSiteConfigurationAssetsBody;
+    params?: PostCustomerSiteConfigurationAssetsParams;
   },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+    Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>,
     {
-      data: PostCustomerUploadSiteConfigurationAssetsBody;
-      params?: PostCustomerUploadSiteConfigurationAssetsParams;
+      data: PostCustomerSiteConfigurationAssetsBody;
+      params?: PostCustomerSiteConfigurationAssetsParams;
     }
   > = (props) => {
     const { data, params } = props ?? {};
 
-    return postCustomerUploadSiteConfigurationAssets(data, params);
+    return postCustomerSiteConfigurationAssets(data, params);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostCustomerUploadSiteConfigurationAssetsMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>
-  >;
-export type PostCustomerUploadSiteConfigurationAssetsMutationBody =
-  PostCustomerUploadSiteConfigurationAssetsBody;
-export type PostCustomerUploadSiteConfigurationAssetsMutationError = unknown;
+export type PostCustomerSiteConfigurationAssetsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>
+>;
+export type PostCustomerSiteConfigurationAssetsMutationBody =
+  PostCustomerSiteConfigurationAssetsBody;
+export type PostCustomerSiteConfigurationAssetsMutationError = unknown;
 
-export const usePostCustomerUploadSiteConfigurationAssets = <
+export const usePostCustomerSiteConfigurationAssets = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+    Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>,
     TError,
     {
-      data: PostCustomerUploadSiteConfigurationAssetsBody;
-      params?: PostCustomerUploadSiteConfigurationAssetsParams;
+      data: PostCustomerSiteConfigurationAssetsBody;
+      params?: PostCustomerSiteConfigurationAssetsParams;
     },
     TContext
   >;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>,
+  Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>,
   TError,
   {
-    data: PostCustomerUploadSiteConfigurationAssetsBody;
-    params?: PostCustomerUploadSiteConfigurationAssetsParams;
+    data: PostCustomerSiteConfigurationAssetsBody;
+    params?: PostCustomerSiteConfigurationAssetsParams;
   },
   TContext
 > => {
   const mutationOptions =
-    getPostCustomerUploadSiteConfigurationAssetsMutationOptions(options);
+    getPostCustomerSiteConfigurationAssetsMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
 
-export const postCustomerUploadHero = (
-  postCustomerUploadHeroBody: PostCustomerUploadHeroBody,
-  params?: PostCustomerUploadHeroParams,
+export const postCustomerHero = (
+  postCustomerHeroBody: PostCustomerHeroBody,
+  params?: PostCustomerHeroParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (postCustomerUploadHeroBody.Image !== undefined) {
-    formData.append("Image", postCustomerUploadHeroBody.Image);
+  if (postCustomerHeroBody.Image !== undefined) {
+    formData.append("Image", postCustomerHeroBody.Image);
   }
-  if (postCustomerUploadHeroBody.removedAssets !== undefined) {
-    postCustomerUploadHeroBody.removedAssets.forEach((value) =>
+  if (postCustomerHeroBody.removedAssets !== undefined) {
+    postCustomerHeroBody.removedAssets.forEach((value) =>
       formData.append("removedAssets", value),
     );
   }
-  if (postCustomerUploadHeroBody.OrderUrl !== undefined) {
-    formData.append("OrderUrl", postCustomerUploadHeroBody.OrderUrl);
+  if (postCustomerHeroBody.OrderUrl !== undefined) {
+    formData.append("OrderUrl", postCustomerHeroBody.OrderUrl);
   }
 
   return authorizedFetch<void>({
-    url: `/Customer/upload-hero`,
+    url: `/Customer/hero`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -612,59 +674,59 @@ export const postCustomerUploadHero = (
   });
 };
 
-export const getPostCustomerUploadHeroMutationOptions = <
+export const getPostCustomerHeroMutationOptions = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadHero>>,
+    Awaited<ReturnType<typeof postCustomerHero>>,
     TError,
-    { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+    { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postCustomerUploadHero>>,
+  Awaited<ReturnType<typeof postCustomerHero>>,
   TError,
-  { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+  { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCustomerUploadHero>>,
-    { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams }
+    Awaited<ReturnType<typeof postCustomerHero>>,
+    { data: PostCustomerHeroBody; params?: PostCustomerHeroParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
-    return postCustomerUploadHero(data, params);
+    return postCustomerHero(data, params);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostCustomerUploadHeroMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerUploadHero>>
+export type PostCustomerHeroMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerHero>>
 >;
-export type PostCustomerUploadHeroMutationBody = PostCustomerUploadHeroBody;
-export type PostCustomerUploadHeroMutationError = unknown;
+export type PostCustomerHeroMutationBody = PostCustomerHeroBody;
+export type PostCustomerHeroMutationError = unknown;
 
-export const usePostCustomerUploadHero = <
+export const usePostCustomerHero = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerUploadHero>>,
+    Awaited<ReturnType<typeof postCustomerHero>>,
     TError,
-    { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+    { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
     TContext
   >;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof postCustomerUploadHero>>,
+  Awaited<ReturnType<typeof postCustomerHero>>,
   TError,
-  { data: PostCustomerUploadHeroBody; params?: PostCustomerUploadHeroParams },
+  { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
   TContext
 > => {
-  const mutationOptions = getPostCustomerUploadHeroMutationOptions(options);
+  const mutationOptions = getPostCustomerHeroMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

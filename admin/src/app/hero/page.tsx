@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  PostCustomerUploadHeroMutationBody,
+  PostCustomerHeroMutationBody,
   useGetPublicGetCustomerConfig,
-  usePostCustomerUploadHero,
+  usePostCustomerHero,
 } from "@/generated/endpoints";
 import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -42,12 +42,12 @@ const assetsInputSchema = [
 const Hero = () => {
   const { selectedDomain } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
-    {}
+    {},
   );
   const [deletedAssets, setDeletedAssets] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
-  const form = useForm<PostCustomerUploadHeroMutationBody>({
+  const form = useForm<PostCustomerHeroMutationBody>({
     defaultValues: {
       Image: "",
       OrderUrl: "",
@@ -58,7 +58,7 @@ const Hero = () => {
     key: selectedDomain,
   });
 
-  const { mutateAsync: uploadHero } = usePostCustomerUploadHero();
+  const { mutateAsync: uploadHero } = usePostCustomerHero();
 
   useEffect(() => {
     if (!customerConfig) return;
@@ -69,7 +69,7 @@ const Hero = () => {
     });
   }, [customerConfig, form]);
 
-  async function onSubmit(data: PostCustomerUploadHeroMutationBody) {
+  async function onSubmit(data: PostCustomerHeroMutationBody) {
     await uploadHero({
       data: {
         ...uploadedAssets,
@@ -85,7 +85,7 @@ const Hero = () => {
   return (
     <Form {...form}>
       <form
-        className="grid gap-4 overflow-auto p-4 max-w-lg"
+        className="grid max-w-lg gap-4 overflow-auto p-4"
         onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
       >
         {inputSchema.map((input) => (
@@ -117,7 +117,7 @@ const Hero = () => {
                   <FormLabel>{input.label}</FormLabel>
                   <FormControl>
                     {field.value && !deletedAssets?.[field.name] ? (
-                      <div className="grid gap-2 justify-start">
+                      <div className="grid justify-start gap-2">
                         {input.type === "image" && (
                           <>
                             {uploadedAssets?.[field.name] ? (
@@ -127,12 +127,12 @@ const Hero = () => {
                                 {field.value ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img
-                                    className="h-20 w-20 object-contain bg-gray-100 rounded"
+                                    className="h-20 w-20 rounded bg-gray-100 object-contain"
                                     src={field.value as unknown as string}
                                     alt=""
                                   />
                                 ) : (
-                                  <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                                  <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
                                     No image
                                   </div>
                                 )}

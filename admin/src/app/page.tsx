@@ -24,10 +24,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  PostCustomerUploadSiteConfigurationBody,
+  PostCustomerSiteConfigurationBody,
   useGetPublicGetCustomerConfig,
-  usePostCustomerUploadSiteConfiguration,
-  usePostCustomerUploadSiteConfigurationAssets,
+  usePostCustomerSiteConfiguration,
+  usePostCustomerSiteConfigurationAssets,
 } from "@/generated/endpoints";
 import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -92,9 +92,9 @@ const Wrapper = () => <FormLayout title="Site">{hasDomain(Site)()}</FormLayout>;
 const Site = () => {
   const { selectedDomain } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
-    {}
+    {},
   );
-  const form = useForm<PostCustomerUploadSiteConfigurationBody>({
+  const form = useForm<PostCustomerSiteConfigurationBody>({
     defaultValues: {
       SiteName: "",
       SiteMetaTitle: "",
@@ -111,12 +111,12 @@ const Site = () => {
   });
 
   const { mutateAsync: uploadSiteConfiguration, isPending: isPendingData } =
-    usePostCustomerUploadSiteConfiguration();
+    usePostCustomerSiteConfiguration();
 
   const {
     mutateAsync: uploadSiteConfigurationAssets,
     isPending: isPendingAssets,
-  } = usePostCustomerUploadSiteConfigurationAssets();
+  } = usePostCustomerSiteConfigurationAssets();
 
   const isPending = isPendingAssets || isPendingData;
 
@@ -135,7 +135,7 @@ const Site = () => {
     });
   }, [customerConfig, form]);
 
-  async function onSubmit(data: PostCustomerUploadSiteConfigurationBody) {
+  async function onSubmit(data: PostCustomerSiteConfigurationBody) {
     await uploadSiteConfigurationAssets({
       data: {
         ...uploadedAssets,
@@ -157,7 +157,7 @@ const Site = () => {
   return (
     <Form {...form}>
       <form
-        className="grid gap-4 overflow-auto p-4 max-w-lg"
+        className="grid max-w-lg gap-4 overflow-auto p-4"
         onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
       >
         {inputSchema.map((input) => (
@@ -212,7 +212,7 @@ const Site = () => {
                   <FormLabel>{input.label}</FormLabel>
                   <FormControl>
                     {field.value && field.value !== ACTIONS.REMOVE ? (
-                      <div className="grid gap-2 justify-start">
+                      <div className="grid justify-start gap-2">
                         {input.type === "image" && (
                           <>
                             {uploadedAssets?.[field.name] ? (
@@ -223,12 +223,12 @@ const Site = () => {
                                 form.watch(field.name) !== ACTIONS.REMOVE ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img
-                                    className="h-20 w-20 object-contain bg-gray-100 rounded"
+                                    className="h-20 w-20 rounded bg-gray-100 object-contain"
                                     src={field.value as string}
                                     alt=""
                                   />
                                 ) : (
-                                  <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                                  <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
                                     No image
                                   </div>
                                 )}
@@ -238,7 +238,7 @@ const Site = () => {
                         )}
                         {input.type === "file" && (
                           <>
-                            <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                            <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
                               {(field.value as unknown as File).name}
                             </div>
                           </>
@@ -275,7 +275,7 @@ const Site = () => {
                             }));
                             form.setValue(
                               field.name,
-                              file as unknown as string
+                              file as unknown as string,
                             );
                           }
                         }}
