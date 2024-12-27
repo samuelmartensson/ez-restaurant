@@ -2,6 +2,12 @@
 export default {
   api: {
     output: {
+      override: {
+        mutator: {
+          path: "./src/authorized-fetch.ts",
+          name: "authorizedFetch",
+        },
+      },
       prettier: true,
       target: "./src/generated/endpoints.ts",
     },

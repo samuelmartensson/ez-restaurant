@@ -4,8 +4,19 @@
  * backend
  * OpenAPI spec version: 1.0
  */
-import axios from "axios";
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
+import { authorizedFetch } from "../authorized-fetch";
+export type GetPublicGetCustomerMenuParams = {
+  key?: string;
+};
+
+export type GetPublicGetCustomerConfigParams = {
+  key?: string;
+};
+
+export type PostMenuCategoryOrderParams = {
+  key?: string;
+};
+
 export type DeleteMenuCategoryParams = {
   id?: number;
   key?: string;
@@ -57,13 +68,14 @@ export type PostCustomerUploadSiteConfigurationParams = {
   key?: string;
 };
 
-export type GetCustomerGetCustomerMenuParams = {
-  key?: string;
-};
+export type SubscriptionState =
+  (typeof SubscriptionState)[keyof typeof SubscriptionState];
 
-export type GetCustomerGetCustomerConfigParams = {
-  key?: string;
-};
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SubscriptionState = {
+  NUMBER_0: 0,
+  NUMBER_1: 1,
+} as const;
 
 export interface SiteSectionHeroResponse {
   heroImage?: string;
@@ -76,8 +88,8 @@ export interface SectionsResponse {
 
 export interface MenuItemResponse {
   categoryId: number;
-  /** @nullable */
-  description?: string | null;
+  /** @minLength 1 */
+  description: string;
   id: number;
   /** @nullable */
   image?: string | null;
@@ -92,27 +104,12 @@ export interface MenuCategoryResponse {
   id: number;
   /** @minLength 1 */
   name: string;
+  order: number;
 }
 
 export interface MenuResponse {
   categories: MenuCategoryResponse[];
   menuItems: MenuItemResponse[];
-}
-
-export interface CustomerResponse {
-  /** @nullable */
-  adress?: string | null;
-  customerId?: number;
-  domain?: string;
-  /** @nullable */
-  email?: string | null;
-  heroType?: number;
-  logo?: string;
-  /** @nullable */
-  phone?: string | null;
-  siteMetaTitle?: string;
-  siteName?: string;
-  theme?: string;
 }
 
 export interface CustomerConfigResponse {
@@ -126,13 +123,17 @@ export interface CustomerConfigResponse {
   heroType?: number;
   logo?: string;
   /** @nullable */
-  menuBackdropUrl?: string | null;
-  /** @nullable */
   phone?: string | null;
   sections?: SectionsResponse;
   siteMetaTitle?: string;
   siteName?: string;
   theme?: string;
+}
+
+export interface CustomerResponse {
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  subscription?: SubscriptionState;
 }
 
 export interface CreateConfigRequest {
@@ -142,52 +143,32 @@ export interface CreateConfigRequest {
 export interface AddCategoryRequest {
   id?: number;
   name?: string;
+  /** @nullable */
+  order?: number | null;
 }
 
-export const getCustomerGetCustomerConfig = <
-  TData = AxiosResponse<CustomerConfigResponse>,
->(
-  params?: GetCustomerGetCustomerConfigParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`/Customer/get-customer-config`, {
-    ...options,
-    params: { ...params, ...options?.params },
+export const getCustomerGetCustomer = () => {
+  return authorizedFetch<CustomerResponse>({
+    url: `/Customer/get-customer`,
+    method: "GET",
   });
 };
 
-export const getCustomerGetCustomerMenu = <TData = AxiosResponse<MenuResponse>>(
-  params?: GetCustomerGetCustomerMenuParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`/Customer/get-customer-menu`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
-};
-
-export const getCustomerGetCustomer = <
-  TData = AxiosResponse<CustomerResponse[]>,
->(
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`/Customer/get-customer`, options);
-};
-
-export const putCustomerCreateConfig = <TData = AxiosResponse<void>>(
+export const putCustomerCreateConfig = (
   createConfigRequest: CreateConfigRequest,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.put(`/Customer/create-config`, createConfigRequest, options);
+) => {
+  return authorizedFetch<void>({
+    url: `/Customer/create-config`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    data: createConfigRequest,
+  });
 };
 
-export const postCustomerUploadSiteConfiguration = <
-  TData = AxiosResponse<void>,
->(
+export const postCustomerUploadSiteConfiguration = (
   postCustomerUploadSiteConfigurationBody: PostCustomerUploadSiteConfigurationBody,
   params?: PostCustomerUploadSiteConfigurationParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
+) => {
   const formData = new FormData();
   if (postCustomerUploadSiteConfigurationBody.SiteName !== undefined) {
     formData.append(
@@ -217,19 +198,19 @@ export const postCustomerUploadSiteConfiguration = <
     formData.append("Email", postCustomerUploadSiteConfigurationBody.Email);
   }
 
-  return axios.post(`/Customer/upload-site-configuration`, formData, {
-    ...options,
-    params: { ...params, ...options?.params },
+  return authorizedFetch<void>({
+    url: `/Customer/upload-site-configuration`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
   });
 };
 
-export const postCustomerUploadSiteConfigurationAssets = <
-  TData = AxiosResponse<void>,
->(
+export const postCustomerUploadSiteConfigurationAssets = (
   postCustomerUploadSiteConfigurationAssetsBody: PostCustomerUploadSiteConfigurationAssetsBody,
   params?: PostCustomerUploadSiteConfigurationAssetsParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
+) => {
   const formData = new FormData();
   if (postCustomerUploadSiteConfigurationAssetsBody.Logo !== undefined) {
     formData.append("Logo", postCustomerUploadSiteConfigurationAssetsBody.Logo);
@@ -238,17 +219,19 @@ export const postCustomerUploadSiteConfigurationAssets = <
     formData.append("Font", postCustomerUploadSiteConfigurationAssetsBody.Font);
   }
 
-  return axios.post(`/Customer/upload-site-configuration-assets`, formData, {
-    ...options,
-    params: { ...params, ...options?.params },
+  return authorizedFetch<void>({
+    url: `/Customer/upload-site-configuration-assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
   });
 };
 
-export const postCustomerUploadHero = <TData = AxiosResponse<void>>(
+export const postCustomerUploadHero = (
   postCustomerUploadHeroBody: PostCustomerUploadHeroBody,
   params?: PostCustomerUploadHeroParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
+) => {
   const formData = new FormData();
   if (postCustomerUploadHeroBody.Image !== undefined) {
     formData.append("Image", postCustomerUploadHeroBody.Image);
@@ -262,17 +245,19 @@ export const postCustomerUploadHero = <TData = AxiosResponse<void>>(
     formData.append("OrderUrl", postCustomerUploadHeroBody.OrderUrl);
   }
 
-  return axios.post(`/Customer/upload-hero`, formData, {
-    ...options,
-    params: { ...params, ...options?.params },
+  return authorizedFetch<void>({
+    url: `/Customer/upload-hero`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
   });
 };
 
-export const postMenuItems = <TData = AxiosResponse<void>>(
+export const postMenuItems = (
   postMenuItemsBody: PostMenuItemsBody,
   params?: PostMenuItemsParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
+) => {
   const formData = new FormData();
   if (postMenuItemsBody.menuItemsJson !== undefined) {
     formData.append("menuItemsJson", postMenuItemsBody.menuItemsJson);
@@ -281,42 +266,106 @@ export const postMenuItems = <TData = AxiosResponse<void>>(
     postMenuItemsBody.files.forEach((value) => formData.append("files", value));
   }
 
-  return axios.post(`/Menu/items`, formData, {
-    ...options,
-    params: { ...params, ...options?.params },
+  return authorizedFetch<void>({
+    url: `/Menu/items`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
   });
 };
 
-export const postMenuCategory = <TData = AxiosResponse<void>>(
+export const postMenuCategory = (
   addCategoryRequest: AddCategoryRequest,
   params?: PostMenuCategoryParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.post(`/Menu/category`, addCategoryRequest, {
-    ...options,
-    params: { ...params, ...options?.params },
+) => {
+  return authorizedFetch<void>({
+    url: `/Menu/category`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addCategoryRequest,
+    params,
   });
 };
 
-export const deleteMenuCategory = <TData = AxiosResponse<void>>(
-  params?: DeleteMenuCategoryParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.delete(`/Menu/category`, {
-    ...options,
-    params: { ...params, ...options?.params },
+export const deleteMenuCategory = (params?: DeleteMenuCategoryParams) => {
+  return authorizedFetch<void>({
+    url: `/Menu/category`,
+    method: "DELETE",
+    params,
   });
 };
 
-export type GetCustomerGetCustomerConfigResult =
-  AxiosResponse<CustomerConfigResponse>;
-export type GetCustomerGetCustomerMenuResult = AxiosResponse<MenuResponse>;
-export type GetCustomerGetCustomerResult = AxiosResponse<CustomerResponse[]>;
-export type PutCustomerCreateConfigResult = AxiosResponse<void>;
-export type PostCustomerUploadSiteConfigurationResult = AxiosResponse<void>;
-export type PostCustomerUploadSiteConfigurationAssetsResult =
-  AxiosResponse<void>;
-export type PostCustomerUploadHeroResult = AxiosResponse<void>;
-export type PostMenuItemsResult = AxiosResponse<void>;
-export type PostMenuCategoryResult = AxiosResponse<void>;
-export type DeleteMenuCategoryResult = AxiosResponse<void>;
+export const postMenuCategoryOrder = (
+  addCategoryRequest: AddCategoryRequest[],
+  params?: PostMenuCategoryOrderParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Menu/category/order`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addCategoryRequest,
+    params,
+  });
+};
+
+export const getPublicGetCustomerConfig = (
+  params?: GetPublicGetCustomerConfigParams,
+) => {
+  return authorizedFetch<CustomerConfigResponse>({
+    url: `/Public/get-customer-config`,
+    method: "GET",
+    params,
+  });
+};
+
+export const getPublicGetCustomerMenu = (
+  params?: GetPublicGetCustomerMenuParams,
+) => {
+  return authorizedFetch<MenuResponse>({
+    url: `/Public/get-customer-menu`,
+    method: "GET",
+    params,
+  });
+};
+
+export const postWebhook = () => {
+  return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
+};
+
+export type GetCustomerGetCustomerResult = NonNullable<
+  Awaited<ReturnType<typeof getCustomerGetCustomer>>
+>;
+export type PutCustomerCreateConfigResult = NonNullable<
+  Awaited<ReturnType<typeof putCustomerCreateConfig>>
+>;
+export type PostCustomerUploadSiteConfigurationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>
+>;
+export type PostCustomerUploadSiteConfigurationAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>
+>;
+export type PostCustomerUploadHeroResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerUploadHero>>
+>;
+export type PostMenuItemsResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuItems>>
+>;
+export type PostMenuCategoryResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuCategory>>
+>;
+export type DeleteMenuCategoryResult = NonNullable<
+  Awaited<ReturnType<typeof deleteMenuCategory>>
+>;
+export type PostMenuCategoryOrderResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuCategoryOrder>>
+>;
+export type GetPublicGetCustomerConfigResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerConfig>>
+>;
+export type GetPublicGetCustomerMenuResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerMenu>>
+>;
+export type PostWebhookResult = NonNullable<
+  Awaited<ReturnType<typeof postWebhook>>
+>;
