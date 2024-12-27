@@ -12,6 +12,7 @@ public class RestaurantContext : DbContext
     public required DbSet<MenuItem> MenuItems { get; set; }
     public required DbSet<User> Users { get; set; }
     public required DbSet<SiteSectionHero> SiteSectionHeros { get; set; }
+    public required DbSet<OpeningHour> OpeningHours { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

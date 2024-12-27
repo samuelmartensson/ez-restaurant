@@ -11,40 +11,26 @@ export function Navigation({ data }: { data: CustomerConfigResponse }) {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 text-white bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
-      <div className="container flex h-20 items-center justify-center gap-10 m-auto max-w-screen-xl">
-        <div>
-          <Link
-            legacyBehavior
-            href="/menu"
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            Menu
-          </Link>
-        </div>
-        <div>
-          <Link legacyBehavior href="/" className="flex items-center">
-            {data?.logo ? (
-              <Link href="/">
-                <img
-                  src={data.logo}
-                  alt=""
-                  className="h-12 max-w-[140px] sm:h-16 rounded-lg object-contain"
-                />
-              </Link>
-            ) : (
-              <span className="font-bold text-xl">{data.siteName}</span>
-            )}
-          </Link>
-        </div>
-        <div>
-          <Link
-            legacyBehavior
-            href="/about"
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            About
-          </Link>
-        </div>
+      <div className="font-customer container flex h-20 items-center justify-center gap-10 m-auto max-w-screen-xl">
+        <Link legacyBehavior href="/menu">
+          <span className="text-lg cursor-pointer">MENU</span>
+        </Link>
+        <Link legacyBehavior href="/">
+          {data?.logo ? (
+            <Link href="/">
+              <img
+                src={data.logo}
+                alt=""
+                className="h-12 max-w-[140px] sm:h-16 rounded-lg object-contain"
+              />
+            </Link>
+          ) : (
+            <span className="font-bold text-xl">{data.siteName}</span>
+          )}
+        </Link>
+        <Link legacyBehavior href="/about">
+          <span className="text-lg cursor-pointer">ABOUT</span>
+        </Link>
       </div>
     </nav>
   );

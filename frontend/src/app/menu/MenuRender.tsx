@@ -56,7 +56,7 @@ const MenuItem = ({
       <div className="grid gap-2 w-full">
         <div className="grid gap-4">
           <div className="grid gap-1">
-            <span className="text-lg">{name}</span>
+            <span className="text-lg font-customer">{name}</span>
             {description && (
               <span className="text-muted-foreground text-sm">
                 {description}
@@ -76,7 +76,7 @@ const MenuItem = ({
             </div>
           )}
         </div>
-        <span className="text-primary font-bold self-end whitespace-nowrap">
+        <span className="font-customer text-primary font-bold self-end whitespace-nowrap">
           {price} SEK
         </span>
       </div>
@@ -135,7 +135,11 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
           >
             <TabsList className="justify-start">
               {data.categories.map((c) => (
-                <TabsTrigger value={String(c.id)} key={c.id} className="w-full">
+                <TabsTrigger
+                  value={String(c.id)}
+                  key={c.id}
+                  className="w-full font-customer text-lg"
+                >
                   {c.name}
                 </TabsTrigger>
               ))}

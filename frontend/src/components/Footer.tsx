@@ -11,7 +11,7 @@ export default async function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {(data?.email || data?.phone || data?.adress) && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="font-customer text-lg font-semibold text-gray-900">
                 Contact Us
               </h3>
               {data?.email && (
@@ -35,7 +35,7 @@ export default async function Footer() {
             </div>
           )}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="font-customer text-lg font-semibold text-gray-900">
               Opening Hours
             </h3>
             <div className="flex items-start space-x-3">
