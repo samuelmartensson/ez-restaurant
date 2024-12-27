@@ -55,5 +55,14 @@ public class MenuController(
         await menuService.DeleteCategory(id, key);
         return Ok(new { message = "Success" });
     }
+    // [Authorize(Policy = "KeyPolicy")]
+    [HttpPost("importqoplamenu")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ImportQoplaMenu([FromQuery] string url)
+    {
+        return Ok(new { message = await QoplaService.FetchQoplaMenu(url) });
+    }
+
 }
 
