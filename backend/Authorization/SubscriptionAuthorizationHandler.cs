@@ -22,7 +22,6 @@ public class SubscriptionAuthorizationHandler(RestaurantContext dbContext) : Aut
         if (string.IsNullOrEmpty(userId))
         {
             context.Fail();
-            return;
         }
 
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -36,6 +35,11 @@ public class SubscriptionAuthorizationHandler(RestaurantContext dbContext) : Aut
         {
             context.Fail();
             return;
+        }
+
+        if (customer.Subscription != 0 && DateTime.Now > customer.SubscriptionExpireAt)
+        {
+            context.Fail();
         }
 
         if (customer.Subscription >= requirement.RequiredState)

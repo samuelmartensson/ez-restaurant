@@ -268,12 +268,13 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   return (
     <div>
       <div
-        className="grid gap-4"
+        className="grid gap-4 duration-100"
         style={{
-          gridTemplateColumns: isMobile || !selectedField ? "1fr" : "3fr 2fr",
+          gridTemplateColumns:
+            isMobile || !selectedField ? "1fr 0fr" : "3fr 2fr",
         }}
       >
-        <div className="grid grid-rows-[auto_70vh]">
+        <div className="grid grid-rows-[auto_60vh]">
           <MenuCategories
             category={addCategory}
             setCategory={setAddCategory}

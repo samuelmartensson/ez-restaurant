@@ -27,6 +27,10 @@ export type GetPublicGetCustomerConfigParams = {
   key?: string;
 };
 
+export type PostMenuImportqoplamenuParams = {
+  url?: string;
+};
+
 export type PostMenuCategoryOrderParams = {
   key?: string;
 };
@@ -144,14 +148,22 @@ export interface CustomerConfigResponse {
   theme?: string;
 }
 
+export interface CreateConfigRequest {
+  domain?: string;
+}
+
+export interface CancelInfo {
+  isCanceled?: boolean;
+  isExpired?: boolean;
+  /** @nullable */
+  periodEnd?: string | null;
+}
+
 export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
   customerConfigs?: CustomerConfigResponse[];
   domain?: string;
   subscription?: SubscriptionState;
-}
-
-export interface CreateConfigRequest {
-  domain?: string;
 }
 
 export interface AddCategoryRequest {
@@ -938,6 +950,75 @@ export const usePostMenuCategoryOrder = <
   TContext
 > => {
   const mutationOptions = getPostMenuCategoryOrderMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postMenuImportqoplamenu = (
+  params?: PostMenuImportqoplamenuParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/Menu/importqoplamenu`,
+    method: "POST",
+    params,
+    signal,
+  });
+};
+
+export const getPostMenuImportqoplamenuMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuImportqoplamenu>>,
+    TError,
+    { params?: PostMenuImportqoplamenuParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postMenuImportqoplamenu>>,
+  TError,
+  { params?: PostMenuImportqoplamenuParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postMenuImportqoplamenu>>,
+    { params?: PostMenuImportqoplamenuParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return postMenuImportqoplamenu(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostMenuImportqoplamenuMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuImportqoplamenu>>
+>;
+
+export type PostMenuImportqoplamenuMutationError = unknown;
+
+export const usePostMenuImportqoplamenu = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMenuImportqoplamenu>>,
+    TError,
+    { params?: PostMenuImportqoplamenuParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postMenuImportqoplamenu>>,
+  TError,
+  { params?: PostMenuImportqoplamenuParams },
+  TContext
+> => {
+  const mutationOptions = getPostMenuImportqoplamenuMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

@@ -35,7 +35,7 @@ export function Navigation({ data }: { data: CustomerConfigResponse }) {
           </Link>
           <Link href="/about">
             <Button className="text-background text-lg" variant="link">
-              About
+              About us
             </Button>
           </Link>
         </div>

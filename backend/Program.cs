@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Clerk.Net.DependencyInjection;
+using Stripe;
+StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 
 var builder = WebApplication.CreateBuilder(args);
 //swagger url: http://localhost:5232/swagger/index.html

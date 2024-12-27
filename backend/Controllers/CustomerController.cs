@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Responses;
 using Models.Requests;
+using Stripe;
+using Clerk.Net.Client;
+using Microsoft.Kiota.Abstractions;
 
 namespace webapi.Controllers;
 
@@ -12,13 +15,16 @@ public class CustomerController(
     RestaurantContext context,
     SiteConfigurationService siteConfigurationService,
     SectionConfigurationService sectionConfigurationService,
-    UserService userService
+    UserService userService,
+    ClerkApiClient clerkApiClient
 ) : ControllerBase
 {
     private RestaurantContext context = context;
     private UserService userService = userService;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
     private SectionConfigurationService sectionConfigurationService = sectionConfigurationService;
+    private ClerkApiClient clerkApiClient = clerkApiClient;
+
 
     private async Task<Database.Models.User> assertUser()
     {
@@ -62,6 +68,15 @@ public class CustomerController(
             return Ok(new List<CustomerResponse>());
         }
 
+        var clerkUser = await clerkApiClient.Users[user.Id].GetAsync();
+
+        var options = new CustomerListOptions { Email = clerkUser?.EmailAddresses?.First().EmailAddressProp };
+        options.AddExpand("data.subscriptions");
+        var service = new CustomerService();
+        Stripe.Customer stripeCustomer = (await service.ListAsync(options)).First();
+        Subscription subscription = stripeCustomer.Subscriptions.First();
+
+
         var customer = await context.Customers
         .Include(c => c.CustomerConfigs)
         .FirstOrDefaultAsync(c => c.Id == user.CustomerId);
@@ -82,7 +97,13 @@ public class CustomerController(
             new CustomerResponse
             {
                 Subscription = customer?.Subscription ?? SubscriptionState.Free,
-                CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>()
+                CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>(),
+                CancelInfo = new CancelInfo
+                {
+                    IsCanceled = subscription.CancelAt.HasValue,
+                    periodEnd = subscription.CurrentPeriodEnd,
+                    IsExpired = DateTime.Now > subscription.CurrentPeriodEnd
+                }
             }
             );
     }
@@ -95,16 +116,16 @@ public class CustomerController(
     {
         try
         {
-            if (config.domain.Trim() == "")
-            {
-                throw new Exception("Domain can't be empty");
-            }
             var user = await assertUser();
-
             var customer = await context.Customers.Include(c => c.CustomerConfigs).FirstOrDefaultAsync(c => c.Id == user.CustomerId);
             if (customer?.Subscription == SubscriptionState.Free && customer.CustomerConfigs.Count() > 0)
             {
                 throw new Exception("Can only create 1 domain on Free plan.");
+            }
+
+            if (config.domain.Trim() == "")
+            {
+                throw new Exception("Domain can't be empty");
             }
 
             var domainAlreadyExists = await context.CustomerConfigs

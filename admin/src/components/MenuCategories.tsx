@@ -49,8 +49,14 @@ interface Props {
 
 const DraggableBadge = ({
   draggableId,
+  onMovePrev,
+  onMoveNext,
   ...props
-}: BadgeProps & { draggableId: number }) => {
+}: BadgeProps & {
+  draggableId: number;
+  onMovePrev: () => void;
+  onMoveNext: () => void;
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: draggableId,
@@ -74,9 +80,21 @@ const DraggableBadge = ({
       {...attributes}
       className="whitespace-nowrap text-base"
     >
-      <ChevronLeft size={16} />
+      <ChevronLeft
+        onClick={(e) => {
+          e.stopPropagation();
+          onMovePrev();
+        }}
+        size={16}
+      />
       {props.children}
-      <ChevronRight size={16} />
+      <ChevronRight
+        onClick={(e) => {
+          e.stopPropagation();
+          onMoveNext();
+        }}
+        size={16}
+      />
     </Badge>
   );
 };
@@ -105,6 +123,21 @@ const MenuCategories = ({
       setItems(result);
       onOrderChange(result);
     }
+  };
+
+  const onMoveClick = ({
+    activeId,
+    dir,
+  }: {
+    activeId: number;
+    dir: "left" | "right";
+  }) => {
+    const activeIndex = items.findIndex((i) => i.id === activeId);
+    let overIndex = activeIndex + 1;
+    if (dir === "left") overIndex = activeIndex - 1;
+    const result = arrayMove(items, activeIndex, overIndex);
+    setItems(result);
+    onOrderChange(result);
   };
 
   return (
@@ -158,6 +191,8 @@ const MenuCategories = ({
 
               return (
                 <DraggableBadge
+                  onMoveNext={() => onMoveClick({ activeId: id, dir: "right" })}
+                  onMovePrev={() => onMoveClick({ activeId: id, dir: "left" })}
                   draggableId={id}
                   variant={
                     selectedCategory === parsedId ? "default" : "outline"
