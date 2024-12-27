@@ -3,6 +3,7 @@ import { CustomerConfigResponse } from "@/generated/endpoints";
 import { getCustomerConfig } from "@/mock_db";
 import "./globals.css";
 import DomainNotFound from "@/components/DomainNotFound";
+import Footer from "@/components/Footer";
 
 const themes = (font: string) =>
   ({
@@ -47,8 +48,7 @@ const FontInitializer = ({
     <style precedence="1" href="1">{`
         @font-face {
           font-family: "Customer";
-          src: url("${fontUrl}")
-            format("truetype");
+          src: url("${fontUrl}");
           font-weight: normal;
           font-style: normal;
         }
@@ -79,6 +79,7 @@ export default async function RootLayout({
       <body className="antialiased relative">
         <Navigation data={data} />
         {children}
+        <Footer />
       </body>
     </html>
   );

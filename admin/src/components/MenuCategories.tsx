@@ -65,7 +65,7 @@ const DraggableBadge = ({
   const style: React.CSSProperties = {
     ...props.style,
     transform: CSS.Transform.toString(
-      transform && { y: 0, scaleY: 1, x: transform.x, scaleX: 1 }
+      transform && { y: 0, scaleY: 1, x: transform.x, scaleX: 1 },
     ),
     transition,
     cursor: "move",
@@ -142,8 +142,8 @@ const MenuCategories = ({
 
   return (
     <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-2">
+      <div className="mb-8 overflow-auto">
+        <div className="mb-2 flex flex-wrap gap-2 overflow-auto">
           <Input
             className="flex-1"
             placeholder="Add category..."
@@ -182,8 +182,8 @@ const MenuCategories = ({
         </div>
         <SortableContext items={items} strategy={horizontalListSortingStrategy}>
           <div
-            style={{ maxWidth: "calc(100vw - 24px)" }}
-            className="flex overflow-auto gap-1 py-2"
+            style={{ maxWidth: "100%" }}
+            className="flex gap-1 overflow-auto py-2"
           >
             {items.map(({ id, name }) => {
               const parsedId = Number(id);
@@ -200,7 +200,7 @@ const MenuCategories = ({
                   onClick={() => {
                     onBadgeClick({ id: parsedId, isSelected, name });
                   }}
-                  className="text-base cursor-pointer select-none"
+                  className="cursor-pointer select-none text-base"
                   key={parsedId}
                 >
                   {name}

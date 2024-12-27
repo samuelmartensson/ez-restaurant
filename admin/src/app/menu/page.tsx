@@ -125,7 +125,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedFieldIndex, setSelectedField] = useState<number>();
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
-    {}
+    {},
   );
 
   const [selectedCategory, setSelectedCategory] = useState<number>(-1);
@@ -136,7 +136,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
   const [categoryList, setCategoryList] = useState(data.categories);
   const categories = Object.fromEntries(
-    categoryList.map((item) => [item.id, item.name])
+    categoryList.map((item) => [item.id, item.name]),
   );
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: { menu: data.menuItems },
@@ -206,10 +206,10 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
             image: d.image === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
             price: Number(d.price),
             categoryId: Number(d.categoryId),
-          }))
+          })),
         ),
         files: Object.entries(uploadedImages).map(
-          ([key, value]) => new File([value], key)
+          ([key, value]) => new File([value], key),
         ),
       },
     });
@@ -308,22 +308,22 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
               return (
                 <div
                   key={field.formId}
-                  className={`relative flex flex-col md:flex-row justify-between gap-2 border-b ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
+                  className={`relative flex flex-col justify-between gap-2 border-b md:flex-row ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
                 >
                   <Button
                     onClick={() => {
                       setSelectedField((state) =>
-                        state === index ? -1 : index
+                        state === index ? -1 : index,
                       );
                     }}
                     type="button"
-                    className="block text-left w-full h-auto"
+                    className="block h-auto w-full text-left"
                     variant={(() => {
                       if (saveStaged) return "default";
                       return deleteStaged ? "destructive" : "ghost";
                     })()}
                   >
-                    <div className="flex gap-2 items-center">
+                    <div className="flex items-center gap-2">
                       {uploadedImages?.[resolveImageId(field)] ? (
                         <FilePreview
                           file={uploadedImages[resolveImageId(field)]}
@@ -335,18 +335,18 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                             ACTIONS.REMOVE ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              className="h-20 w-20 object-contain bg-gray-100 rounded"
+                              className="h-20 w-20 rounded bg-gray-100 object-contain"
                               src={field.image}
                               alt=""
                             />
                           ) : (
-                            <div className="grid place-items-center p-2 text-xs h-20 w-20 bg-gray-100 rounded text-primary">
+                            <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
                               No image
                             </div>
                           )}
                         </>
                       )}
-                      <div className="grid gap-1 justify-items-start">
+                      <div className="grid justify-items-start gap-1">
                         <span className="text-base">
                           {form.watch(`menu.${index}.name`)}
                         </span>
@@ -356,7 +356,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                       </div>
                     </div>
                   </Button>
-                  <div className="grid gap-2 content-start">
+                  <div className="grid content-start gap-2">
                     <Button
                       size="sm"
                       variant="outline"
@@ -369,7 +369,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                         setDeletedItems((state) =>
                           state.includes(index)
                             ? state.filter((n) => n !== index)
-                            : [...state, index]
+                            : [...state, index],
                         );
                       }}
                     >
@@ -406,7 +406,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
             </Button>
           </div>
         </div>
-        <div className="border-l px-4">
+        <div className="md:border-l md:px-4">
           <MobileDrawer
             title={`Edit menu item - "${selectedField?.name}"`}
             open={!!selectedField}
@@ -458,7 +458,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                                         `menu.${selectedField.index}.${input.id}` as const,
                                         selectedField.image
                                           ? ACTIONS.REMOVE
-                                          : ""
+                                          : "",
                                       );
 
                                       setUploadedImages((state) => {
@@ -486,7 +486,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                                         }));
                                         form.setValue(
                                           `menu.${selectedField.index}.${input.id}` as const,
-                                          file as unknown as string
+                                          file as unknown as string,
                                         );
                                       }
                                     }}
@@ -538,8 +538,8 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
           </MobileDrawer>
         </div>
       </div>
-      <form className="grid gap-4 mt-6" onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex gap-2 flex-wrap">
+      <form className="mt-6 grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex flex-wrap gap-2">
           <Button
             className="flex-1"
             onClick={handleAddMenuItem}

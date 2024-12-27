@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
 import { Image } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRef } from "react";
 
 function groupBy<T extends MenuItemResponse>(
   list: T[],
@@ -45,7 +46,7 @@ const MenuItem = ({
         <img
           src={image}
           alt=""
-          className="w-28 h-28 bg-gray-200 object-cover rounded-xl"
+          className="min-w-28 max-w-28 h-28 bg-gray-200 object-cover rounded-xl"
         />
       ) : (
         <div className="grid place-items-center min-w-28 max-w-28 h-28 bg-gray-200 object-cover rounded-xl">
@@ -87,6 +88,7 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const ref = useRef<HTMLDivElement>(null);
   const selectedCategory =
     searchParams.get("selectedCategory") || data.categories?.[0]?.id || "all";
 
@@ -103,12 +105,35 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
       <div className="relative z-10 grid gap-4">
         {data.categories.length > 0 && (
           <Tabs
+            ref={ref}
+            className="overflow-auto scroll-smooth"
             value={String(selectedCategory)}
-            onValueChange={(category) =>
-              router.push(pathname + "?selectedCategory=" + category)
-            }
+            onValueChange={(category) => {
+              router.push(pathname + "?selectedCategory=" + category);
+              if (!ref.current) return;
+
+              const scrollDistance =
+                ref.current.scrollWidth - ref.current.clientWidth;
+              const avgLength = scrollDistance / data.categories.length;
+              const result =
+                (data.categories.findIndex((c) => c.id == Number(category)) +
+                  1) *
+                avgLength;
+              const ratio = result / scrollDistance;
+
+              if (ratio < 0.34) {
+                ref.current.scrollLeft = 0;
+              }
+              if (ratio > 0.7) {
+                ref.current.scrollLeft = scrollDistance;
+                return;
+              }
+              if (ratio >= 0.5) {
+                ref.current.scrollLeft = scrollDistance / 2;
+              }
+            }}
           >
-            <TabsList className="w-full">
+            <TabsList className="justify-start">
               {data.categories.map((c) => (
                 <TabsTrigger value={String(c.id)} key={c.id} className="w-full">
                   {c.name}

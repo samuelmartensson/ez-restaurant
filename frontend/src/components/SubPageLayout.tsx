@@ -6,14 +6,14 @@ const SubPageLayout = async ({
   title,
   children,
 }: {
-  title: string;
+  title?: string;
   children: ReactNode;
 }) => {
   const data = await getCustomerConfig();
   if (!data) return null;
 
   return (
-    <div className="py-8 max-w-screen-xl m-auto px-2 sm:px-4 min-h-nav-sm sm:min-h-nav">
+    <div className="relative min-h-svh">
       <div className="absolute inset-0 bg-white">
         <Image
           priority
@@ -23,8 +23,10 @@ const SubPageLayout = async ({
           className="object-cover opacity-10"
         />
       </div>
-      <div className="relative max-w-screen-md m-auto z-10">
-        <h1 className="text-4xl font-bold mb-8 font-customer">{title}</h1>
+      <div className="relative pt-28 pb-8 px-2 max-w-screen-md m-auto z-10">
+        {title && (
+          <h1 className="text-4xl font-bold mb-8 font-customer">{title}</h1>
+        )}
         {children}
       </div>
     </div>

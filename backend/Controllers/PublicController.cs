@@ -33,6 +33,9 @@ public class PublicController(RestaurantContext context) : ControllerBase
             SiteMetaTitle = customerConfig.SiteMetaTitle,
             SiteName = customerConfig.SiteName,
             HeroType = customerConfig.HeroType,
+            Adress = customerConfig.Adress,
+            Email = customerConfig.Email,
+            Phone = customerConfig.Phone,
             Sections = new SectionsResponse
             {
                 Hero = new SiteSectionHeroResponse

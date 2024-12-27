@@ -10,10 +10,6 @@ export default {
   ],
   theme: {
     extend: {
-      minHeight: {
-        nav: "calc(100svh - 112px)",
-        "nav-sm": "calc(100svh - 64px)",
-      },
       fontFamily: {
         customer: "var(--font-main)",
       },
