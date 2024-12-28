@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import {
+  Clock,
   CreditCard,
   Globe,
   Home,
@@ -41,6 +42,11 @@ const items = [
     title: "Hero",
     url: "/hero",
     icon: Wallpaper,
+  },
+  {
+    title: "Open hours",
+    url: "/open-hours",
+    icon: Clock,
   },
   {
     title: "Menu",

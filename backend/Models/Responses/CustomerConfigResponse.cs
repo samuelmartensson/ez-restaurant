@@ -24,5 +24,6 @@ namespace Models.Responses
         public string? Phone { get; set; } = "";
         public string? Email { get; set; } = "";
         public SectionsResponse? Sections { get; set; }
+        public List<OpeningHourResponse> OpeningHours { get; set; } = new List<OpeningHourResponse>();
     }
 }

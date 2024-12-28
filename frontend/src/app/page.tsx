@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/ui/button";
 import { getCustomerConfig } from "@/mock_db";
+import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -45,6 +45,13 @@ export default async function Home() {
           </div>
         </div>
       </div>
+      <Link
+        href="#open-hours"
+        className="absolute bottom-4 grid place-items-center text-white"
+      >
+        <span>Open hours</span>
+        <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
+      </Link>
     </main>
   );
 }

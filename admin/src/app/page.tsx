@@ -139,11 +139,12 @@ const Site = () => {
   }, [customerConfig, form]);
 
   async function onSubmit(data: PostCustomerSiteConfigurationBody) {
+    const params = { key: selectedDomain };
     await uploadSiteConfigurationAssets({
       data: {
         ...uploadedAssets,
       },
-      params: { key: selectedDomain },
+      params,
     });
     await uploadSiteConfiguration({
       data: {
@@ -151,8 +152,9 @@ const Site = () => {
         Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
         Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
       },
-      params: { key: selectedDomain },
+      params,
     });
+
     refetch();
     toast.success("Site information saved.");
   }

@@ -87,6 +87,7 @@ builder.Services.AddScoped<SiteConfigurationService>();
 builder.Services.AddScoped<S3Service>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<SectionConfigurationService>();
+builder.Services.AddScoped<OpeningHourService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();

@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
 
-public class SiteConfigurationService(RestaurantContext context, S3Service s3Service)
+public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService)
 {
-    private RestaurantContext context = context;
+    private readonly RestaurantContext context = context;
     private readonly S3Service s3Service = s3Service;
+    private readonly OpeningHourService openingHourService = openingHourService;
 
 
     public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, string key)
@@ -59,6 +60,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
 
     public async Task CreateSiteConfiguration(string domain, int customerId)
     {
+        var defaultOpeningHours = openingHourService.InitializeWeeklyOpeningHours(domain);
         var newConfig = new CustomerConfig
         {
             CustomerId = customerId,
@@ -68,6 +70,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             SiteMetaTitle = "",
             SiteName = domain,
             Theme = "rustic",
+            OpeningHours = defaultOpeningHours
         };
 
         await context.CustomerConfigs.AddAsync(newConfig);

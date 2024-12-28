@@ -27,6 +27,14 @@ export type GetPublicGetCustomerConfigParams = {
   key?: string;
 };
 
+export type PostOpeningHourParams = {
+  key?: string;
+};
+
+export type GetOpeningHourParams = {
+  key?: string;
+};
+
 export type PostMenuImportqoplamenuParams = {
   url?: string;
 };
@@ -109,6 +117,14 @@ export interface SectionsResponse {
   hero?: SiteSectionHeroResponse;
 }
 
+export interface OpeningHourResponse {
+  closeTime?: string;
+  day?: CustomDayOfWeek;
+  id?: number;
+  isClosed?: boolean;
+  openTime?: string;
+}
+
 export interface MenuItemResponse {
   categoryId: number;
   /** @minLength 1 */
@@ -145,6 +161,7 @@ export interface CustomerConfigResponse {
   font?: string | null;
   heroType?: number;
   logo?: string;
+  openingHours?: OpeningHourResponse[];
   /** @nullable */
   phone?: string | null;
   sections?: SectionsResponse;
@@ -152,6 +169,20 @@ export interface CustomerConfigResponse {
   siteName?: string;
   theme?: string;
 }
+
+export type CustomDayOfWeek =
+  (typeof CustomDayOfWeek)[keyof typeof CustomDayOfWeek];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CustomDayOfWeek = {
+  NUMBER_1: 1,
+  NUMBER_2: 2,
+  NUMBER_3: 3,
+  NUMBER_4: 4,
+  NUMBER_5: 5,
+  NUMBER_6: 6,
+  NUMBER_7: 7,
+} as const;
 
 export interface CreateConfigRequest {
   domain?: string;
@@ -169,6 +200,13 @@ export interface CustomerResponse {
   customerConfigs?: CustomerConfigResponse[];
   domain?: string;
   subscription?: SubscriptionState;
+}
+
+export interface AddOpeningHourRequest {
+  closeTime?: string;
+  id?: number;
+  isClosed?: boolean;
+  openTime?: string;
 }
 
 export interface AddCategoryRequest {
@@ -1085,6 +1123,199 @@ export const usePostMenuImportqoplamenu = <
   TContext
 > => {
   const mutationOptions = getPostMenuImportqoplamenuMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getOpeningHour = (
+  params?: GetOpeningHourParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<OpeningHourResponse[]>({
+    url: `/OpeningHour`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetOpeningHourQueryKey = (params?: GetOpeningHourParams) => {
+  return [`/OpeningHour`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetOpeningHourQueryOptions = <
+  TData = Awaited<ReturnType<typeof getOpeningHour>>,
+  TError = unknown,
+>(
+  params?: GetOpeningHourParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetOpeningHourQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getOpeningHour>>> = ({
+    signal,
+  }) => getOpeningHour(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getOpeningHour>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetOpeningHourQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getOpeningHour>>
+>;
+export type GetOpeningHourQueryError = unknown;
+
+export function useGetOpeningHour<
+  TData = Awaited<ReturnType<typeof getOpeningHour>>,
+  TError = unknown,
+>(
+  params: undefined | GetOpeningHourParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOpeningHour>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetOpeningHour<
+  TData = Awaited<ReturnType<typeof getOpeningHour>>,
+  TError = unknown,
+>(
+  params?: GetOpeningHourParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOpeningHour>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetOpeningHour<
+  TData = Awaited<ReturnType<typeof getOpeningHour>>,
+  TError = unknown,
+>(
+  params?: GetOpeningHourParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetOpeningHour<
+  TData = Awaited<ReturnType<typeof getOpeningHour>>,
+  TError = unknown,
+>(
+  params?: GetOpeningHourParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetOpeningHourQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const postOpeningHour = (
+  addOpeningHourRequest: AddOpeningHourRequest[],
+  params?: PostOpeningHourParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/OpeningHour`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addOpeningHourRequest,
+    params,
+    signal,
+  });
+};
+
+export const getPostOpeningHourMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postOpeningHour>>,
+    TError,
+    { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postOpeningHour>>,
+  TError,
+  { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postOpeningHour>>,
+    { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postOpeningHour(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostOpeningHourMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postOpeningHour>>
+>;
+export type PostOpeningHourMutationBody = AddOpeningHourRequest[];
+export type PostOpeningHourMutationError = unknown;
+
+export const usePostOpeningHour = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postOpeningHour>>,
+    TError,
+    { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postOpeningHour>>,
+  TError,
+  { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+  TContext
+> => {
+  const mutationOptions = getPostOpeningHourMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

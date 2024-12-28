@@ -46,10 +46,10 @@ const MenuItem = ({
         <img
           src={image}
           alt=""
-          className="min-w-28 max-w-28 h-28 bg-gray-200 object-cover rounded-xl"
+          className="min-w-32 max-w-32 h-32 bg-gray-200 object-cover rounded-xl"
         />
       ) : (
-        <div className="grid place-items-center min-w-28 max-w-28 h-28 bg-gray-200 object-cover rounded-xl">
+        <div className="grid place-items-center min-w-32 max-w-32 h-32 bg-gray-200 object-cover rounded-xl">
           <Image className="text-gray-400" />
         </div>
       )}

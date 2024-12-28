@@ -43,6 +43,7 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import MobileDrawer from "@/components/MobileDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Textarea } from "@/components/ui/textarea";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
@@ -87,7 +88,7 @@ const inputSchema = [
     {
       id: "description",
       label: "Description",
-      type: "text",
+      type: "textarea",
     },
   ],
   [
@@ -437,6 +438,10 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                             let render = (
                               <Input {...field} value={field.value ?? ""} />
                             );
+
+                            if (input.type === "textarea") {
+                              render = <Textarea {...field} />;
+                            }
 
                             if (input.type === "number") {
                               render = (

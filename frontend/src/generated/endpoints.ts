@@ -13,6 +13,18 @@ export type GetPublicGetCustomerConfigParams = {
   key?: string;
 };
 
+export type PostOpeningHourParams = {
+  key?: string;
+};
+
+export type GetOpeningHourParams = {
+  key?: string;
+};
+
+export type PostMenuImportqoplamenuParams = {
+  url?: string;
+};
+
 export type PostMenuCategoryOrderParams = {
   key?: string;
 };
@@ -35,28 +47,29 @@ export type PostMenuItemsParams = {
   key?: string;
 };
 
-export type PostCustomerUploadHeroBody = {
+export type PostCustomerHeroBody = {
   Image?: Blob;
   OrderUrl?: string;
   removedAssets?: string[];
 };
 
-export type PostCustomerUploadHeroParams = {
+export type PostCustomerHeroParams = {
   key?: string;
 };
 
-export type PostCustomerUploadSiteConfigurationAssetsBody = {
+export type PostCustomerSiteConfigurationAssetsBody = {
   Font?: Blob;
   Logo?: Blob;
 };
 
-export type PostCustomerUploadSiteConfigurationAssetsParams = {
+export type PostCustomerSiteConfigurationAssetsParams = {
   key?: string;
 };
 
-export type PostCustomerUploadSiteConfigurationBody = {
+export type PostCustomerSiteConfigurationBody = {
   Adress?: string;
   Email?: string;
+  Font?: string;
   Logo?: string;
   Phone?: string;
   SiteMetaTitle?: string;
@@ -64,7 +77,11 @@ export type PostCustomerUploadSiteConfigurationBody = {
   Theme?: string;
 };
 
-export type PostCustomerUploadSiteConfigurationParams = {
+export type PostCustomerSiteConfigurationParams = {
+  key?: string;
+};
+
+export type DeleteCustomerConfigParams = {
   key?: string;
 };
 
@@ -84,6 +101,14 @@ export interface SiteSectionHeroResponse {
 
 export interface SectionsResponse {
   hero?: SiteSectionHeroResponse;
+}
+
+export interface OpeningHourResponse {
+  closeTime?: string;
+  day?: CustomDayOfWeek;
+  id?: number;
+  isClosed?: boolean;
+  openTime?: string;
 }
 
 export interface MenuItemResponse {
@@ -122,6 +147,7 @@ export interface CustomerConfigResponse {
   font?: string | null;
   heroType?: number;
   logo?: string;
+  openingHours?: OpeningHourResponse[];
   /** @nullable */
   phone?: string | null;
   sections?: SectionsResponse;
@@ -130,14 +156,43 @@ export interface CustomerConfigResponse {
   theme?: string;
 }
 
+export type CustomDayOfWeek =
+  (typeof CustomDayOfWeek)[keyof typeof CustomDayOfWeek];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CustomDayOfWeek = {
+  NUMBER_1: 1,
+  NUMBER_2: 2,
+  NUMBER_3: 3,
+  NUMBER_4: 4,
+  NUMBER_5: 5,
+  NUMBER_6: 6,
+  NUMBER_7: 7,
+} as const;
+
+export interface CreateConfigRequest {
+  domain?: string;
+}
+
+export interface CancelInfo {
+  isCanceled?: boolean;
+  isExpired?: boolean;
+  /** @nullable */
+  periodEnd?: string | null;
+}
+
 export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
   customerConfigs?: CustomerConfigResponse[];
   domain?: string;
   subscription?: SubscriptionState;
 }
 
-export interface CreateConfigRequest {
-  domain?: string;
+export interface AddOpeningHourRequest {
+  closeTime?: string;
+  id?: number;
+  isClosed?: boolean;
+  openTime?: string;
 }
 
 export interface AddCategoryRequest {
@@ -147,59 +202,65 @@ export interface AddCategoryRequest {
   order?: number | null;
 }
 
-export const getCustomerGetCustomer = () => {
+export const getCustomerCustomer = () => {
   return authorizedFetch<CustomerResponse>({
-    url: `/Customer/get-customer`,
+    url: `/Customer/customer`,
     method: "GET",
   });
 };
 
-export const putCustomerCreateConfig = (
-  createConfigRequest: CreateConfigRequest,
-) => {
+export const putCustomerConfig = (createConfigRequest: CreateConfigRequest) => {
   return authorizedFetch<void>({
-    url: `/Customer/create-config`,
+    url: `/Customer/config`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     data: createConfigRequest,
   });
 };
 
-export const postCustomerUploadSiteConfiguration = (
-  postCustomerUploadSiteConfigurationBody: PostCustomerUploadSiteConfigurationBody,
-  params?: PostCustomerUploadSiteConfigurationParams,
+export const deleteCustomerConfig = (params?: DeleteCustomerConfigParams) => {
+  return authorizedFetch<void>({
+    url: `/Customer/config`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const postCustomerSiteConfiguration = (
+  postCustomerSiteConfigurationBody: PostCustomerSiteConfigurationBody,
+  params?: PostCustomerSiteConfigurationParams,
 ) => {
   const formData = new FormData();
-  if (postCustomerUploadSiteConfigurationBody.SiteName !== undefined) {
-    formData.append(
-      "SiteName",
-      postCustomerUploadSiteConfigurationBody.SiteName,
-    );
+  if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
+    formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
   }
-  if (postCustomerUploadSiteConfigurationBody.SiteMetaTitle !== undefined) {
+  if (postCustomerSiteConfigurationBody.SiteMetaTitle !== undefined) {
     formData.append(
       "SiteMetaTitle",
-      postCustomerUploadSiteConfigurationBody.SiteMetaTitle,
+      postCustomerSiteConfigurationBody.SiteMetaTitle,
     );
   }
-  if (postCustomerUploadSiteConfigurationBody.Theme !== undefined) {
-    formData.append("Theme", postCustomerUploadSiteConfigurationBody.Theme);
+  if (postCustomerSiteConfigurationBody.Theme !== undefined) {
+    formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
-  if (postCustomerUploadSiteConfigurationBody.Logo !== undefined) {
-    formData.append("Logo", postCustomerUploadSiteConfigurationBody.Logo);
+  if (postCustomerSiteConfigurationBody.Logo !== undefined) {
+    formData.append("Logo", postCustomerSiteConfigurationBody.Logo);
   }
-  if (postCustomerUploadSiteConfigurationBody.Adress !== undefined) {
-    formData.append("Adress", postCustomerUploadSiteConfigurationBody.Adress);
+  if (postCustomerSiteConfigurationBody.Font !== undefined) {
+    formData.append("Font", postCustomerSiteConfigurationBody.Font);
   }
-  if (postCustomerUploadSiteConfigurationBody.Phone !== undefined) {
-    formData.append("Phone", postCustomerUploadSiteConfigurationBody.Phone);
+  if (postCustomerSiteConfigurationBody.Adress !== undefined) {
+    formData.append("Adress", postCustomerSiteConfigurationBody.Adress);
   }
-  if (postCustomerUploadSiteConfigurationBody.Email !== undefined) {
-    formData.append("Email", postCustomerUploadSiteConfigurationBody.Email);
+  if (postCustomerSiteConfigurationBody.Phone !== undefined) {
+    formData.append("Phone", postCustomerSiteConfigurationBody.Phone);
+  }
+  if (postCustomerSiteConfigurationBody.Email !== undefined) {
+    formData.append("Email", postCustomerSiteConfigurationBody.Email);
   }
 
   return authorizedFetch<void>({
-    url: `/Customer/upload-site-configuration`,
+    url: `/Customer/site-configuration`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -207,20 +268,20 @@ export const postCustomerUploadSiteConfiguration = (
   });
 };
 
-export const postCustomerUploadSiteConfigurationAssets = (
-  postCustomerUploadSiteConfigurationAssetsBody: PostCustomerUploadSiteConfigurationAssetsBody,
-  params?: PostCustomerUploadSiteConfigurationAssetsParams,
+export const postCustomerSiteConfigurationAssets = (
+  postCustomerSiteConfigurationAssetsBody: PostCustomerSiteConfigurationAssetsBody,
+  params?: PostCustomerSiteConfigurationAssetsParams,
 ) => {
   const formData = new FormData();
-  if (postCustomerUploadSiteConfigurationAssetsBody.Logo !== undefined) {
-    formData.append("Logo", postCustomerUploadSiteConfigurationAssetsBody.Logo);
+  if (postCustomerSiteConfigurationAssetsBody.Logo !== undefined) {
+    formData.append("Logo", postCustomerSiteConfigurationAssetsBody.Logo);
   }
-  if (postCustomerUploadSiteConfigurationAssetsBody.Font !== undefined) {
-    formData.append("Font", postCustomerUploadSiteConfigurationAssetsBody.Font);
+  if (postCustomerSiteConfigurationAssetsBody.Font !== undefined) {
+    formData.append("Font", postCustomerSiteConfigurationAssetsBody.Font);
   }
 
   return authorizedFetch<void>({
-    url: `/Customer/upload-site-configuration-assets`,
+    url: `/Customer/site-configuration-assets`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -228,25 +289,25 @@ export const postCustomerUploadSiteConfigurationAssets = (
   });
 };
 
-export const postCustomerUploadHero = (
-  postCustomerUploadHeroBody: PostCustomerUploadHeroBody,
-  params?: PostCustomerUploadHeroParams,
+export const postCustomerHero = (
+  postCustomerHeroBody: PostCustomerHeroBody,
+  params?: PostCustomerHeroParams,
 ) => {
   const formData = new FormData();
-  if (postCustomerUploadHeroBody.Image !== undefined) {
-    formData.append("Image", postCustomerUploadHeroBody.Image);
+  if (postCustomerHeroBody.Image !== undefined) {
+    formData.append("Image", postCustomerHeroBody.Image);
   }
-  if (postCustomerUploadHeroBody.removedAssets !== undefined) {
-    postCustomerUploadHeroBody.removedAssets.forEach((value) =>
+  if (postCustomerHeroBody.removedAssets !== undefined) {
+    postCustomerHeroBody.removedAssets.forEach((value) =>
       formData.append("removedAssets", value),
     );
   }
-  if (postCustomerUploadHeroBody.OrderUrl !== undefined) {
-    formData.append("OrderUrl", postCustomerUploadHeroBody.OrderUrl);
+  if (postCustomerHeroBody.OrderUrl !== undefined) {
+    formData.append("OrderUrl", postCustomerHeroBody.OrderUrl);
   }
 
   return authorizedFetch<void>({
-    url: `/Customer/upload-hero`,
+    url: `/Customer/hero`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -309,6 +370,37 @@ export const postMenuCategoryOrder = (
   });
 };
 
+export const postMenuImportqoplamenu = (
+  params?: PostMenuImportqoplamenuParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Menu/importqoplamenu`,
+    method: "POST",
+    params,
+  });
+};
+
+export const getOpeningHour = (params?: GetOpeningHourParams) => {
+  return authorizedFetch<OpeningHourResponse[]>({
+    url: `/OpeningHour`,
+    method: "GET",
+    params,
+  });
+};
+
+export const postOpeningHour = (
+  addOpeningHourRequest: AddOpeningHourRequest[],
+  params?: PostOpeningHourParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/OpeningHour`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addOpeningHourRequest,
+    params,
+  });
+};
+
 export const getPublicGetCustomerConfig = (
   params?: GetPublicGetCustomerConfigParams,
 ) => {
@@ -333,20 +425,23 @@ export const postWebhook = () => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
 };
 
-export type GetCustomerGetCustomerResult = NonNullable<
-  Awaited<ReturnType<typeof getCustomerGetCustomer>>
+export type GetCustomerCustomerResult = NonNullable<
+  Awaited<ReturnType<typeof getCustomerCustomer>>
 >;
-export type PutCustomerCreateConfigResult = NonNullable<
-  Awaited<ReturnType<typeof putCustomerCreateConfig>>
+export type PutCustomerConfigResult = NonNullable<
+  Awaited<ReturnType<typeof putCustomerConfig>>
 >;
-export type PostCustomerUploadSiteConfigurationResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfiguration>>
+export type DeleteCustomerConfigResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerConfig>>
 >;
-export type PostCustomerUploadSiteConfigurationAssetsResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerUploadSiteConfigurationAssets>>
+export type PostCustomerSiteConfigurationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerSiteConfiguration>>
 >;
-export type PostCustomerUploadHeroResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerUploadHero>>
+export type PostCustomerSiteConfigurationAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>
+>;
+export type PostCustomerHeroResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerHero>>
 >;
 export type PostMenuItemsResult = NonNullable<
   Awaited<ReturnType<typeof postMenuItems>>
@@ -359,6 +454,15 @@ export type DeleteMenuCategoryResult = NonNullable<
 >;
 export type PostMenuCategoryOrderResult = NonNullable<
   Awaited<ReturnType<typeof postMenuCategoryOrder>>
+>;
+export type PostMenuImportqoplamenuResult = NonNullable<
+  Awaited<ReturnType<typeof postMenuImportqoplamenu>>
+>;
+export type GetOpeningHourResult = NonNullable<
+  Awaited<ReturnType<typeof getOpeningHour>>
+>;
+export type PostOpeningHourResult = NonNullable<
+  Awaited<ReturnType<typeof postOpeningHour>>
 >;
 export type GetPublicGetCustomerConfigResult = NonNullable<
   Awaited<ReturnType<typeof getPublicGetCustomerConfig>>

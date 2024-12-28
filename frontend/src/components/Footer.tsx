@@ -1,12 +1,22 @@
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getCustomerConfig } from "@/mock_db";
+import { Mail, MapPin, Phone } from "lucide-react";
+
+const dayMap: { [key: number]: string } = {
+  1: "Monday",
+  2: "Tuesday",
+  3: "Wednesday",
+  4: "Thursday",
+  5: "Friday",
+  6: "Saturday",
+  7: "Sunday",
+};
 
 export default async function Footer() {
   const data = await getCustomerConfig();
 
   return (
-    <footer className="text-gray-600 py-8 px-4 sm:px-6 lg:px-8">
+    <footer id="open-hours" className="text-gray-600 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {(data?.email || data?.phone || data?.adress) && (
@@ -36,23 +46,22 @@ export default async function Footer() {
           )}
           <div className="space-y-4">
             <h3 className="font-customer text-lg font-semibold text-gray-900">
-              Opening Hours
+              Open Hours
             </h3>
             <div className="flex items-start space-x-3">
-              <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
               <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-x-4">
-                  <span>Monday - Friday:</span>
-                  <span>9:00 AM - 6:00 PM</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-4">
-                  <span>Saturday:</span>
-                  <span>10:00 AM - 4:00 PM</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-4">
-                  <span>Sunday:</span>
-                  <span>Closed</span>
-                </div>
+                {data?.openingHours?.map((o) => (
+                  <div key={o.id} className="grid grid-cols-2 gap-x-4">
+                    <span>{o.day && dayMap[o.day]}</span>
+                    {o.isClosed ? (
+                      <span>Closed</span>
+                    ) : (
+                      <span>
+                        {o.openTime} - {o.closeTime}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

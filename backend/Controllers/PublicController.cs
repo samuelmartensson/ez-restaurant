@@ -17,12 +17,23 @@ public class PublicController(RestaurantContext context) : ControllerBase
     {
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
+            .Include(cf => cf.OpeningHours)
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
 
         if (string.IsNullOrEmpty(key) || customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
+
+        var openingHours = customerConfig.OpeningHours.Select(o =>
+        new OpeningHourResponse
+        {
+            OpenTime = o.OpenTime.ToString(@"hh\:mm"),
+            CloseTime = o.CloseTime.ToString(@"hh\:mm"),
+            Day = o.Day,
+            Id = o.Id,
+            IsClosed = o.IsClosed
+        }).ToList();
 
         var response = new CustomerConfigResponse
         {
@@ -36,6 +47,7 @@ public class PublicController(RestaurantContext context) : ControllerBase
             Adress = customerConfig.Adress,
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
+            OpeningHours = openingHours,
             Sections = new SectionsResponse
             {
                 Hero = new SiteSectionHeroResponse
