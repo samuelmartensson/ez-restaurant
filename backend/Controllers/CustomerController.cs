@@ -72,8 +72,20 @@ public class CustomerController(
         var options = new CustomerListOptions { Email = clerkUser?.EmailAddresses?.First().EmailAddressProp };
         options.AddExpand("data.subscriptions");
         var service = new CustomerService();
-        Stripe.Customer stripeCustomer = (await service.ListAsync(options)).First();
-        Subscription subscription = stripeCustomer.Subscriptions.First();
+        Stripe.Customer? stripeCustomer = (await service.ListAsync(options)).FirstOrDefault();
+        Subscription? subscription = stripeCustomer?.Subscriptions.FirstOrDefault();
+        CancelInfo cancelInfo = new CancelInfo
+        {
+            IsCanceled = subscription?.CancelAt.HasValue ?? false,
+            periodEnd = subscription?.CurrentPeriodEnd,
+            IsExpired = DateTime.Now > subscription?.CurrentPeriodEnd
+        };
+        if (subscription != null)
+        {
+            cancelInfo.IsCanceled = subscription.CancelAt.HasValue;
+            cancelInfo.periodEnd = subscription.CurrentPeriodEnd;
+            cancelInfo.IsExpired = DateTime.Now > subscription.CurrentPeriodEnd;
+        }
 
 
         var customer = await context.Customers
@@ -97,12 +109,7 @@ public class CustomerController(
             {
                 Subscription = customer?.Subscription ?? SubscriptionState.Free,
                 CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>(),
-                CancelInfo = new CancelInfo
-                {
-                    IsCanceled = subscription.CancelAt.HasValue,
-                    periodEnd = subscription.CurrentPeriodEnd,
-                    IsExpired = DateTime.Now > subscription.CurrentPeriodEnd
-                }
+                CancelInfo = cancelInfo
             }
             );
     }
