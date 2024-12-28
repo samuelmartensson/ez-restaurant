@@ -6,6 +6,7 @@ import {
 } from "@/generated/endpoints";
 import { useUser } from "@clerk/nextjs";
 import { createContext, useContext, useEffect, useState } from "react";
+import AppLoader from "./AppLoader";
 
 const DataContext = createContext<{
   configs: CustomerConfigResponse[];
@@ -43,7 +44,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [data, selectedDomain]);
 
-  if (isLoading) return null;
+  if (isLoading) return <AppLoader />;
 
   return (
     <DataContext.Provider

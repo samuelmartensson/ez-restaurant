@@ -110,9 +110,12 @@ const DataLayer = () => {
   const { selectedDomain } = useDataContext();
 
   const { data = { categories: [], menuItems: [] }, isLoading } =
-    useGetPublicGetCustomerMenu({
-      key: selectedDomain,
-    });
+    useGetPublicGetCustomerMenu(
+      {
+        key: selectedDomain,
+      },
+      { query: { enabled: !!selectedDomain } },
+    );
 
   if (isLoading) return <></>;
 
@@ -130,9 +133,12 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
   const [selectedCategory, setSelectedCategory] = useState<number>(-1);
   const [addCategory, setAddCategory] = useState("");
-  const { refetch } = useGetPublicGetCustomerMenu({
-    key: selectedDomain,
-  });
+  const { refetch } = useGetPublicGetCustomerMenu(
+    {
+      key: selectedDomain,
+    },
+    { query: { enabled: false } },
+  );
 
   const [categoryList, setCategoryList] = useState(data.categories);
   const categories = Object.fromEntries(

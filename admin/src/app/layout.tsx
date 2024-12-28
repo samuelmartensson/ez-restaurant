@@ -5,17 +5,17 @@ import DataContextProvider from "@/components/DataContextProvider";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import {
+  ClerkLoading,
   ClerkProvider,
   RedirectToSignUp,
   SignedIn,
   SignedOut,
-  ClerkLoading,
 } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { toast } from "sonner";
 import "./globals.css";
-import { LoaderPinwheel } from "lucide-react";
+import AppLoader from "@/components/AppLoader";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,7 +34,7 @@ export default function AdminLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased relative">
+      <body className="relative antialiased">
         <ClerkProvider>
           <Toaster position="bottom-center" />
           <QueryClientProvider client={queryClient}>
@@ -50,12 +50,7 @@ export default function AdminLayout({
               </DataContextProvider>
             </SignedIn>
             <ClerkLoading>
-              <div className="grid place-items-center h-svh w-svw">
-                <div className="grid place-items-center">
-                  <LoaderPinwheel size={48} className="animate-spin" />
-                  <h1 className="text-3xl">EZ Rest</h1>
-                </div>
-              </div>
+              <AppLoader />
             </ClerkLoading>
             <SignedOut>
               <RedirectToSignUp />

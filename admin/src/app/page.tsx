@@ -106,9 +106,12 @@ const Site = () => {
     },
   });
 
-  const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
-    key: selectedDomain,
-  });
+  const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig(
+    {
+      key: selectedDomain,
+    },
+    { query: { enabled: !!selectedDomain } },
+  );
 
   const { mutateAsync: uploadSiteConfiguration, isPending: isPendingData } =
     usePostCustomerSiteConfiguration();
