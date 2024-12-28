@@ -1,25 +1,20 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Models.Responses;
 using Models.Requests;
-using Stripe;
-using Clerk.Net.Client;
 
 namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 public class OpeningHourController(
-    RestaurantContext context,
     OpeningHourService openingHourService
 ) : ControllerBase
 {
-    private RestaurantContext context = context;
     private readonly OpeningHourService openingHourService = openingHourService;
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(typeof(List<OpeningHourResponse>), StatusCodes.Status200OK)]
@@ -36,6 +31,7 @@ public class OpeningHourController(
             });
         return Ok(openingHours);
     }
+
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost]
