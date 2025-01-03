@@ -18,7 +18,7 @@ public class PublicController(RestaurantContext context) : ControllerBase
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
             .Include(cf => cf.OpeningHours)
-            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
+            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
 
         if (string.IsNullOrEmpty(key) || customerConfig == null)
         {
@@ -68,9 +68,16 @@ public class PublicController(RestaurantContext context) : ControllerBase
     [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
     {
+        var customerConfig = await context.CustomerConfigs
+            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
+        if (customerConfig == null)
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        }
+
         var menuCategories = await context.MenuCategorys
             .Include(mc => mc.MenuItems)
-            .Where(mc => mc.CustomerConfigDomain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower())
+            .Where(mc => mc.CustomerConfigDomain == customerConfig.Domain)
             .ToListAsync();
 
 

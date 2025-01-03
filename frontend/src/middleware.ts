@@ -17,6 +17,12 @@ export function middleware(request: NextRequest) {
 
     return NextResponse.next({ headers });
   }
+  const domain = parts.length > 2 ? parts[1] : null;
+
+  if (domain !== "ezrest") {
+    headers.set(CUSTOMER_ID_HEADER, hostname);
+    return NextResponse.next({ headers });
+  }
 
   let customerId = "";
 

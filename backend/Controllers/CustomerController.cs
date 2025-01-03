@@ -248,8 +248,6 @@ public class CustomerController(
             }
             else
             {
-                var errorResponseStr = await response.Content.ReadAsStringAsync();
-
                 var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
                 return BadRequest(new { message = errorResponse?.error?.message ?? "Error registering domain", error = errorResponse?.error?.code ?? "unknown" });
             }
