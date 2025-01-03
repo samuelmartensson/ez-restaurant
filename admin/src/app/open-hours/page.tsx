@@ -91,7 +91,7 @@ const OpenHours = () => {
               <div className="flex justify-between gap-2">
                 <span>{value.day && dayMap[value.day]}</span>
                 <div className="flex items-center space-x-2 rounded-full border p-2">
-                  <Label htmlFor="airplane-mode">Open</Label>
+                  <Label>Open</Label>
                   <Switch
                     checked={isClosed}
                     name={`${index}.isClosed`}
@@ -99,7 +99,7 @@ const OpenHours = () => {
                       form.setValue(`${index}.isClosed`, checked)
                     }
                   />
-                  <Label htmlFor="airplane-mode">Closed</Label>
+                  <Label>Closed</Label>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">

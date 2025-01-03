@@ -38,10 +38,6 @@ export const authorizedFetch = async <T>({
     ...(data ? { body: JSON.stringify(data) } : {}),
   });
 
-  if (response.status >= 400) {
-    throw await response.json();
-  }
-
   return response.json();
 };
 

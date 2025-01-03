@@ -57,10 +57,10 @@ const Domain = () => {
           Create domain
         </Button>
       </div>
-      <div className="mt-16 grid gap-2">
-        <h2 className="mb-2">Danger zone</h2>
-        <Separator />
-        {selectedDomain && (
+      {selectedDomain && (
+        <div className="mt-16 grid gap-2">
+          <h2 className="mb-2">Danger zone</h2>
+          <Separator />
           <Dialog>
             <DialogTrigger asChild>
               <Button
@@ -92,8 +92,8 @@ const Domain = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -10,10 +10,10 @@ const Wrapper = (Component: () => JSX.Element) => {
 
     if (configs.length === 0) {
       return (
-        <div className="grid place-items-center h-full w-full">
+        <div className="grid h-full w-full place-items-center">
           <div className="grid place-items-center gap-2">
             <div>Create a domain to get started.</div>
-            <Link href="/domain">
+            <Link href="/domains">
               <Button>Go to Domains</Button>
             </Link>
           </div>
