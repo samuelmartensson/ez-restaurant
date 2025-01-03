@@ -61,6 +61,15 @@ export type PostMenuItemsParams = {
   key?: string;
 };
 
+export type DeleteCustomerDomainParams = {
+  key?: string;
+};
+
+export type PostCustomerDomainParams = {
+  key?: string;
+  domainName?: string;
+};
+
 export type PostCustomerHeroBody = {
   Image?: Blob;
   OrderUrl?: string;
@@ -154,6 +163,8 @@ export interface MenuResponse {
 export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
+  /** @nullable */
+  customDomain?: string | null;
   domain?: string;
   /** @nullable */
   email?: string | null;
@@ -765,6 +776,140 @@ export const usePostCustomerHero = <
   TContext
 > => {
   const mutationOptions = getPostCustomerHeroMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postCustomerDomain = (
+  params?: PostCustomerDomainParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/Customer/domain`,
+    method: "POST",
+    params,
+    signal,
+  });
+};
+
+export const getPostCustomerDomainMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerDomain>>,
+    TError,
+    { params?: PostCustomerDomainParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postCustomerDomain>>,
+  TError,
+  { params?: PostCustomerDomainParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postCustomerDomain>>,
+    { params?: PostCustomerDomainParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return postCustomerDomain(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostCustomerDomainMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerDomain>>
+>;
+
+export type PostCustomerDomainMutationError = unknown;
+
+export const usePostCustomerDomain = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerDomain>>,
+    TError,
+    { params?: PostCustomerDomainParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postCustomerDomain>>,
+  TError,
+  { params?: PostCustomerDomainParams },
+  TContext
+> => {
+  const mutationOptions = getPostCustomerDomainMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const deleteCustomerDomain = (params?: DeleteCustomerDomainParams) => {
+  return authorizedFetch<void>({
+    url: `/Customer/domain`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteCustomerDomainMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerDomain>>,
+    TError,
+    { params?: DeleteCustomerDomainParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCustomerDomain>>,
+  TError,
+  { params?: DeleteCustomerDomainParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCustomerDomain>>,
+    { params?: DeleteCustomerDomainParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return deleteCustomerDomain(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCustomerDomainMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerDomain>>
+>;
+
+export type DeleteCustomerDomainMutationError = unknown;
+
+export const useDeleteCustomerDomain = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerDomain>>,
+    TError,
+    { params?: DeleteCustomerDomainParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCustomerDomain>>,
+  TError,
+  { params?: DeleteCustomerDomainParams },
+  TContext
+> => {
+  const mutationOptions = getDeleteCustomerDomainMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

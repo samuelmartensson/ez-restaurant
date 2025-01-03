@@ -12,11 +12,13 @@ const DataContext = createContext<{
   configs: CustomerConfigResponse[];
   selectedDomain: string;
   setSelectedDomain: (domain: string) => void;
+  customDomain: string;
   refetch: () => Promise<void>;
 }>({
   configs: [],
   selectedDomain: "",
   setSelectedDomain: () => null,
+  customDomain: "",
   refetch: () => Promise.resolve(),
 });
 
@@ -32,6 +34,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const { data, isLoading, refetch } = useGetCustomerCustomer();
+  const configs = data?.customerConfigs ?? [];
 
   const setSelectedDomainInternal = (domain: string) => {
     setSelectedDomain(domain);
@@ -49,9 +52,11 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataContext.Provider
       value={{
-        configs: data?.customerConfigs ?? [],
+        configs,
         setSelectedDomain: setSelectedDomainInternal,
         selectedDomain,
+        customDomain:
+          configs.find((c) => c.domain === selectedDomain)?.customDomain ?? "",
         refetch: async () => {
           await refetch();
         },

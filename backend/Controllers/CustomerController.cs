@@ -5,6 +5,9 @@ using Models.Responses;
 using Models.Requests;
 using Stripe;
 using Clerk.Net.Client;
+using System.Text;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace webapi.Controllers;
 
@@ -102,6 +105,7 @@ public class CustomerController(
             Adress = c.Adress,
             Phone = c.Phone,
             Email = c.Email,
+            CustomDomain = c.CustomDomain
         }).ToList();
 
         return Ok(
@@ -199,6 +203,95 @@ public class CustomerController(
     {
         await sectionConfigurationService.UpdateHero(assets, removedAssets, fields, key);
         return Ok(new { message = "Success" });
+    }
+
+    public record VercelErrorInner(string code, string message);
+    public record VercelError(VercelErrorInner error);
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPost("domain")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> RegisterDomain([FromQuery] string key, [FromQuery] string domainName)
+    {
+        var vercelToken = Environment.GetEnvironmentVariable("VERCEL_TOKEN");
+        var projectId = "prj_6kb7M2XxJs42SjJ8pVpgCIcmlIgi";
+        var teamId = "team_ejexGzALAEl9jCP3BWkU0m6X";
+        var requestBody = new
+        {
+            name = domainName,
+        };
+        var jsonRequestBody = JsonConvert.SerializeObject(requestBody);
+        var customerConfig = await context.CustomerConfigs
+            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
+
+        if (customerConfig == null)
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        };
+
+        using (var client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {vercelToken}");
+            var response = await client.PostAsync(
+                $"https://api.vercel.com/v10/projects/{projectId}/domains?teamId={teamId}",
+                new StringContent(jsonRequestBody, Encoding.UTF8, new MediaTypeHeaderValue("application/json"))
+            );
+
+            if (response.IsSuccessStatusCode)
+            {
+
+
+                customerConfig.CustomDomain = domainName;
+                await context.SaveChangesAsync();
+                return Ok(new { message = "Domain successfully registered" });
+            }
+            else
+            {
+                var errorResponseStr = await response.Content.ReadAsStringAsync();
+
+                var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
+                return BadRequest(new { message = errorResponse?.error?.message ?? "Error registering domain", error = errorResponse?.error?.code ?? "unknown" });
+            }
+        }
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpDelete("domain")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteDomain([FromQuery] string key)
+    {
+        var vercelToken = Environment.GetEnvironmentVariable("VERCEL_TOKEN");
+        var projectId = "prj_6kb7M2XxJs42SjJ8pVpgCIcmlIgi";
+        var teamId = "team_ejexGzALAEl9jCP3BWkU0m6X";
+        var customerConfig = await context.CustomerConfigs
+            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
+
+        if (customerConfig == null)
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        };
+
+        using (var client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {vercelToken}");
+            var response = await client.DeleteAsync(
+                $"https://api.vercel.com/v9/projects/{projectId}/domains/{customerConfig.CustomDomain}?teamId={teamId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                customerConfig.CustomDomain = "";
+                await context.SaveChangesAsync();
+                return Ok(new { message = "Domain successfully removed." });
+            }
+            else
+            {
+                var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
+                return BadRequest(new { message = errorResponse?.error?.message ?? "Error removing domain", error = errorResponse?.error?.code ?? "unknown" });
+            }
+        }
     }
 }
 

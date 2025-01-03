@@ -43,6 +43,7 @@ jobs:
             Environment=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             Environment=CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
             Environment=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            Environment=VERCEL_TOKEN=${{ secrets.VERCEL_TOKEN }}
             \" > /etc/systemd/system/restaurantbackend.service.d/aws-env.conf
             systemctl daemon-reload
             '

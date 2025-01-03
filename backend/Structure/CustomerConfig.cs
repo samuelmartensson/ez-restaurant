@@ -11,6 +11,7 @@ public class CustomerConfig
     public string? Adress { get; set; } = "";
     public string? Phone { get; set; } = "";
     public string? Email { get; set; } = "";
+    public string? CustomDomain { get; set; } = "";
 
     public Customer? Customer { get; set; }
     public SiteSectionHero? SiteSectionHero { get; set; }

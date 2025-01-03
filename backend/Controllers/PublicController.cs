@@ -47,6 +47,7 @@ public class PublicController(RestaurantContext context) : ControllerBase
             Adress = customerConfig.Adress,
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
+            CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
             Sections = new SectionsResponse
             {
