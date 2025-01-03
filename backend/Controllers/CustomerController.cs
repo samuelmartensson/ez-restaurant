@@ -5,9 +5,6 @@ using Models.Responses;
 using Models.Requests;
 using Stripe;
 using Clerk.Net.Client;
-using System.Text;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
 
 namespace webapi.Controllers;
 
@@ -18,11 +15,13 @@ public class CustomerController(
     SiteConfigurationService siteConfigurationService,
     SectionConfigurationService sectionConfigurationService,
     UserService userService,
+    VercelService vercelService,
     ClerkApiClient clerkApiClient
 ) : ControllerBase
 {
     private RestaurantContext context = context;
     private UserService userService = userService;
+    private VercelService vercelService = vercelService;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
     private SectionConfigurationService sectionConfigurationService = sectionConfigurationService;
     private ClerkApiClient clerkApiClient = clerkApiClient;
@@ -207,6 +206,7 @@ public class CustomerController(
 
     public record VercelErrorInner(string code, string message);
     public record VercelError(VercelErrorInner error);
+
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("domain")]
@@ -214,14 +214,6 @@ public class CustomerController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> RegisterDomain([FromQuery] string key, [FromQuery] string domainName)
     {
-        var vercelToken = Environment.GetEnvironmentVariable("VERCEL_TOKEN");
-        var projectId = "prj_6kb7M2XxJs42SjJ8pVpgCIcmlIgi";
-        var teamId = "team_ejexGzALAEl9jCP3BWkU0m6X";
-        var requestBody = new
-        {
-            name = domainName,
-        };
-        var jsonRequestBody = JsonConvert.SerializeObject(requestBody);
         var customerConfig = await context.CustomerConfigs
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
 
@@ -230,27 +222,17 @@ public class CustomerController(
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         };
 
-        using (var client = new HttpClient())
+        var response = await vercelService.CreateDomain(domainName);
+        if (response.IsSuccessStatusCode)
         {
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {vercelToken}");
-            var response = await client.PostAsync(
-                $"https://api.vercel.com/v10/projects/{projectId}/domains?teamId={teamId}",
-                new StringContent(jsonRequestBody, Encoding.UTF8, new MediaTypeHeaderValue("application/json"))
-            );
-
-            if (response.IsSuccessStatusCode)
-            {
-
-
-                customerConfig.CustomDomain = domainName;
-                await context.SaveChangesAsync();
-                return Ok(new { message = "Domain successfully registered" });
-            }
-            else
-            {
-                var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
-                return BadRequest(new { message = errorResponse?.error?.message ?? "Error registering domain", error = errorResponse?.error?.code ?? "unknown" });
-            }
+            customerConfig.CustomDomain = domainName;
+            await context.SaveChangesAsync();
+            return Ok(new { message = "Domain successfully registered" });
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
+            return BadRequest(new { message = errorResponse?.error?.message ?? "Error registering domain", error = errorResponse?.error?.code ?? "unknown" });
         }
     }
 
@@ -261,9 +243,6 @@ public class CustomerController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteDomain([FromQuery] string key)
     {
-        var vercelToken = Environment.GetEnvironmentVariable("VERCEL_TOKEN");
-        var projectId = "prj_6kb7M2XxJs42SjJ8pVpgCIcmlIgi";
-        var teamId = "team_ejexGzALAEl9jCP3BWkU0m6X";
         var customerConfig = await context.CustomerConfigs
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
 
@@ -272,23 +251,22 @@ public class CustomerController(
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         };
 
-        using (var client = new HttpClient())
+        if (string.IsNullOrEmpty(customerConfig.CustomDomain) || customerConfig.CustomDomain == null)
         {
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {vercelToken}");
-            var response = await client.DeleteAsync(
-                $"https://api.vercel.com/v9/projects/{projectId}/domains/{customerConfig.CustomDomain}?teamId={teamId}");
+            return NotFound(new { message = "Custom domain not found." });
+        };
 
-            if (response.IsSuccessStatusCode)
-            {
-                customerConfig.CustomDomain = "";
-                await context.SaveChangesAsync();
-                return Ok(new { message = "Domain successfully removed." });
-            }
-            else
-            {
-                var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
-                return BadRequest(new { message = errorResponse?.error?.message ?? "Error removing domain", error = errorResponse?.error?.code ?? "unknown" });
-            }
+        var response = await vercelService.DeleteDomain(customerConfig.CustomDomain);
+        if (response.IsSuccessStatusCode)
+        {
+            customerConfig.CustomDomain = "";
+            await context.SaveChangesAsync();
+            return Ok(new { message = "Domain successfully removed." });
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
+            return BadRequest(new { message = errorResponse?.error?.message ?? "Error removing domain", error = errorResponse?.error?.code ?? "unknown" });
         }
     }
 }

@@ -56,7 +56,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { configs, selectedDomain } = useDataContext();
+  const { configs, selectedDomain, customDomain } = useDataContext();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   const { user } = useUser();
@@ -76,9 +76,13 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => {
+                      const prodUrl =
+                        customDomain ||
+                        `https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`;
+
                       window.open(
                         process.env.NODE_ENV === "production"
-                          ? `https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`
+                          ? prodUrl
                           : `http://localhost:3001?key=${selectedDomain}`,
                         "_blank",
                       );
