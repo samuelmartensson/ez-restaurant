@@ -6,5 +6,6 @@ namespace Models.Requests
         public required string OpenTime { get; set; }
         public required string CloseTime { get; set; }
         public required bool IsClosed { get; set; }
+        public string? Label { get; set; }
     };
 }

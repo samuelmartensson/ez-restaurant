@@ -62,6 +62,11 @@ const inputSchema = [
     type: "text",
   },
   {
+    id: "InstagramUrl",
+    label: "Instagram URL",
+    type: "text",
+  },
+  {
     id: "Theme",
     label: "Theme",
     type: "select",
@@ -103,6 +108,7 @@ const Site = () => {
       Adress: "",
       Phone: "",
       Email: "",
+      InstagramUrl: "",
     },
   });
 
@@ -135,6 +141,7 @@ const Site = () => {
       Adress: customerConfig.adress ?? "",
       Phone: customerConfig.phone ?? "",
       Email: customerConfig.email ?? "",
+      InstagramUrl: customerConfig.instagramUrl ?? "",
     });
   }, [customerConfig, form]);
 

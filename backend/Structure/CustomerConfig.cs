@@ -12,7 +12,7 @@ public class CustomerConfig
     public string? Phone { get; set; } = "";
     public string? Email { get; set; } = "";
     public string? CustomDomain { get; set; } = "";
-
+    public string? InstagramUrl { get; set; } = "";
     public Customer? Customer { get; set; }
     public SiteSectionHero? SiteSectionHero { get; set; }
     public ICollection<MenuCategory> MenuCategorys { get; set; } = new List<MenuCategory>();

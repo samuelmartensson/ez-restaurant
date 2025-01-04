@@ -1,5 +1,6 @@
 public enum CustomDayOfWeek
 {
+    Special = 0,
     Monday = 1,
     Tuesday = 2,
     Wednesday = 3,
@@ -17,5 +18,6 @@ public class OpeningHour
     public TimeSpan OpenTime { get; set; }
     public TimeSpan CloseTime { get; set; }
     public bool IsClosed { get; set; }
+    public string? Label { get; set; }
     public CustomerConfig? CustomerConfig { get; set; }
 }

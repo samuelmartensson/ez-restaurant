@@ -18,9 +18,9 @@ import {
   useGetOpeningHour,
   usePostOpeningHour,
 } from "@/generated/endpoints";
-import { Save } from "lucide-react";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Plus, Save, Trash } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 const dayMap: { [key: number]: string } = {
@@ -48,8 +48,17 @@ const inputSchema = [
 
 const OpenHours = () => {
   const { selectedDomain } = useDataContext();
-  const form = useForm<PostOpeningHourMutationBody>({
+  const formNormal = useForm<PostOpeningHourMutationBody>({
     defaultValues: [],
+  });
+  const formSpecial = useForm<{ special: PostOpeningHourMutationBody }>({
+    defaultValues: {
+      special: [],
+    },
+  });
+  const { append, remove, fields } = useFieldArray({
+    name: "special",
+    control: formSpecial.control,
   });
 
   const { data: openingHours, refetch } = useGetOpeningHour(
@@ -62,15 +71,28 @@ const OpenHours = () => {
       },
     },
   );
+  const normalOpeningHours = useMemo(
+    () => openingHours?.filter((o) => o?.day !== 0),
+    [openingHours],
+  );
+  const specialOpeningHours = useMemo(
+    () => openingHours?.filter((o) => o?.day === 0),
+    [openingHours],
+  );
 
   useEffect(() => {
-    if (!openingHours) return;
-    form.reset(openingHours);
-  }, [openingHours, form]);
+    if (!normalOpeningHours) return;
+    formNormal.reset(normalOpeningHours);
+  }, [normalOpeningHours, formNormal]);
+
+  useEffect(() => {
+    if (!specialOpeningHours) return;
+    formSpecial.reset({ special: specialOpeningHours });
+  }, [specialOpeningHours, formSpecial]);
 
   async function onSubmit(data: PostOpeningHourMutationBody) {
     updateOpeningHour({
-      data: data,
+      data: [...data, ...formSpecial.getValues("special")],
       params: { key: selectedDomain },
     });
     toast.success("Opening hours saved.");
@@ -79,13 +101,13 @@ const OpenHours = () => {
   const { mutateAsync: updateOpeningHour } = usePostOpeningHour();
 
   return (
-    <Form {...form}>
+    <Form {...formNormal}>
       <form
         className="grid max-w-lg gap-4 overflow-auto p-4"
-        onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
+        onSubmit={formNormal.handleSubmit(onSubmit)}
       >
-        {openingHours?.map((value, index) => {
-          const isClosed = form.watch(`${index}.isClosed`);
+        {normalOpeningHours?.map((value, index) => {
+          const isClosed = formNormal.watch(`${index}.isClosed`);
           return (
             <div key={value.id}>
               <div className="flex justify-between gap-2">
@@ -96,7 +118,7 @@ const OpenHours = () => {
                     checked={isClosed}
                     name={`${index}.isClosed`}
                     onCheckedChange={(checked) =>
-                      form.setValue(`${index}.isClosed`, checked)
+                      formNormal.setValue(`${index}.isClosed`, checked)
                     }
                   />
                   <Label>Closed</Label>
@@ -111,7 +133,67 @@ const OpenHours = () => {
                     <FormLabel>{input.label}</FormLabel>
                     <FormControl>
                       <Input
-                        {...form.register(`${index}.${input.id}`)}
+                        {...formNormal.register(`${index}.${input.id}`)}
+                        defaultValue={value[input.id]}
+                        type="time"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <h2 className="text-2xl">Special opening hours</h2>
+        {fields?.map((value, index) => {
+          const isClosed = formSpecial.watch(`special.${index}.isClosed`);
+          return (
+            <div key={value.id}>
+              <div className="flex justify-between gap-2">
+                <Button
+                  onClick={() => remove(index)}
+                  className="ml-auto"
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                >
+                  <Trash />
+                </Button>
+                <div className="flex items-center space-x-2 rounded-full border p-2">
+                  <Label>Open</Label>
+                  <Switch
+                    checked={isClosed}
+                    name={`${index}.isClosed`}
+                    onCheckedChange={(checked) =>
+                      formSpecial.setValue(`special.${index}.isClosed`, checked)
+                    }
+                  />
+                  <Label>Closed</Label>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <FormItem className="col-span-2">
+                  <FormLabel>Label</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...formSpecial.register(`special.${index}.label`)}
+                      defaultValue={value?.label ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                {inputSchema.map((input) => (
+                  <FormItem
+                    style={{ display: isClosed ? "none" : "block" }}
+                    key={`${index}.${input.id}`}
+                  >
+                    <FormLabel>{input.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...formSpecial.register(
+                          `special.${index}.${input.id}`,
+                        )}
                         defaultValue={value[input.id]}
                         type="time"
                       />
@@ -124,6 +206,21 @@ const OpenHours = () => {
           );
         })}
 
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            append({
+              closeTime: "20:00",
+              id: -1,
+              isClosed: false,
+              openTime: "08:00",
+            });
+          }}
+        >
+          <Plus /> Add special opening hour
+        </Button>
         <Button type="submit">
           <Save /> Save
         </Button>

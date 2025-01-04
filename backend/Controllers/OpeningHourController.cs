@@ -27,7 +27,8 @@ public class OpeningHourController(
                 CloseTime = o.CloseTime.ToString(@"hh\:mm"),
                 Day = o.Day,
                 Id = o.Id,
-                IsClosed = o.IsClosed
+                IsClosed = o.IsClosed,
+                Label = o.Label
             });
         return Ok(openingHours);
     }

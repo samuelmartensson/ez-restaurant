@@ -14,6 +14,7 @@ const dayMap: { [key: number]: string } = {
 
 export default async function Footer() {
   const data = await getCustomerConfig();
+  console.log(data);
 
   return (
     <footer id="open-hours" className="text-gray-600 py-8 px-4 sm:px-6 lg:px-8">
@@ -52,7 +53,7 @@ export default async function Footer() {
               <div className="space-y-2">
                 {data?.openingHours?.map((o) => (
                   <div key={o.id} className="grid grid-cols-2 gap-x-4">
-                    <span>{o.day && dayMap[o.day]}</span>
+                    <span>{(o.day && dayMap[o.day]) || o.label}</span>
                     {o.isClosed ? (
                       <span>Closed</span>
                     ) : (

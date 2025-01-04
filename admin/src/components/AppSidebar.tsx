@@ -76,9 +76,9 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => {
-                      const prodUrl =
-                        customDomain ||
-                        `https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`;
+                      const prodUrl = customDomain
+                        ? `https://${customDomain}`
+                        : `https://${selectedDomain.replaceAll(" ", "")}.ezrest.se`;
 
                       window.open(
                         process.env.NODE_ENV === "production"

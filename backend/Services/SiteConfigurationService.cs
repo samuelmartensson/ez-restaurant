@@ -21,6 +21,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Theme = siteConfiguration.Theme;
         customerConfig.Adress = siteConfiguration.Adress;
         customerConfig.Email = siteConfiguration.Email;
+        customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
         customerConfig.Phone = siteConfiguration.Phone;
 
         if (siteConfiguration.Logo == "REMOVE")

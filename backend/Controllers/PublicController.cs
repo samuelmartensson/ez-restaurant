@@ -32,7 +32,8 @@ public class PublicController(RestaurantContext context) : ControllerBase
             CloseTime = o.CloseTime.ToString(@"hh\:mm"),
             Day = o.Day,
             Id = o.Id,
-            IsClosed = o.IsClosed
+            IsClosed = o.IsClosed,
+            Label = o.Label
         }).ToList();
 
         var response = new CustomerConfigResponse
@@ -47,6 +48,7 @@ public class PublicController(RestaurantContext context) : ControllerBase
             Adress = customerConfig.Adress,
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
+            InstagramUrl = customerConfig.InstagramUrl,
             CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
             Sections = new SectionsResponse

@@ -47,6 +47,10 @@ public class OpeningHourService(RestaurantContext context)
     public async Task UpdateOpeningHours(string domain, List<AddOpeningHourRequest> newOpeningHours)
     {
         var existingOpeningHours = await context.OpeningHours.Where(o => o.CustomerConfigDomain == domain).ToListAsync();
+        var itemsToDelete = existingOpeningHours
+            .Where(m => !newOpeningHours.Select(o => o.Id).Contains(m.Id)).ToList();
+        context.OpeningHours.RemoveRange(itemsToDelete);
+
         foreach (var newHour in newOpeningHours)
         {
             var existingHour = existingOpeningHours.FirstOrDefault(o => o.Id == newHour.Id);
@@ -58,7 +62,20 @@ public class OpeningHourService(RestaurantContext context)
                 existingHour.OpenTime = openTime;
                 existingHour.CloseTime = closeTime;
                 existingHour.IsClosed = newHour.IsClosed;
+                existingHour.Label = newHour.Label;
             }
+            else
+            {
+                // Special hours
+                await context.AddAsync(new OpeningHour
+                {
+                    CustomerConfigDomain = domain,
+                    CloseTime = closeTime,
+                    OpenTime = openTime,
+                    IsClosed = newHour.IsClosed,
+                    Day = 0,
+                });
+            };
         }
         await context.SaveChangesAsync();
     }

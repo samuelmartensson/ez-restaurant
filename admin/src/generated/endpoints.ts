@@ -93,6 +93,7 @@ export type PostCustomerSiteConfigurationBody = {
   Adress?: string;
   Email?: string;
   Font?: string;
+  InstagramUrl?: string;
   Logo?: string;
   Phone?: string;
   SiteMetaTitle?: string;
@@ -171,6 +172,8 @@ export interface CustomerConfigResponse {
   /** @nullable */
   font?: string | null;
   heroType?: number;
+  /** @nullable */
+  instagramUrl?: string | null;
   logo?: string;
   openingHours?: OpeningHourResponse[];
   /** @nullable */
@@ -186,6 +189,7 @@ export type CustomDayOfWeek =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CustomDayOfWeek = {
+  NUMBER_0: 0,
   NUMBER_1: 1,
   NUMBER_2: 2,
   NUMBER_3: 3,
@@ -217,6 +221,8 @@ export interface AddOpeningHourRequest {
   closeTime?: string;
   id?: number;
   isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
   openTime?: string;
 }
 
@@ -512,6 +518,12 @@ export const postCustomerSiteConfiguration = (
   }
   if (postCustomerSiteConfigurationBody.Email !== undefined) {
     formData.append("Email", postCustomerSiteConfigurationBody.Email);
+  }
+  if (postCustomerSiteConfigurationBody.InstagramUrl !== undefined) {
+    formData.append(
+      "InstagramUrl",
+      postCustomerSiteConfigurationBody.InstagramUrl,
+    );
   }
 
   return authorizedFetch<void>({
