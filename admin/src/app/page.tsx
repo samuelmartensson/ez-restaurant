@@ -178,7 +178,7 @@ const Site = () => {
   return (
     <Form {...form}>
       <form
-        className="grid max-w-lg gap-4 overflow-auto p-4"
+        className="grid max-w-lg gap-4 overflow-auto"
         onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
       >
         {inputSchema.map((input) => (

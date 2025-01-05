@@ -73,6 +73,7 @@ public class OpeningHourService(RestaurantContext context)
                     CloseTime = closeTime,
                     OpenTime = openTime,
                     IsClosed = newHour.IsClosed,
+                    Label = newHour.Label,
                     Day = 0,
                 });
             };

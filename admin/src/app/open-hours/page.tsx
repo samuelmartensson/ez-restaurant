@@ -103,7 +103,7 @@ const OpenHours = () => {
   return (
     <Form {...formNormal}>
       <form
-        className="grid max-w-lg gap-4 overflow-auto p-4"
+        className="grid max-w-lg gap-4 overflow-auto"
         onSubmit={formNormal.handleSubmit(onSubmit)}
       >
         {normalOpeningHours?.map((value, index) => {
