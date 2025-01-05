@@ -154,6 +154,7 @@ public class CustomerController(
     }
 
     [HttpDelete("config")]
+    [RequireSubscription(SubscriptionState.Free)]
     [Authorize(Policy = "KeyPolicy")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

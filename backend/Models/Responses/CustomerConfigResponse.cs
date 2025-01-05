@@ -18,6 +18,11 @@ namespace Models.Responses
         public required SiteSectionAboutResponse About { get; set; }
     }
 
+    public class SectionVisibilityResponse
+    {
+        public bool ContactFormVisible { get; set; } = false;
+    }
+
     public class CustomerConfigResponse
     {
         public int HeroType { get; set; }
@@ -32,7 +37,9 @@ namespace Models.Responses
         public string? Phone { get; set; } = "";
         public string? Email { get; set; } = "";
         public string? InstagramUrl { get; set; } = "";
+        public string? MapUrl { get; set; } = "";
         public string? CustomDomain { get; set; } = "";
+        public SectionVisibilityResponse? SectionVisibility { get; set; }
         public SectionsResponse? Sections { get; set; }
         public List<OpeningHourResponse> OpeningHours { get; set; } = new List<OpeningHourResponse>();
     }

@@ -24,6 +24,7 @@ public class RestaurantContext : DbContext
         modelBuilder.Entity<User>().HasKey(c => c.Id);
         modelBuilder.Entity<OpeningHour>().HasKey(c => c.Id);
 
+        modelBuilder.Entity<SectionVisibility>().HasKey(c => c.Id);
         modelBuilder.Entity<SiteSectionHero>().HasKey(c => c.Id);
         modelBuilder.Entity<SiteSectionAbout>().HasKey(c => c.Id);
 
@@ -46,6 +47,11 @@ public class RestaurantContext : DbContext
             .HasMany(cf => cf.OpeningHours)
             .WithOne(c => c.CustomerConfig)
             .HasForeignKey(c => c.CustomerConfigDomain);
+
+        modelBuilder.Entity<CustomerConfig>()
+            .HasOne(c => c.SectionVisibility)
+            .WithOne(c => c.CustomerConfig)
+            .HasForeignKey<SectionVisibility>(c => c.CustomerConfigDomain);
 
         modelBuilder.Entity<CustomerConfig>()
             .HasOne(c => c.SiteSectionHero)

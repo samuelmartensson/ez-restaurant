@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   PostCustomerSiteConfigurationBody,
   useGetPublicGetCustomerConfig,
@@ -39,42 +39,37 @@ const inputSchema = [
   {
     id: "SiteName",
     label: "Name",
-    type: "text",
   },
   {
     id: "SiteMetaTitle",
     label: "Site meta title",
-    type: "text",
   },
   {
     id: "Adress",
     label: "Adress",
-    type: "text",
   },
   {
     id: "Phone",
     label: "Phone",
-    type: "text",
   },
   {
     id: "Email",
     label: "Email",
-    type: "text",
   },
   {
     id: "InstagramUrl",
     label: "Instagram URL",
-    type: "text",
   },
   {
-    id: "AboutUsDescription",
-    label: "About description",
-    type: "textarea",
+    id: "MapUrl",
+    label: "Map URL",
   },
+] as const;
+
+const toggleInputSchema = [
   {
-    id: "Theme",
-    label: "Theme",
-    type: "select",
+    id: "ContactFormVisible",
+    label: "Contact form",
   },
 ] as const;
 
@@ -115,6 +110,7 @@ const Site = () => {
       Phone: "",
       Email: "",
       InstagramUrl: "",
+      MapUrl: "",
     },
   });
 
@@ -148,7 +144,9 @@ const Site = () => {
       Phone: customerConfig.phone ?? "",
       Email: customerConfig.email ?? "",
       InstagramUrl: customerConfig.instagramUrl ?? "",
+      MapUrl: customerConfig.mapUrl ?? "",
       AboutUsDescription: customerConfig.aboutUsDescription ?? "",
+      ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
     });
   }, [customerConfig, form]);
 
@@ -179,7 +177,7 @@ const Site = () => {
     <Form {...form}>
       <form
         className="grid max-w-lg gap-4 overflow-auto"
-        onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         {inputSchema.map((input) => (
           <FormField
@@ -187,24 +185,33 @@ const Site = () => {
             control={form.control}
             name={input.id}
             render={({ field }) => {
-              let render = <Input {...field} />;
-
-              if (input.type === "textarea") {
-                render = <Textarea {...field} />;
-              }
-
-              if (input.type === "select") {
-                render = (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={String(field.value)}
-                  >
+              return (
+                <FormItem>
+                  <FormLabel>{input.label}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        ))}
+        <FormField
+          control={form.control}
+          name="Theme"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Theme</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder={field.value} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>{input.label}</SelectLabel>
+                        <SelectLabel>Theme</SelectLabel>
                         {THEMES.filter(Boolean).map((c) => (
                           <SelectItem key={c} value={c}>
                             {c}
@@ -213,20 +220,14 @@ const Site = () => {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                );
-              }
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
 
-              return (
-                <FormItem>
-                  <FormLabel>{input.label}</FormLabel>
-                  <FormControl>{render}</FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-        ))}
-        <div className="flex flex-wrap gap-2">
+        <div className="mb-4 flex flex-wrap gap-2">
           {assetsInputSchema.map((input) => (
             <FormField
               key={input.id}
@@ -334,6 +335,34 @@ const Site = () => {
                           }}
                         />
                       )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          ))}
+        </div>
+        <div className="mb-4">
+          <h2 className="mb-6 text-xl">Section visibility</h2>
+          {toggleInputSchema.map((input) => (
+            <FormField
+              key={input.id}
+              control={form.control}
+              name={input.id}
+              render={({ field }) => {
+                return (
+                  <FormItem className="flex items-center">
+                    <FormLabel className="pb-0">{input.label}</FormLabel>
+                    <FormControl>
+                      <Switch
+                        defaultChecked={false}
+                        className="ml-2"
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => {
+                          form.setValue(field.name, checked);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

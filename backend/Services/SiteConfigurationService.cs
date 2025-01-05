@@ -10,10 +10,17 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
 
     public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, string key)
     {
-        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
+        var customerConfig = context.CustomerConfigs.Include(cf => cf.SectionVisibility).FirstOrDefault((x) => x.Domain == key);
         if (customerConfig == null)
         {
             throw new Exception("CustomerConfig not found for the provided key.");
+        }
+        if (customerConfig.SectionVisibility == null)
+        {
+            customerConfig.SectionVisibility = new SectionVisibility
+            {
+                CustomerConfigDomain = key
+            };
         }
 
         customerConfig.SiteName = siteConfiguration.SiteName;
@@ -22,8 +29,10 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Adress = siteConfiguration.Adress;
         customerConfig.Email = siteConfiguration.Email;
         customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
+        customerConfig.MapUrl = siteConfiguration.MapUrl;
         customerConfig.Phone = siteConfiguration.Phone;
         customerConfig.AboutUsDescription = siteConfiguration.AboutUsDescription;
+        customerConfig.SectionVisibility.ContactFormVisible = siteConfiguration.ContactFormVisible;
 
         if (siteConfiguration.Logo == "REMOVE")
         {
@@ -73,7 +82,11 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             SiteName = domain,
             Theme = "rustic",
             OpeningHours = defaultOpeningHours,
-            AboutUsDescription = ""
+            AboutUsDescription = "",
+            SectionVisibility = new SectionVisibility
+            {
+                CustomerConfigDomain = domain
+            }
         };
 
         await context.CustomerConfigs.AddAsync(newConfig);

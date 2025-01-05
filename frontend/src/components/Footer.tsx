@@ -28,10 +28,13 @@ export default async function Footer() {
                 CONTACT US
               </h3>
               {data?.email && (
-                <div className="flex items-center space-x-3">
+                <a
+                  href={`mailto:${data.email}`}
+                  className="flex items-center space-x-3"
+                >
                   <Mail className="h-5 w-5 text-gray-400" />
                   <span>{data?.email}</span>
-                </div>
+                </a>
               )}
               {data?.phone && (
                 <div className="flex items-center space-x-3">
@@ -40,10 +43,13 @@ export default async function Footer() {
                 </div>
               )}
               {data?.adress && (
-                <div className="flex items-center space-x-3">
+                <a
+                  {...(data?.mapUrl && { href: data.mapUrl, target: "_blank" })}
+                  className="flex items-center space-x-3"
+                >
                   <MapPin className="h-5 w-5 text-gray-400" />
                   <span>{data?.adress}</span>
-                </div>
+                </a>
               )}
               {data?.instagramUrl && (
                 <a

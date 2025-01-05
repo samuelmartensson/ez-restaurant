@@ -20,6 +20,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
             .Include(cf => cf.SiteSectionAbout)
+            .Include(cf => cf.SectionVisibility)
             .Include(cf => cf.OpeningHours)
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
 
@@ -52,20 +53,25 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
             InstagramUrl = customerConfig.InstagramUrl,
+            MapUrl = customerConfig.MapUrl,
             AboutUsDescription = customerConfig.AboutUsDescription,
             CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
+            SectionVisibility = new SectionVisibilityResponse
+            {
+                ContactFormVisible = customerConfig?.SectionVisibility?.ContactFormVisible ?? false
+            },
             Sections = new SectionsResponse
             {
                 Hero = new SiteSectionHeroResponse
                 {
-                    HeroImage = customerConfig.SiteSectionHero?.Image ?? "",
-                    OrderUrl = customerConfig.SiteSectionHero?.OrderUrl ?? ""
+                    HeroImage = customerConfig?.SiteSectionHero?.Image ?? "",
+                    OrderUrl = customerConfig?.SiteSectionHero?.OrderUrl ?? ""
                 },
                 About = new SiteSectionAboutResponse
                 {
-                    Image = customerConfig.SiteSectionAbout?.Image ?? "",
-                    Description = customerConfig.SiteSectionAbout?.Description ?? ""
+                    Image = customerConfig?.SiteSectionAbout?.Image ?? "",
+                    Description = customerConfig?.SiteSectionAbout?.Description ?? ""
                 }
             }
         };

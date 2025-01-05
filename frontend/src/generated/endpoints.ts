@@ -92,10 +92,12 @@ export type PostCustomerSiteConfigurationAssetsParams = {
 export type PostCustomerSiteConfigurationBody = {
   AboutUsDescription?: string;
   Adress?: string;
+  ContactFormVisible?: boolean;
   Email?: string;
   Font?: string;
   InstagramUrl?: string;
   Logo?: string;
+  MapUrl?: string;
   Phone?: string;
   SiteMetaTitle?: string;
   SiteName?: string;
@@ -132,6 +134,10 @@ export interface SiteSectionAboutResponse {
 export interface SectionsResponse {
   about?: SiteSectionAboutResponse;
   hero?: SiteSectionHeroResponse;
+}
+
+export interface SectionVisibilityResponse {
+  contactFormVisible?: boolean;
 }
 
 export interface MenuItemResponse {
@@ -175,10 +181,13 @@ export interface CustomerConfigResponse {
   /** @nullable */
   instagramUrl?: string | null;
   logo?: string;
+  /** @nullable */
+  mapUrl?: string | null;
   openingHours?: OpeningHourResponse[];
   /** @nullable */
   phone?: string | null;
   sections?: SectionsResponse;
+  sectionVisibility?: SectionVisibilityResponse;
   siteMetaTitle?: string;
   siteName?: string;
   theme?: string;
@@ -296,6 +305,12 @@ export const postCustomerSiteConfiguration = (
       postCustomerSiteConfigurationBody.AboutUsDescription,
     );
   }
+  if (postCustomerSiteConfigurationBody.ContactFormVisible !== undefined) {
+    formData.append(
+      "ContactFormVisible",
+      postCustomerSiteConfigurationBody.ContactFormVisible.toString(),
+    );
+  }
   if (postCustomerSiteConfigurationBody.Logo !== undefined) {
     formData.append("Logo", postCustomerSiteConfigurationBody.Logo);
   }
@@ -316,6 +331,9 @@ export const postCustomerSiteConfiguration = (
       "InstagramUrl",
       postCustomerSiteConfigurationBody.InstagramUrl,
     );
+  }
+  if (postCustomerSiteConfigurationBody.MapUrl !== undefined) {
+    formData.append("MapUrl", postCustomerSiteConfigurationBody.MapUrl);
   }
 
   return authorizedFetch<void>({

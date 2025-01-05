@@ -81,9 +81,11 @@ const Domain = () => {
   };
 
   const handleDeleteConfig = async () => {
+    if (customDomain) {
+      await handleDeleteDomain();
+    }
     await deleteConfig({ params: { key: selectedDomain } });
     await refetch();
-    await handleDeleteDomain();
     setSelectedDomain("");
   };
 

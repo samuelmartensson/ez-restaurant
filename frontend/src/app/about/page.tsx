@@ -2,11 +2,13 @@ import SubPageLayout from "@/components/SubPageLayout";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCustomerConfig } from "@/mock_db";
+import { Fragment } from "react";
 
 const About = async () => {
   const data = await getCustomerConfig();
   if (!data) return null;
   const aboutSection = data?.sections?.about;
+  const descriptionLines = aboutSection?.description?.split("\n");
 
   return (
     <SubPageLayout>
@@ -27,7 +29,12 @@ const About = async () => {
                 ABOUT US
               </h1>
               <p className="text-lg mb-4 text-muted-foreground text-pretty">
-                {aboutSection?.description}
+                {descriptionLines?.map((line, index) => (
+                  <Fragment key={index}>
+                    {line}
+                    <br />
+                  </Fragment>
+                ))}
               </p>
             </CardContent>
           </div>

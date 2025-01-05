@@ -55,7 +55,9 @@ export default async function Home() {
           <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
         </Link>
       </div>
-      <ContactForm data={data} />
+      {data.sectionVisibility?.contactFormVisible && (
+        <ContactForm data={data} />
+      )}
     </main>
   );
 }
