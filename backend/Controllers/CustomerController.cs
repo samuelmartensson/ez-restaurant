@@ -104,7 +104,8 @@ public class CustomerController(
             Adress = c.Adress,
             Phone = c.Phone,
             Email = c.Email,
-            CustomDomain = c.CustomDomain
+            CustomDomain = c.CustomDomain,
+            AboutUsDescription = c.AboutUsDescription,
         }).ToList();
 
         return Ok(

@@ -1,14 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.Requests;
 using Models.Responses;
 
 namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PublicController(RestaurantContext context) : ControllerBase
+public class PublicController(RestaurantContext context, EmailService emailService) : ControllerBase
 {
     private RestaurantContext context = context;
+    private EmailService emailService = emailService;
 
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
@@ -49,6 +51,7 @@ public class PublicController(RestaurantContext context) : ControllerBase
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
             InstagramUrl = customerConfig.InstagramUrl,
+            AboutUsDescription = customerConfig.AboutUsDescription,
             CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
             Sections = new SectionsResponse
@@ -116,6 +119,16 @@ public class PublicController(RestaurantContext context) : ControllerBase
             Categories = menuCategoriesResponse,
             MenuItems = menuItemsResponse
         });
+    }
+
+    [HttpPost("contact")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ContactForm([FromBody] ContactRequest request, [FromQuery] string key)
+    {
+        await emailService.SendEmail(request, key);
+
+        return Ok(new { message = "Success" });
     }
 }
 

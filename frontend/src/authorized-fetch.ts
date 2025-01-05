@@ -35,6 +35,9 @@ export const authorizedFetch = async <T>({
   const response = await fetch(finalURL, {
     method,
     signal,
+    headers: {
+      "Content-Type": "application/json",
+    },
     ...(data ? { body: JSON.stringify(data) } : {}),
   });
 

@@ -1,6 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { getCustomerConfig } from "@/mock_db";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 const dayMap: { [key: number]: string } = {
   1: "Monday",
@@ -14,16 +14,18 @@ const dayMap: { [key: number]: string } = {
 
 export default async function Footer() {
   const data = await getCustomerConfig();
-  console.log(data);
 
   return (
     <footer id="open-hours" className="text-gray-600 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-screen-lg mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {(data?.email || data?.phone || data?.adress) && (
+          {(data?.email ||
+            data?.phone ||
+            data?.adress ||
+            data?.instagramUrl) && (
             <div className="space-y-4">
               <h3 className="font-customer text-lg font-semibold text-gray-900">
-                Contact Us
+                CONTACT US
               </h3>
               {data?.email && (
                 <div className="flex items-center space-x-3">
@@ -43,11 +45,21 @@ export default async function Footer() {
                   <span>{data?.adress}</span>
                 </div>
               )}
+              {data?.instagramUrl && (
+                <a
+                  target="_blank"
+                  href={data.instagramUrl}
+                  className="flex items-center space-x-3"
+                >
+                  <Instagram className="h-5 w-5 text-gray-400" />
+                  <span>Instagram</span>
+                </a>
+              )}
             </div>
           )}
           <div className="space-y-4">
             <h3 className="font-customer text-lg font-semibold text-gray-900">
-              Open Hours
+              OPEN HOURS
             </h3>
             <div className="flex items-start space-x-3">
               <div className="space-y-2">
@@ -67,10 +79,19 @@ export default async function Footer() {
             </div>
           </div>
         </div>
+
         <Separator className="my-8" />
-        <div className="text-center text-sm">
+        <div className="text-center text-sm mb-4">
           © {new Date().getFullYear()} {data?.siteName}. All rights reserved.
         </div>
+        {data?.logo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={data.logo}
+            alt=""
+            className="mx-auto h-12 max-w-[140px] sm:h-16 rounded-lg object-contain"
+          />
+        )}
       </div>
     </footer>
   );

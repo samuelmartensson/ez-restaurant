@@ -23,6 +23,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Email = siteConfiguration.Email;
         customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
         customerConfig.Phone = siteConfiguration.Phone;
+        customerConfig.AboutUsDescription = siteConfiguration.AboutUsDescription;
 
         if (siteConfiguration.Logo == "REMOVE")
         {
@@ -71,7 +72,8 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             SiteMetaTitle = "",
             SiteName = domain,
             Theme = "rustic",
-            OpeningHours = defaultOpeningHours
+            OpeningHours = defaultOpeningHours,
+            AboutUsDescription = ""
         };
 
         await context.CustomerConfigs.AddAsync(newConfig);

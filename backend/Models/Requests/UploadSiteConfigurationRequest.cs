@@ -11,6 +11,7 @@ namespace Models.Requests
         required public string SiteName { get; set; }
         required public string SiteMetaTitle { get; set; }
         required public string Theme { get; set; }
+        required public string AboutUsDescription { get; set; }
         public string? Logo { get; set; }
         public string? Font { get; set; }
         public string? Adress { get; set; }

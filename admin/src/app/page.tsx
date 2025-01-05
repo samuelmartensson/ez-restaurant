@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   PostCustomerSiteConfigurationBody,
   useGetPublicGetCustomerConfig,
@@ -45,7 +46,6 @@ const inputSchema = [
     label: "Site meta title",
     type: "text",
   },
-
   {
     id: "Adress",
     label: "Adress",
@@ -65,6 +65,11 @@ const inputSchema = [
     id: "InstagramUrl",
     label: "Instagram URL",
     type: "text",
+  },
+  {
+    id: "AboutUsDescription",
+    label: "About description",
+    type: "textarea",
   },
   {
     id: "Theme",
@@ -103,6 +108,7 @@ const Site = () => {
     defaultValues: {
       SiteName: "",
       SiteMetaTitle: "",
+      AboutUsDescription: "",
       Logo: "",
       Theme: "",
       Adress: "",
@@ -142,6 +148,7 @@ const Site = () => {
       Phone: customerConfig.phone ?? "",
       Email: customerConfig.email ?? "",
       InstagramUrl: customerConfig.instagramUrl ?? "",
+      AboutUsDescription: customerConfig.aboutUsDescription ?? "",
     });
   }, [customerConfig, form]);
 
@@ -162,7 +169,9 @@ const Site = () => {
       params,
     });
 
-    refetch();
+    const updated = await refetch();
+    // Rerender font preview
+    form.setValue("Font", updated.data?.font ?? "");
     toast.success("Site information saved.");
   }
 
@@ -179,6 +188,10 @@ const Site = () => {
             name={input.id}
             render={({ field }) => {
               let render = <Input {...field} />;
+
+              if (input.type === "textarea") {
+                render = <Textarea {...field} />;
+              }
 
               if (input.type === "select") {
                 render = (
@@ -213,93 +226,122 @@ const Site = () => {
             }}
           />
         ))}
-        {assetsInputSchema.map((input) => (
-          <FormField
-            key={input.id}
-            control={form.control}
-            name={input.id}
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>{input.label}</FormLabel>
-                  <FormControl>
-                    {field.value && field.value !== ACTIONS.REMOVE ? (
-                      <div className="grid justify-start gap-2">
-                        {input.type === "image" && (
-                          <>
-                            {uploadedAssets?.[field.name] ? (
-                              <FilePreview file={uploadedAssets[field.name]} />
-                            ) : (
-                              <>
-                                {field.value &&
-                                form.watch(field.name) !== ACTIONS.REMOVE ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    className="h-20 w-20 rounded bg-gray-100 object-contain"
-                                    src={field.value as string}
-                                    alt=""
-                                  />
-                                ) : (
-                                  <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
-                                    No image
+        <div className="flex flex-wrap gap-2">
+          {assetsInputSchema.map((input) => (
+            <FormField
+              key={input.id}
+              control={form.control}
+              name={input.id}
+              render={({ field }) => {
+                return (
+                  <FormItem className="flex-1">
+                    <FormLabel>{input.label}</FormLabel>
+                    <FormControl>
+                      {field.value && field.value !== ACTIONS.REMOVE ? (
+                        <div className="grid gap-2">
+                          {input.type === "image" && (
+                            <>
+                              {uploadedAssets?.[field.name] ? (
+                                <FilePreview
+                                  file={uploadedAssets[field.name]}
+                                />
+                              ) : (
+                                <>
+                                  {field.value &&
+                                  form.watch(field.name) !== ACTIONS.REMOVE ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      className="mx-auto h-32 w-32 rounded bg-gray-100 object-contain"
+                                      src={field.value as string}
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <div className="grid h-32 w-32 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
+                                      No image
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </>
+                          )}
+                          {input.type === "file" && (
+                            <>
+                              {!(field.value as unknown as File)?.name && (
+                                <style>{`
+                                  @font-face {
+                                    font-family: "Customer";
+                                    src: url("${field.value}");
+                                  }
+                            `}</style>
+                              )}
+                              <div
+                                className="grid h-32 place-items-center rounded bg-gray-100 px-2 py-1"
+                                style={{
+                                  fontFamily: (field.value as unknown as File)
+                                    ?.name
+                                    ? "inherit"
+                                    : "Customer",
+                                }}
+                              >
+                                {(field.value as unknown as File)?.name ?? (
+                                  <div className="grid place-items-center gap-1">
+                                    <span>My font</span>
+                                    <span>MY FONT</span>
                                   </div>
                                 )}
-                              </>
-                            )}
-                          </>
-                        )}
-                        {input.type === "file" && (
-                          <>
-                            <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
-                              {(field.value as unknown as File).name}
-                            </div>
-                          </>
-                        )}
-                        <Button
-                          className="block"
-                          variant="destructive"
-                          type="button"
-                          onClick={() => {
-                            if (field.value) {
-                              form.setValue(field.name, ACTIONS.REMOVE);
-                            }
-                            setUploadedAssets((state) => {
-                              const newState = { ...state };
-                              delete newState[field.name];
+                              </div>
+                            </>
+                          )}
+                          <Button
+                            className="block"
+                            variant="destructive"
+                            type="button"
+                            onClick={() => {
+                              if (field.value) {
+                                form.setValue(field.name, ACTIONS.REMOVE);
+                              }
+                              setUploadedAssets((state) => {
+                                const newState = { ...state };
+                                delete newState[field.name];
 
-                              return newState;
-                            });
-                          }}
-                        >
-                          Remove file
-                        </Button>
-                      </div>
-                    ) : (
-                      <Input
-                        type="file"
-                        accept={input.type === "image" ? "image/*" : ""}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (file) {
-                            setUploadedAssets((state) => ({
-                              ...state,
-                              [field.name]: file,
-                            }));
-                            form.setValue(
-                              field.name,
-                              file as unknown as string,
-                            );
+                                return newState;
+                              });
+                            }}
+                          >
+                            Remove file
+                          </Button>
+                        </div>
+                      ) : (
+                        <Input
+                          type="file"
+                          accept={
+                            input.type === "image"
+                              ? "image/*"
+                              : ".woff, .woff2, .otf, .ttf"
                           }
-                        }}
-                      />
-                    )}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-        ))}
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (file) {
+                              setUploadedAssets((state) => ({
+                                ...state,
+                                [field.name]: file,
+                              }));
+                              form.setValue(
+                                field.name,
+                                file as unknown as string,
+                              );
+                            }
+                          }}
+                        />
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          ))}
+        </div>
         <Button disabled={isPending} type="submit">
           <Save /> Save
         </Button>

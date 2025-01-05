@@ -23,15 +23,10 @@ const About = async () => {
             </div>
             <CardContent className="p-8">
               <h1 className="font-customer text-4xl font-bold mb-6 text-primary">
-                About Us
+                ABOUT US
               </h1>
-              <p className="text-lg mb-4 text-muted-foreground">
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                Sapiente, hic similique reiciendis corporis eligendi impedit
-                alias numquam quibusdam nobis dolores libero odit repudiandae,
-                rem, officiis earum optio. Rem esse minus non officiis rerum?
-                Deleniti modi eius ex laborum obcaecati velit. Lorem ipsum dolor
-                sit, amet consectetur adipisicing elit.
+              <p className="text-lg mb-4 text-muted-foreground text-pretty">
+                {data.aboutUsDescription}
               </p>
             </CardContent>
           </div>

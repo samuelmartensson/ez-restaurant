@@ -90,6 +90,7 @@ export type PostCustomerSiteConfigurationAssetsParams = {
 };
 
 export type PostCustomerSiteConfigurationBody = {
+  AboutUsDescription?: string;
   Adress?: string;
   Email?: string;
   Font?: string;
@@ -132,6 +133,8 @@ export interface OpeningHourResponse {
   day?: CustomDayOfWeek;
   id?: number;
   isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
   openTime?: string;
 }
 
@@ -162,6 +165,7 @@ export interface MenuResponse {
 }
 
 export interface CustomerConfigResponse {
+  aboutUsDescription?: string;
   /** @nullable */
   adress?: string | null;
   /** @nullable */
@@ -523,6 +527,12 @@ export const postCustomerSiteConfiguration = (
     formData.append(
       "InstagramUrl",
       postCustomerSiteConfigurationBody.InstagramUrl,
+    );
+  }
+  if (postCustomerSiteConfigurationBody.AboutUsDescription !== undefined) {
+    formData.append(
+      "AboutUsDescription",
+      postCustomerSiteConfigurationBody.AboutUsDescription,
     );
   }
 

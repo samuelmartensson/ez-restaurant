@@ -28,7 +28,6 @@ builder.Services.AddClerkApiClient(config =>
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
   {
-
       options.AddPolicy("Prod",
           builder => builder
                 .WithOrigins("https://*.ezrest.se", "https://ez-restaurant-admin.vercel.app", "https://www.ezrest.se")
@@ -42,7 +41,6 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Dev",
         builder => builder
-            // .WithOrigins("http://localhost:3000", "https://localhost:3000", "http://localhost:3001", "https://localhost:3001", "http://localhost:5173")
             .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod());
@@ -75,10 +73,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
-
-
-
 string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")};foreign keys=true" ?? "NO PATH. ERROR";
 
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
@@ -89,6 +83,7 @@ builder.Services.AddScoped<VercelService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<SectionConfigurationService>();
 builder.Services.AddScoped<OpeningHourService>();
+builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();

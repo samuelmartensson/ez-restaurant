@@ -5,6 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 import { authorizedFetch } from "../authorized-fetch";
+export type PostPublicContactParams = {
+  key?: string;
+};
+
 export type GetPublicGetCustomerMenuParams = {
   key?: string;
 };
@@ -47,6 +51,15 @@ export type PostMenuItemsParams = {
   key?: string;
 };
 
+export type DeleteCustomerDomainParams = {
+  key?: string;
+};
+
+export type PostCustomerDomainParams = {
+  key?: string;
+  domainName?: string;
+};
+
 export type PostCustomerHeroBody = {
   Image?: Blob;
   OrderUrl?: string;
@@ -67,9 +80,11 @@ export type PostCustomerSiteConfigurationAssetsParams = {
 };
 
 export type PostCustomerSiteConfigurationBody = {
+  AboutUsDescription?: string;
   Adress?: string;
   Email?: string;
   Font?: string;
+  InstagramUrl?: string;
   Logo?: string;
   Phone?: string;
   SiteMetaTitle?: string;
@@ -103,14 +118,6 @@ export interface SectionsResponse {
   hero?: SiteSectionHeroResponse;
 }
 
-export interface OpeningHourResponse {
-  closeTime?: string;
-  day?: CustomDayOfWeek;
-  id?: number;
-  isClosed?: boolean;
-  openTime?: string;
-}
-
 export interface MenuItemResponse {
   categoryId: number;
   /** @minLength 1 */
@@ -138,14 +145,19 @@ export interface MenuResponse {
 }
 
 export interface CustomerConfigResponse {
+  aboutUsDescription?: string;
   /** @nullable */
   adress?: string | null;
+  /** @nullable */
+  customDomain?: string | null;
   domain?: string;
   /** @nullable */
   email?: string | null;
   /** @nullable */
   font?: string | null;
   heroType?: number;
+  /** @nullable */
+  instagramUrl?: string | null;
   logo?: string;
   openingHours?: OpeningHourResponse[];
   /** @nullable */
@@ -156,11 +168,19 @@ export interface CustomerConfigResponse {
   theme?: string;
 }
 
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  subscription?: SubscriptionState;
+}
+
 export type CustomDayOfWeek =
   (typeof CustomDayOfWeek)[keyof typeof CustomDayOfWeek];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CustomDayOfWeek = {
+  NUMBER_0: 0,
   NUMBER_1: 1,
   NUMBER_2: 2,
   NUMBER_3: 3,
@@ -170,8 +190,24 @@ export const CustomDayOfWeek = {
   NUMBER_7: 7,
 } as const;
 
+export interface OpeningHourResponse {
+  closeTime?: string;
+  day?: CustomDayOfWeek;
+  id?: number;
+  isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
+  openTime?: string;
+}
+
 export interface CreateConfigRequest {
   domain?: string;
+}
+
+export interface ContactRequest {
+  description?: string;
+  email?: string;
+  name?: string;
 }
 
 export interface CancelInfo {
@@ -181,17 +217,12 @@ export interface CancelInfo {
   periodEnd?: string | null;
 }
 
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
-  domain?: string;
-  subscription?: SubscriptionState;
-}
-
 export interface AddOpeningHourRequest {
   closeTime?: string;
   id?: number;
   isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
   openTime?: string;
 }
 
@@ -243,6 +274,12 @@ export const postCustomerSiteConfiguration = (
   if (postCustomerSiteConfigurationBody.Theme !== undefined) {
     formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
+  if (postCustomerSiteConfigurationBody.AboutUsDescription !== undefined) {
+    formData.append(
+      "AboutUsDescription",
+      postCustomerSiteConfigurationBody.AboutUsDescription,
+    );
+  }
   if (postCustomerSiteConfigurationBody.Logo !== undefined) {
     formData.append("Logo", postCustomerSiteConfigurationBody.Logo);
   }
@@ -257,6 +294,12 @@ export const postCustomerSiteConfiguration = (
   }
   if (postCustomerSiteConfigurationBody.Email !== undefined) {
     formData.append("Email", postCustomerSiteConfigurationBody.Email);
+  }
+  if (postCustomerSiteConfigurationBody.InstagramUrl !== undefined) {
+    formData.append(
+      "InstagramUrl",
+      postCustomerSiteConfigurationBody.InstagramUrl,
+    );
   }
 
   return authorizedFetch<void>({
@@ -311,6 +354,22 @@ export const postCustomerHero = (
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
+    params,
+  });
+};
+
+export const postCustomerDomain = (params?: PostCustomerDomainParams) => {
+  return authorizedFetch<void>({
+    url: `/Customer/domain`,
+    method: "POST",
+    params,
+  });
+};
+
+export const deleteCustomerDomain = (params?: DeleteCustomerDomainParams) => {
+  return authorizedFetch<void>({
+    url: `/Customer/domain`,
+    method: "DELETE",
     params,
   });
 };
@@ -421,6 +480,19 @@ export const getPublicGetCustomerMenu = (
   });
 };
 
+export const postPublicContact = (
+  contactRequest: ContactRequest,
+  params?: PostPublicContactParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Public/contact`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: contactRequest,
+    params,
+  });
+};
+
 export const postWebhook = () => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
 };
@@ -442,6 +514,12 @@ export type PostCustomerSiteConfigurationAssetsResult = NonNullable<
 >;
 export type PostCustomerHeroResult = NonNullable<
   Awaited<ReturnType<typeof postCustomerHero>>
+>;
+export type PostCustomerDomainResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerDomain>>
+>;
+export type DeleteCustomerDomainResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerDomain>>
 >;
 export type PostMenuItemsResult = NonNullable<
   Awaited<ReturnType<typeof postMenuItems>>
@@ -469,6 +547,9 @@ export type GetPublicGetCustomerConfigResult = NonNullable<
 >;
 export type GetPublicGetCustomerMenuResult = NonNullable<
   Awaited<ReturnType<typeof getPublicGetCustomerMenu>>
+>;
+export type PostPublicContactResult = NonNullable<
+  Awaited<ReturnType<typeof postPublicContact>>
 >;
 export type PostWebhookResult = NonNullable<
   Awaited<ReturnType<typeof postWebhook>>
