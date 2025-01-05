@@ -18,6 +18,7 @@ import {
   CreditCard,
   Globe,
   Home,
+  Info,
   LogOut,
   SquareMenu,
   Wallpaper,
@@ -29,11 +30,6 @@ import { useEffect } from "react";
 
 const items = [
   {
-    title: "Domains",
-    url: "/domains",
-    icon: Globe,
-  },
-  {
     title: "Site",
     url: "/",
     icon: Home,
@@ -42,6 +38,11 @@ const items = [
     title: "Hero",
     url: "/hero",
     icon: Wallpaper,
+  },
+  {
+    title: "About",
+    url: "/about",
+    icon: Info,
   },
   {
     title: "Open hours",
@@ -73,6 +74,18 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setOpenMobile(false)}
+                    asChild
+                    isActive={"/domains" === pathname}
+                  >
+                    <Link href="/domains">
+                      <Globe />
+                      <span>Domain</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => {

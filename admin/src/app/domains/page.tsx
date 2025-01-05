@@ -89,10 +89,7 @@ const Domain = () => {
 
   return (
     <div className="grid max-w-lg gap-4">
-      <p className="text-muted-foreground">
-        Create a new domain for your website
-      </p>
-      <Separator />
+      <p className="text-muted-foreground">Create a new domain</p>
       <div className="grid gap-2">
         <div className="flex gap-2">
           <Input
@@ -166,7 +163,7 @@ const Domain = () => {
                     </li>
                     <li>
                       {`In the "Value" or "Points to" field, enter the full domain
-                      name it should resolve to: "${selectedDomain}.ezrest.se".`}
+                      name, it should resolve to: "${selectedDomain}.ezrest.se".`}
                     </li>
                   </ul>
                 </li>
@@ -182,7 +179,6 @@ const Domain = () => {
                 </li>
               </ol>
             )}
-            <Separator />
             {customDomain ? (
               <Button
                 disabled={isPendingDeleteDomain}

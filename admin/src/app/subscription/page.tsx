@@ -40,6 +40,8 @@ const Subscription = () => {
 
   return (
     <div className="grid place-items-center p-4">
+      <title>EZ Rest - Subscription</title>
+
       {data?.cancelInfo?.isExpired ? (
         <>
           <div className="mb-4 text-pretty">

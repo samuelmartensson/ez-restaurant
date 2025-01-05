@@ -19,6 +19,30 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type PostSectionAboutBody = {
+  Description?: string;
+  Image?: Blob;
+  removedAssets?: string[];
+};
+
+export type PostSectionAboutParams = {
+  key?: string;
+};
+
+export type PostSectionHeroBody = {
+  Image?: Blob;
+  OrderUrl?: string;
+  removedAssets?: string[];
+};
+
+export type PostSectionHeroParams = {
+  key?: string;
+};
+
+export type PostPublicContactParams = {
+  key?: string;
+};
+
 export type GetPublicGetCustomerMenuParams = {
   key?: string;
 };
@@ -70,16 +94,6 @@ export type PostCustomerDomainParams = {
   domainName?: string;
 };
 
-export type PostCustomerHeroBody = {
-  Image?: Blob;
-  OrderUrl?: string;
-  removedAssets?: string[];
-};
-
-export type PostCustomerHeroParams = {
-  key?: string;
-};
-
 export type PostCustomerSiteConfigurationAssetsBody = {
   Font?: Blob;
   Logo?: Blob;
@@ -124,18 +138,14 @@ export interface SiteSectionHeroResponse {
   orderUrl?: string;
 }
 
-export interface SectionsResponse {
-  hero?: SiteSectionHeroResponse;
+export interface SiteSectionAboutResponse {
+  description?: string;
+  image?: string;
 }
 
-export interface OpeningHourResponse {
-  closeTime?: string;
-  day?: CustomDayOfWeek;
-  id?: number;
-  isClosed?: boolean;
-  /** @nullable */
-  label?: string | null;
-  openTime?: string;
+export interface SectionsResponse {
+  about?: SiteSectionAboutResponse;
+  hero?: SiteSectionHeroResponse;
 }
 
 export interface MenuItemResponse {
@@ -188,6 +198,13 @@ export interface CustomerConfigResponse {
   theme?: string;
 }
 
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  subscription?: SubscriptionState;
+}
+
 export type CustomDayOfWeek =
   (typeof CustomDayOfWeek)[keyof typeof CustomDayOfWeek];
 
@@ -203,8 +220,24 @@ export const CustomDayOfWeek = {
   NUMBER_7: 7,
 } as const;
 
+export interface OpeningHourResponse {
+  closeTime?: string;
+  day?: CustomDayOfWeek;
+  id?: number;
+  isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
+  openTime?: string;
+}
+
 export interface CreateConfigRequest {
   domain?: string;
+}
+
+export interface ContactRequest {
+  description?: string;
+  email?: string;
+  name?: string;
 }
 
 export interface CancelInfo {
@@ -212,13 +245,6 @@ export interface CancelInfo {
   isExpired?: boolean;
   /** @nullable */
   periodEnd?: string | null;
-}
-
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
-  domain?: string;
-  subscription?: SubscriptionState;
 }
 
 export interface AddOpeningHourRequest {
@@ -508,6 +534,12 @@ export const postCustomerSiteConfiguration = (
   if (postCustomerSiteConfigurationBody.Theme !== undefined) {
     formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
+  if (postCustomerSiteConfigurationBody.AboutUsDescription !== undefined) {
+    formData.append(
+      "AboutUsDescription",
+      postCustomerSiteConfigurationBody.AboutUsDescription,
+    );
+  }
   if (postCustomerSiteConfigurationBody.Logo !== undefined) {
     formData.append("Logo", postCustomerSiteConfigurationBody.Logo);
   }
@@ -527,12 +559,6 @@ export const postCustomerSiteConfiguration = (
     formData.append(
       "InstagramUrl",
       postCustomerSiteConfigurationBody.InstagramUrl,
-    );
-  }
-  if (postCustomerSiteConfigurationBody.AboutUsDescription !== undefined) {
-    formData.append(
-      "AboutUsDescription",
-      postCustomerSiteConfigurationBody.AboutUsDescription,
     );
   }
 
@@ -713,91 +739,6 @@ export const usePostCustomerSiteConfigurationAssets = <
 > => {
   const mutationOptions =
     getPostCustomerSiteConfigurationAssetsMutationOptions(options);
-
-  return useMutation(mutationOptions);
-};
-
-export const postCustomerHero = (
-  postCustomerHeroBody: PostCustomerHeroBody,
-  params?: PostCustomerHeroParams,
-  signal?: AbortSignal,
-) => {
-  const formData = new FormData();
-  if (postCustomerHeroBody.Image !== undefined) {
-    formData.append("Image", postCustomerHeroBody.Image);
-  }
-  if (postCustomerHeroBody.removedAssets !== undefined) {
-    postCustomerHeroBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-  if (postCustomerHeroBody.OrderUrl !== undefined) {
-    formData.append("OrderUrl", postCustomerHeroBody.OrderUrl);
-  }
-
-  return authorizedFetch<void>({
-    url: `/Customer/hero`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-    signal,
-  });
-};
-
-export const getPostCustomerHeroMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerHero>>,
-    TError,
-    { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postCustomerHero>>,
-  TError,
-  { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
-  TContext
-> => {
-  const { mutation: mutationOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCustomerHero>>,
-    { data: PostCustomerHeroBody; params?: PostCustomerHeroParams }
-  > = (props) => {
-    const { data, params } = props ?? {};
-
-    return postCustomerHero(data, params);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PostCustomerHeroMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerHero>>
->;
-export type PostCustomerHeroMutationBody = PostCustomerHeroBody;
-export type PostCustomerHeroMutationError = unknown;
-
-export const usePostCustomerHero = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCustomerHero>>,
-    TError,
-    { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postCustomerHero>>,
-  TError,
-  { data: PostCustomerHeroBody; params?: PostCustomerHeroParams },
-  TContext
-> => {
-  const mutationOptions = getPostCustomerHeroMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -1777,6 +1718,248 @@ export function useGetPublicGetCustomerMenu<
 
   return query;
 }
+
+export const postPublicContact = (
+  contactRequest: ContactRequest,
+  params?: PostPublicContactParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/Public/contact`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: contactRequest,
+    params,
+    signal,
+  });
+};
+
+export const getPostPublicContactMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPublicContact>>,
+    TError,
+    { data: ContactRequest; params?: PostPublicContactParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postPublicContact>>,
+  TError,
+  { data: ContactRequest; params?: PostPublicContactParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postPublicContact>>,
+    { data: ContactRequest; params?: PostPublicContactParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postPublicContact(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostPublicContactMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postPublicContact>>
+>;
+export type PostPublicContactMutationBody = ContactRequest;
+export type PostPublicContactMutationError = unknown;
+
+export const usePostPublicContact = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPublicContact>>,
+    TError,
+    { data: ContactRequest; params?: PostPublicContactParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postPublicContact>>,
+  TError,
+  { data: ContactRequest; params?: PostPublicContactParams },
+  TContext
+> => {
+  const mutationOptions = getPostPublicContactMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postSectionHero = (
+  postSectionHeroBody: PostSectionHeroBody,
+  params?: PostSectionHeroParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postSectionHeroBody.Image !== undefined) {
+    formData.append("Image", postSectionHeroBody.Image);
+  }
+  if (postSectionHeroBody.removedAssets !== undefined) {
+    postSectionHeroBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+  if (postSectionHeroBody.OrderUrl !== undefined) {
+    formData.append("OrderUrl", postSectionHeroBody.OrderUrl);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/hero`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostSectionHeroMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionHero>>,
+    TError,
+    { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postSectionHero>>,
+  TError,
+  { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postSectionHero>>,
+    { data: PostSectionHeroBody; params?: PostSectionHeroParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postSectionHero(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostSectionHeroMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionHero>>
+>;
+export type PostSectionHeroMutationBody = PostSectionHeroBody;
+export type PostSectionHeroMutationError = unknown;
+
+export const usePostSectionHero = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionHero>>,
+    TError,
+    { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postSectionHero>>,
+  TError,
+  { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+  TContext
+> => {
+  const mutationOptions = getPostSectionHeroMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postSectionAbout = (
+  postSectionAboutBody: PostSectionAboutBody,
+  params?: PostSectionAboutParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postSectionAboutBody.Image !== undefined) {
+    formData.append("Image", postSectionAboutBody.Image);
+  }
+  if (postSectionAboutBody.removedAssets !== undefined) {
+    postSectionAboutBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+  if (postSectionAboutBody.Description !== undefined) {
+    formData.append("Description", postSectionAboutBody.Description);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/about`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostSectionAboutMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionAbout>>,
+    TError,
+    { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postSectionAbout>>,
+  TError,
+  { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postSectionAbout>>,
+    { data: PostSectionAboutBody; params?: PostSectionAboutParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postSectionAbout(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostSectionAboutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionAbout>>
+>;
+export type PostSectionAboutMutationBody = PostSectionAboutBody;
+export type PostSectionAboutMutationError = unknown;
+
+export const usePostSectionAbout = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionAbout>>,
+    TError,
+    { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postSectionAbout>>,
+  TError,
+  { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+  TContext
+> => {
+  const mutationOptions = getPostSectionAboutMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
 
 export const postWebhook = (signal?: AbortSignal) => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST", signal });

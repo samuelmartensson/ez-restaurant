@@ -13,10 +13,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  PostSectionHeroMutationBody,
+  PostSectionAboutMutationBody,
   useGetPublicGetCustomerConfig,
-  usePostSectionHero,
+  usePostSectionAbout,
 } from "@/generated/endpoints";
 import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -25,21 +26,21 @@ import { toast } from "sonner";
 
 const inputSchema = [
   {
-    id: "OrderUrl",
-    label: "Order now URL",
-    type: "text",
+    id: "Description",
+    label: "Description",
+    type: "textarea",
   },
 ] as const;
 
 const assetsInputSchema = [
   {
     id: "Image",
-    label: "Hero image",
+    label: "Image",
     type: "image",
   },
 ] as const;
 
-const Hero = () => {
+const About = () => {
   const { selectedDomain } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
@@ -47,10 +48,10 @@ const Hero = () => {
   const [deletedAssets, setDeletedAssets] = useState<Record<string, boolean>>(
     {},
   );
-  const form = useForm<PostSectionHeroMutationBody>({
+  const form = useForm<PostSectionAboutMutationBody>({
     defaultValues: {
       Image: "",
-      OrderUrl: "",
+      Description: "",
     },
   });
 
@@ -58,33 +59,33 @@ const Hero = () => {
     key: selectedDomain,
   });
 
-  const { mutateAsync: uploadHero } = usePostSectionHero();
+  const { mutateAsync: uploadAbout } = usePostSectionAbout();
 
   useEffect(() => {
     if (!customerConfig) return;
 
     form.reset({
-      Image: customerConfig.sections?.hero?.heroImage ?? "",
-      OrderUrl: customerConfig.sections?.hero?.orderUrl ?? "",
+      Image: customerConfig.sections?.about?.image ?? "",
+      Description: customerConfig.sections?.about?.description ?? "",
     });
   }, [customerConfig, form]);
 
-  async function onSubmit(data: PostSectionHeroMutationBody) {
-    await uploadHero({
+  async function onSubmit(data: PostSectionAboutMutationBody) {
+    await uploadAbout({
       data: {
         ...uploadedAssets,
         removedAssets: Object.keys(deletedAssets),
-        OrderUrl: data.OrderUrl,
+        Description: data.Description,
       },
       params: { key: selectedDomain },
     });
-    toast.success("Hero saved.");
+    toast.success("About saved.");
     const updated = await refetch();
     setUploadedAssets({});
     setDeletedAssets({});
     form.setValue(
       "Image",
-      (updated?.data?.sections?.hero?.heroImage as unknown as Blob) ?? "",
+      (updated?.data?.sections?.about?.image as unknown as Blob) ?? "",
     );
   }
 
@@ -92,7 +93,7 @@ const Hero = () => {
     <Form {...form}>
       <form
         className="grid max-w-lg gap-4 overflow-auto"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
       >
         {inputSchema.map((input) => (
           <FormField
@@ -104,7 +105,7 @@ const Hero = () => {
                 <FormItem>
                   <FormLabel>{input.label}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,25 +126,21 @@ const Hero = () => {
                     {(field.value && !deletedAssets?.[field.name]) ||
                     uploadedAssets?.[field.name] ? (
                       <div className="grid justify-start gap-2">
-                        {input.type === "image" && (
+                        {uploadedAssets?.[field.name] ? (
+                          <FilePreview file={uploadedAssets[field.name]} />
+                        ) : (
                           <>
-                            {uploadedAssets?.[field.name] ? (
-                              <FilePreview file={uploadedAssets[field.name]} />
+                            {field.value ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                className="h-32 w-32 rounded bg-gray-100 object-contain"
+                                src={field.value as unknown as string}
+                                alt=""
+                              />
                             ) : (
-                              <>
-                                {field.value ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    className="h-32 w-32 rounded bg-gray-100 object-contain"
-                                    src={field.value as unknown as string}
-                                    alt=""
-                                  />
-                                ) : (
-                                  <div className="grid h-32 w-32 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
-                                    No image
-                                  </div>
-                                )}
-                              </>
+                              <div className="grid h-32 w-32 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
+                                No image
+                              </div>
                             )}
                           </>
                         )}
@@ -200,4 +197,4 @@ const Hero = () => {
   );
 };
 
-export default hasDomain(Hero);
+export default hasDomain(About);

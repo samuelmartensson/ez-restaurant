@@ -6,6 +6,7 @@ import { getCustomerConfig } from "@/mock_db";
 const About = async () => {
   const data = await getCustomerConfig();
   if (!data) return null;
+  const aboutSection = data?.sections?.about;
 
   return (
     <SubPageLayout>
@@ -14,11 +15,11 @@ const About = async () => {
           <div>
             <div className="p-2">
               <Image
-                src={data.sections?.hero?.heroImage ?? ""}
-                alt="Team working together"
-                width={800}
+                src={aboutSection?.image ?? ""}
+                alt=""
+                width={600}
                 height={600}
-                className="object-cover w-full h-full rounded-xl"
+                className="m-auto w-full max-h-96 object-cover rounded-xl"
               />
             </div>
             <CardContent className="p-8">
@@ -26,7 +27,7 @@ const About = async () => {
                 ABOUT US
               </h1>
               <p className="text-lg mb-4 text-muted-foreground text-pretty">
-                {data.aboutUsDescription}
+                {aboutSection?.description}
               </p>
             </CardContent>
           </div>

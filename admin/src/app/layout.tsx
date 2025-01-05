@@ -34,6 +34,7 @@ export default function AdminLayout({
 }) {
   return (
     <html lang="en">
+      <title>EZ Rest</title>
       <body className="relative antialiased">
         <ClerkProvider>
           <Toaster position="bottom-center" />

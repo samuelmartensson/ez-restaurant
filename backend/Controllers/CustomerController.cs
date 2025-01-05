@@ -13,7 +13,6 @@ namespace webapi.Controllers;
 public class CustomerController(
     RestaurantContext context,
     SiteConfigurationService siteConfigurationService,
-    SectionConfigurationService sectionConfigurationService,
     UserService userService,
     VercelService vercelService,
     ClerkApiClient clerkApiClient
@@ -23,7 +22,6 @@ public class CustomerController(
     private UserService userService = userService;
     private VercelService vercelService = vercelService;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
-    private SectionConfigurationService sectionConfigurationService = sectionConfigurationService;
     private ClerkApiClient clerkApiClient = clerkApiClient;
 
 
@@ -191,17 +189,6 @@ public class CustomerController(
     public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery] string key)
     {
         await siteConfigurationService.UpdateSiteConfigurationAssets(assets, key);
-        return Ok(new { message = "Success" });
-    }
-
-    [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
-    [HttpPost("hero")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadHero([FromForm] UploadHeroAssetsRequest assets, [FromForm] List<string> removedAssets, [FromForm] UploadHeroRequest fields, [FromQuery] string key)
-    {
-        await sectionConfigurationService.UpdateHero(assets, removedAssets, fields, key);
         return Ok(new { message = "Success" });
     }
 

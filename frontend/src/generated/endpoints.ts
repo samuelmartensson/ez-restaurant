@@ -5,6 +5,26 @@
  * OpenAPI spec version: 1.0
  */
 import { authorizedFetch } from "../authorized-fetch";
+export type PostSectionAboutBody = {
+  Description?: string;
+  Image?: Blob;
+  removedAssets?: string[];
+};
+
+export type PostSectionAboutParams = {
+  key?: string;
+};
+
+export type PostSectionHeroBody = {
+  Image?: Blob;
+  OrderUrl?: string;
+  removedAssets?: string[];
+};
+
+export type PostSectionHeroParams = {
+  key?: string;
+};
+
 export type PostPublicContactParams = {
   key?: string;
 };
@@ -60,16 +80,6 @@ export type PostCustomerDomainParams = {
   domainName?: string;
 };
 
-export type PostCustomerHeroBody = {
-  Image?: Blob;
-  OrderUrl?: string;
-  removedAssets?: string[];
-};
-
-export type PostCustomerHeroParams = {
-  key?: string;
-};
-
 export type PostCustomerSiteConfigurationAssetsBody = {
   Font?: Blob;
   Logo?: Blob;
@@ -114,7 +124,13 @@ export interface SiteSectionHeroResponse {
   orderUrl?: string;
 }
 
+export interface SiteSectionAboutResponse {
+  description?: string;
+  image?: string;
+}
+
 export interface SectionsResponse {
+  about?: SiteSectionAboutResponse;
   hero?: SiteSectionHeroResponse;
 }
 
@@ -332,32 +348,6 @@ export const postCustomerSiteConfigurationAssets = (
   });
 };
 
-export const postCustomerHero = (
-  postCustomerHeroBody: PostCustomerHeroBody,
-  params?: PostCustomerHeroParams,
-) => {
-  const formData = new FormData();
-  if (postCustomerHeroBody.Image !== undefined) {
-    formData.append("Image", postCustomerHeroBody.Image);
-  }
-  if (postCustomerHeroBody.removedAssets !== undefined) {
-    postCustomerHeroBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-  if (postCustomerHeroBody.OrderUrl !== undefined) {
-    formData.append("OrderUrl", postCustomerHeroBody.OrderUrl);
-  }
-
-  return authorizedFetch<void>({
-    url: `/Customer/hero`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-  });
-};
-
 export const postCustomerDomain = (params?: PostCustomerDomainParams) => {
   return authorizedFetch<void>({
     url: `/Customer/domain`,
@@ -493,6 +483,58 @@ export const postPublicContact = (
   });
 };
 
+export const postSectionHero = (
+  postSectionHeroBody: PostSectionHeroBody,
+  params?: PostSectionHeroParams,
+) => {
+  const formData = new FormData();
+  if (postSectionHeroBody.Image !== undefined) {
+    formData.append("Image", postSectionHeroBody.Image);
+  }
+  if (postSectionHeroBody.removedAssets !== undefined) {
+    postSectionHeroBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+  if (postSectionHeroBody.OrderUrl !== undefined) {
+    formData.append("OrderUrl", postSectionHeroBody.OrderUrl);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/hero`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
+export const postSectionAbout = (
+  postSectionAboutBody: PostSectionAboutBody,
+  params?: PostSectionAboutParams,
+) => {
+  const formData = new FormData();
+  if (postSectionAboutBody.Image !== undefined) {
+    formData.append("Image", postSectionAboutBody.Image);
+  }
+  if (postSectionAboutBody.removedAssets !== undefined) {
+    postSectionAboutBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+  if (postSectionAboutBody.Description !== undefined) {
+    formData.append("Description", postSectionAboutBody.Description);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/about`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
 export const postWebhook = () => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
 };
@@ -511,9 +553,6 @@ export type PostCustomerSiteConfigurationResult = NonNullable<
 >;
 export type PostCustomerSiteConfigurationAssetsResult = NonNullable<
   Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>
->;
-export type PostCustomerHeroResult = NonNullable<
-  Awaited<ReturnType<typeof postCustomerHero>>
 >;
 export type PostCustomerDomainResult = NonNullable<
   Awaited<ReturnType<typeof postCustomerDomain>>
@@ -550,6 +589,12 @@ export type GetPublicGetCustomerMenuResult = NonNullable<
 >;
 export type PostPublicContactResult = NonNullable<
   Awaited<ReturnType<typeof postPublicContact>>
+>;
+export type PostSectionHeroResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionHero>>
+>;
+export type PostSectionAboutResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionAbout>>
 >;
 export type PostWebhookResult = NonNullable<
   Awaited<ReturnType<typeof postWebhook>>

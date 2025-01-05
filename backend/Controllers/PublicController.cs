@@ -19,6 +19,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     {
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
+            .Include(cf => cf.SiteSectionAbout)
             .Include(cf => cf.OpeningHours)
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
 
@@ -60,6 +61,11 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 {
                     HeroImage = customerConfig.SiteSectionHero?.Image ?? "",
                     OrderUrl = customerConfig.SiteSectionHero?.OrderUrl ?? ""
+                },
+                About = new SiteSectionAboutResponse
+                {
+                    Image = customerConfig.SiteSectionAbout?.Image ?? "",
+                    Description = customerConfig.SiteSectionAbout?.Description ?? ""
                 }
             }
         };

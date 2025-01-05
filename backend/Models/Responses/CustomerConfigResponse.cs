@@ -6,9 +6,16 @@ namespace Models.Responses
         public required string OrderUrl { get; set; }
     }
 
+    public class SiteSectionAboutResponse
+    {
+        public required string Image { get; set; }
+        public required string Description { get; set; }
+    }
+
     public class SectionsResponse
     {
         public required SiteSectionHeroResponse Hero { get; set; }
+        public required SiteSectionAboutResponse About { get; set; }
     }
 
     public class CustomerConfigResponse

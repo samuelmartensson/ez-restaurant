@@ -27,7 +27,7 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
         var siteSectionHeroType = customerConfig.SiteSectionHero.GetType();
         foreach (var name in removedAssets)
         {
-            await s3Service.DeleteFileAsync($"{key}/{name}");
+            await s3Service.DeleteFileAsync($"{key}/hero/{name}");
             var matchingProperty = siteSectionHeroType.GetProperty(name);
             if (matchingProperty != null)
             {
@@ -41,11 +41,58 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
             var file = property.GetValue(assets) as IFormFile;
             if (file != null)
             {
-                string url = await s3Service.UploadFileAsync(file, $"{key}/{property.Name.ToLowerInvariant()}");
+                string url = await s3Service.UploadFileAsync(file, $"{key}/hero/{property.Name.ToLowerInvariant()}");
                 var matchingProperty = siteSectionHeroType.GetProperty(property.Name);
                 if (matchingProperty != null)
                 {
                     matchingProperty.SetValue(customerConfig.SiteSectionHero, url);
+                }
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAbout(UploadAboutAssetsRequest assets, List<string> removedAssets, UploadAboutRequest fields, string key)
+    {
+        var customerConfig = await context.CustomerConfigs.Include(cf => cf.SiteSectionAbout).FirstOrDefaultAsync((x) => x.Domain == key);
+
+        if (customerConfig == null)
+        {
+            throw new Exception("CustomerConfig not found for the provided key.");
+        }
+
+        if (customerConfig.SiteSectionAbout == null)
+        {
+            var newAbout = new SiteSectionAbout { CustomerConfigDomain = customerConfig.Domain, Image = "" };
+            await context.SiteSectionAbouts.AddAsync(newAbout);
+            customerConfig.SiteSectionAbout = newAbout;
+        }
+
+        customerConfig.SiteSectionAbout.Description = fields?.Description ?? "";
+
+        var siteSectionAboutType = customerConfig.SiteSectionAbout.GetType();
+        foreach (var name in removedAssets)
+        {
+            await s3Service.DeleteFileAsync($"{key}/about/{name}");
+            var matchingProperty = siteSectionAboutType.GetProperty(name);
+            if (matchingProperty != null)
+            {
+                matchingProperty.SetValue(customerConfig.SiteSectionAbout, "");
+            }
+        }
+
+        var uploadRequestType = typeof(UploadAboutAssetsRequest);
+        foreach (var property in uploadRequestType.GetProperties())
+        {
+            var file = property.GetValue(assets) as IFormFile;
+            if (file != null)
+            {
+                string url = await s3Service.UploadFileAsync(file, $"{key}/about/{property.Name.ToLowerInvariant()}");
+                var matchingProperty = siteSectionAboutType.GetProperty(property.Name);
+                if (matchingProperty != null)
+                {
+                    matchingProperty.SetValue(customerConfig.SiteSectionAbout, url);
                 }
             }
         }
