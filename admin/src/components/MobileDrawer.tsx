@@ -28,7 +28,7 @@ const MobileDrawer = ({
       onOpenChange={setIsOpen}
       onAnimationEnd={(open) => open && setIsOpen?.(false)}
     >
-      <DrawerContent className="min-h-[80svh]">
+      <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
