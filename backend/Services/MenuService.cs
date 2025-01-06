@@ -49,7 +49,6 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
         foreach (AddCategoryRequest item in request)
         {
             var existingCategory = existingCategories.First(c => c.Id == item.Id);
-            existingCategory.Name = item.Name;
             existingCategory.Order = item.Order ?? 0;
         }
 
@@ -62,10 +61,11 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
         if (existingCategory != null)
         {
             existingCategory.Name = request.Name;
+            existingCategory.Description = request.Description;
         }
         else
         {
-            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name, Order = request.Order ?? 0 });
+            await context.MenuCategorys.AddAsync(new MenuCategory { CustomerConfigDomain = key, Name = request.Name, Description = request.Description, Order = request.Order ?? 0 });
         }
 
         await context.SaveChangesAsync();

@@ -7,6 +7,7 @@ public class CustomerConfig
     required public string SiteName { get; set; }
     required public string SiteMetaTitle { get; set; }
     required public string Logo { get; set; }
+    required public string Currency { get; set; }
     public string? Font { get; set; } = "";
     public string? Adress { get; set; } = "";
     public string? Phone { get; set; } = "";

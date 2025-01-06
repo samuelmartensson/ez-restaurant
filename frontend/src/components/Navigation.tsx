@@ -3,14 +3,90 @@
 import { CustomerConfigResponse } from "@/generated/endpoints";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+let timer: NodeJS.Timeout | null = null;
 
 export function Navigation({ data }: { data: CustomerConfigResponse }) {
   const pathname = usePathname();
+  const [isExpanded, setExpanded] = useState(false);
+  const [options, setOptions] = useState({
+    hidden: false,
+    lastHiddenY: 0,
+    fill: false,
+  });
+  const [scrollData, setScrollData] = useState({
+    x: 0,
+    y: 0,
+    lastX: 0,
+    lastY: 0,
+  });
+  const { lastY, y } = scrollData;
+
+  const handleScroll = () => {
+    if (timer !== null) {
+      clearTimeout(timer);
+    }
+
+    timer = setTimeout(function () {
+      setOptions((s) => {
+        if (window.scrollY > s.lastHiddenY) {
+          return {
+            ...s,
+            lastHiddenY: window.scrollY,
+          };
+        }
+
+        return s;
+      });
+    }, 150);
+
+    setScrollData((last) => {
+      return {
+        ...last,
+        y: window.scrollY,
+        lastY: last.y,
+      };
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isExpanded) return;
+    let shouldHide = false;
+
+    if (y > 60 && y - lastY > 0) {
+      shouldHide = true;
+    }
+
+    setOptions((s) => {
+      if (s.lastHiddenY - y < 4 && y > 60) {
+        shouldHide = true;
+      }
+
+      return {
+        hidden: shouldHide,
+        fill: y > 20,
+        lastHiddenY: shouldHide ? y : s.lastHiddenY,
+      };
+    });
+  }, [y, lastY, setExpanded, isExpanded]);
 
   if (pathname.includes("admin")) return null;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 text-white bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+    <nav
+      style={{
+        height: isExpanded ? "100%" : "unset",
+        transform: options.hidden ? "translateY(-100%)" : "translateY(0%)",
+      }}
+      className="fixed top-0 left-0 right-0 z-50 text-white duration-300 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60"
+    >
       <div className="font-customer container flex h-20 items-center justify-center gap-10 m-auto max-w-screen-xl">
         <Link href="/menu">
           <span className="text-lg cursor-pointer">MENU</span>

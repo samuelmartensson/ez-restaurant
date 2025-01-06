@@ -26,13 +26,18 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
-type Item = { id: number; name: string; order: number };
+type Item = { id: number; name: string; order: number; description: string };
 interface Props {
   isSelected: React.ReactNode;
-  category: string;
-  setCategory: (value: string) => void;
+  category: { name: string; description: string };
+  setCategory: Dispatch<
+    SetStateAction<{
+      name: string;
+      description: string;
+    }>
+  >;
   items: Item[];
   setItems: React.Dispatch<React.SetStateAction<Item[]>>;
   selectedCategory: number;
@@ -43,6 +48,7 @@ interface Props {
     isSelected: boolean;
     id: number;
     name: string;
+    description: string;
   }) => void;
   onOrderChange: (items: Item[]) => void;
 }
@@ -57,10 +63,16 @@ const DraggableBadge = ({
   onMovePrev: () => void;
   onMoveNext: () => void;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: draggableId,
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: draggableId,
+  });
 
   const style: React.CSSProperties = {
     ...props.style,
@@ -69,6 +81,7 @@ const DraggableBadge = ({
     ),
     transition,
     cursor: "move",
+    zIndex: isDragging ? 2 : 1,
   };
 
   return (
@@ -78,23 +91,31 @@ const DraggableBadge = ({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className="whitespace-nowrap text-base"
+      className="flex gap-1 whitespace-nowrap rounded-full text-sm"
     >
-      <ChevronLeft
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         onClick={(e) => {
           e.stopPropagation();
           onMovePrev();
         }}
-        size={16}
-      />
+      >
+        <ChevronLeft />
+      </Button>
       {props.children}
-      <ChevronRight
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
         onClick={(e) => {
           e.stopPropagation();
           onMoveNext();
         }}
-        size={16}
-      />
+      >
+        <ChevronRight />
+      </Button>
     </Badge>
   );
 };
@@ -147,24 +168,37 @@ const MenuCategories = ({
           <Input
             className="flex-1"
             placeholder="Add category..."
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={category.name}
+            onChange={(e) =>
+              setCategory((s) => ({ ...s, name: e.target.value }))
+            }
           />
-          <Button className="ml-auto" onClick={onClick}>
-            {isSelected ? "Update category" : "Add category"}
-          </Button>
+          {isSelected && (
+            <div className="w-full">
+              <Input
+                className="flex-1"
+                placeholder="Category description"
+                value={category.description}
+                onChange={(e) =>
+                  setCategory((s) => ({ ...s, description: e.target.value }))
+                }
+              />
+            </div>
+          )}
           {isSelected && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="destructive">Delete</Button>
+                <Button className="ml-auto" variant="destructive">
+                  Delete
+                </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Are you absolutely sure?</DialogTitle>
                   <DialogDescription>
                     This action cannot be undone. This will permanently delete
-                    the <span className="font-bold">{category}</span> category
-                    and all its items.
+                    the <span className="font-bold">{category.name}</span>{" "}
+                    category and all its items.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -179,13 +213,16 @@ const MenuCategories = ({
               </DialogContent>
             </Dialog>
           )}
+          <Button onClick={onClick}>
+            {isSelected ? "Update category" : "Add category"}
+          </Button>
         </div>
         <SortableContext items={items} strategy={horizontalListSortingStrategy}>
           <div
             style={{ maxWidth: "100%" }}
             className="flex gap-1 overflow-auto py-2"
           >
-            {items.map(({ id, name }) => {
+            {items.map(({ id, name, description }) => {
               const parsedId = Number(id);
               const isSelected = selectedCategory === parsedId;
 
@@ -195,15 +232,20 @@ const MenuCategories = ({
                   onMovePrev={() => onMoveClick({ activeId: id, dir: "left" })}
                   draggableId={id}
                   variant={
-                    selectedCategory === parsedId ? "default" : "outline"
+                    selectedCategory === parsedId ? "default" : "secondary"
                   }
                   onClick={() => {
-                    onBadgeClick({ id: parsedId, isSelected, name });
+                    onBadgeClick({
+                      id: parsedId,
+                      isSelected,
+                      name,
+                      description,
+                    });
                   }}
                   className="cursor-pointer select-none text-base"
                   key={parsedId}
                 >
-                  {name}
+                  <div className="select-none">{name}</div>
                 </DraggableBadge>
               );
             })}

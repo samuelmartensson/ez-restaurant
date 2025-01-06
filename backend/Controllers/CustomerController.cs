@@ -108,6 +108,7 @@ public class CustomerController(
             Phone = c.Phone,
             Email = c.Email,
             CustomDomain = c.CustomDomain,
+            Currency = c.Currency
         }).ToList();
 
         return Ok(
@@ -226,6 +227,10 @@ public class CustomerController(
         else
         {
             var errorResponse = await response.Content.ReadFromJsonAsync<VercelError>();
+            if (errorResponse?.error?.code == "domain_already_in_use")
+            {
+                return BadRequest(new { message = errorResponse?.error?.message ?? "This domain is already registered by a different domain or account.", error = errorResponse?.error?.code ?? "unknown" });
+            }
             return BadRequest(new { message = errorResponse?.error?.message ?? "Error registering domain", error = errorResponse?.error?.code ?? "unknown" });
         }
     }

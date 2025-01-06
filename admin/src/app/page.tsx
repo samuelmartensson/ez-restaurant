@@ -42,7 +42,11 @@ const inputSchema = [
   },
   {
     id: "SiteMetaTitle",
-    label: "Site meta title",
+    label: "Short description / Slogan",
+  },
+  {
+    id: "Currency",
+    label: "Currency",
   },
   {
     id: "Adress",
@@ -110,6 +114,7 @@ const Site = () => {
       Email: "",
       InstagramUrl: "",
       MapUrl: "",
+      Currency: "",
     },
   });
 
@@ -143,6 +148,7 @@ const Site = () => {
       Phone: customerConfig.phone ?? "",
       Email: customerConfig.email ?? "",
       InstagramUrl: customerConfig.instagramUrl ?? "",
+      Currency: customerConfig.currency ?? "",
       MapUrl: customerConfig.mapUrl ?? "",
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
     });

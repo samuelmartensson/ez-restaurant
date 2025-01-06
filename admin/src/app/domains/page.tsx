@@ -1,6 +1,9 @@
 "use client";
+import { useDataContext } from "@/components/DataContextProvider";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -8,9 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useDataContext } from "@/components/DataContextProvider";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import {
   useDeleteCustomerConfig,
   useDeleteCustomerDomain,
@@ -19,12 +21,10 @@ import {
 } from "@/generated/endpoints";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 const Domain = () => {
   const router = useRouter();
-  const [expandDNSHelp, setExpandDNSHelp] = useState(false);
   const [domainNameValue, setDomainNameValue] = useState("");
   const [customDomainValue, setCustomDomainValue] = useState("");
   const {
@@ -60,13 +60,6 @@ const Domain = () => {
       {
         onSuccess: () => {
           toast.success(`Added domain ${customDomainValue}`);
-        },
-        onError: (e) => {
-          if ((e as { error?: string })?.error === "domain_already_in_use") {
-            toast.error(
-              "This domain is already registered by a different domain or account.",
-            );
-          }
         },
       },
     );
@@ -120,18 +113,18 @@ const Domain = () => {
           <span className="text-muted-foreground">
             Will make your website directly available on:
           </span>{" "}
-          {domainNameValue}
+          {domainNameValue}.ezrest.se
         </p>
       </div>
 
       {selectedDomain && (
         <div>
           <div className="mt-6 grid justify-items-start gap-2">
-            <h2 className="mb-2 text-2xl">DNS</h2>
+            <h2 className="mb-2 text-2xl">DNS & Custom domain</h2>
             <div className="grid justify-items-start gap-1 text-muted-foreground">
               <p>
-                To use your own domain you must register your domain URL in the
-                field below and point your domain to
+                To use your own domain you must register your personally owned
+                domain in the field below and point your domain to
               </p>
               <code className="rounded bg-gray-100 px-2 py-1 text-black">
                 {selectedDomain.replace(" ", "")}.ezrest.se
@@ -141,62 +134,75 @@ const Domain = () => {
                 settings.
               </p>
             </div>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => setExpandDNSHelp((s) => !s)}
-              size="lg"
-            >
-              How do I do this?
-            </Button>
-            {expandDNSHelp && (
-              <ol className="grid list-disc gap-2 pl-5">
-                <li>
-                  <strong>Log in to your DNS providers dashboard</strong>: This
-                  could be your domain registrar (like GoDaddy, One.com, Loopia)
-                  or a hosting provider with DNS management tools.
-                </li>
-                <li>
-                  <strong>Navigate to DNS Management</strong>:{" "}
-                  {`Look for options
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" type="button" size="lg">
+                  How do I do this?
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>DNS setup for custom domain</DialogTitle>
+                  <DialogDescription className="text-left">
+                    <ol className="grid list-disc gap-2 pl-5 pt-5">
+                      <li>
+                        <strong>Log in to your DNS providers dashboard</strong>:
+                        This could be your domain registrar (like GoDaddy,
+                        One.com, Loopia) or a hosting provider with DNS
+                        management tools.
+                      </li>
+                      <li>
+                        <strong>Navigate to DNS Management</strong>:{" "}
+                        {`Look for options
                   like "DNS Settings," "DNS Management," or "Advanced DNS" to
                   access your domain's DNS records.`}
-                </li>
-                <li>
-                  <strong>Add a New CNAME Record</strong>: Select the option to
-                  {`"Add Record" or "Create New Record."`} Choose{" "}
-                  <code>CNAME</code> as the record type.
-                </li>
-                <li>
-                  <strong>Enter the domain and Target</strong>:
-                  <ul>
-                    <li>
-                      {`In the "Name" field, enter the subdomain you want to point
+                      </li>
+                      <li>
+                        <strong>Add a New CNAME Record</strong>: Select the
+                        option to
+                        {`"Add Record" or "Create New Record."`} Choose{" "}
+                        <code>CNAME</code> as the record type.
+                      </li>
+                      <li>
+                        <strong>Enter the domain and Target</strong>:
+                        <ul>
+                          <li>
+                            {`In the "Name" field, enter the subdomain you want to point
                       (e.g., "www" or "blog"). Leave blank if you want to use
                       your apex domain.`}
-                    </li>
-                    <li>
-                      {`In the "Value" or "Points to" field, enter the full domain
+                          </li>
+                          <li>
+                            {`In the "Value" or "Points to" field, enter the full domain
                       name, it should resolve to: "${selectedDomain}.ezrest.se".`}
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <strong>Save the Record</strong>:{" "}
-                  {`Click the "Save" or "Add
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <strong>Save the Record</strong>:{" "}
+                        {`Click the "Save" or "Add
                   Record" button to save the changes.`}
-                </li>
-                <li>
-                  <strong>Wait for Propagation</strong>: It may take a few
-                  minutes to several hours for DNS changes to propagate across
-                  the internet.
-                </li>
-                <li>
-                  <strong>Done!</strong>: Your EZ Rest website should now be
-                  available via your own domain.
-                </li>
-              </ol>
-            )}
+                      </li>
+                      <li>
+                        <strong>Wait for Propagation</strong>: It may take a few
+                        minutes to several hours for DNS changes to propagate
+                        across the internet.
+                      </li>
+                      <li>
+                        <strong>Done!</strong>: Your EZ Rest website should now
+                        be available via your own domain.
+                      </li>
+                    </ol>
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button">Got it</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
             {customDomain ? (
               <Button
                 disabled={isPendingDeleteDomain}

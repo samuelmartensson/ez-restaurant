@@ -2,36 +2,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
 import { Image } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef } from "react";
-
-function groupBy<T extends MenuItemResponse>(
-  list: T[],
-  key: keyof T
-): { group: string; items: T[] }[] {
-  const grouped = list.reduce(
-    (result, item) => {
-      const groupKey = item[key] as string;
-
-      if (!result[groupKey]) {
-        result[groupKey] = [];
-      }
-
-      result[groupKey].push(item);
-
-      return result;
-    },
-    {} as { [key: string]: T[] }
-  );
-
-  return Object.keys(grouped).map((groupKey) => ({
-    group: groupKey,
-    items: grouped[groupKey],
-  }));
-}
 
 const MenuItem = ({
   description,
@@ -39,7 +15,8 @@ const MenuItem = ({
   price,
   tags,
   image,
-}: MenuItemResponse) => {
+  currency,
+}: MenuItemResponse & { currency: string }) => {
   return (
     <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-4">
       {image ? (
@@ -77,14 +54,20 @@ const MenuItem = ({
           )}
         </div>
         <span className="font-customer text-primary font-bold self-end whitespace-nowrap">
-          {price} SEK
+          {price} {currency}
         </span>
       </div>
     </div>
   );
 };
 
-const MenuRender = ({ data }: { data: MenuResponse }) => {
+const MenuRender = ({
+  data,
+  currency,
+}: {
+  data: MenuResponse;
+  currency: string;
+}) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -102,7 +85,7 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
             "url(https://ez-rest.s3.eu-north-1.amazonaws.com/adflow.se/menu-backdrop.jpg)",
         }}
       />
-      <div className="relative z-10 grid gap-4">
+      <div className="relative z-10 grid gap-1">
         {data.categories.length > 0 && (
           <Tabs
             ref={ref}
@@ -148,20 +131,21 @@ const MenuRender = ({ data }: { data: MenuResponse }) => {
         )}
 
         <div className="max-h-[65svh] overflow-auto">
-          {groupBy(
-            data.menuItems?.filter(
-              (item) =>
-                selectedCategory === "all" ||
-                item.categoryId === Number(selectedCategory)
-            ),
-            "categoryId"
-          ).map((item) => (
-            <div key={item.group}>
-              {item.items.map((x, i) => (
-                <MenuItem key={i} {...x} />
-              ))}
-            </div>
-          ))}
+          {data.categories
+            ?.filter((item) => item.id === Number(selectedCategory))
+            .map((item) => (
+              <div key={item.id}>
+                <div className="pt-4 p-2 text-muted-foreground">
+                  <span className="mb-2 block">{item.description}</span>
+                  <Separator />
+                </div>
+                {data?.menuItems
+                  ?.filter((m) => m.categoryId === item.id)
+                  ?.map((x, i) => (
+                    <MenuItem key={i} {...x} currency={currency} />
+                  ))}
+              </div>
+            ))}
         </div>
       </div>
     </div>

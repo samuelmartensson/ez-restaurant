@@ -20,23 +20,25 @@ const badgeVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof badgeVariants> {}
 
-const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
+const Badge = React.forwardRef<HTMLButtonElement, BadgeProps>(
   ({ className, variant, ...props }, ref) => {
     return (
-      <div
+      <button
+        type="button"
         ref={ref}
+        tabIndex={-1}
         className={cn(badgeVariants({ variant }), className)}
         {...props}
       />
     );
-  }
+  },
 );
 Badge.displayName = "Badge";
 

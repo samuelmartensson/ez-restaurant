@@ -37,10 +37,13 @@ export default async function Footer() {
                 </a>
               )}
               {data?.phone && (
-                <div className="flex items-center space-x-3">
+                <a
+                  href={`tel:${data.phone}`}
+                  className="flex items-center space-x-3"
+                >
                   <Phone className="h-5 w-5 text-gray-400" />
                   <span>{data?.phone}</span>
-                </div>
+                </a>
               )}
               {data?.adress && (
                 <a

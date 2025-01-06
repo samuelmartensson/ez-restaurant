@@ -53,6 +53,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
             InstagramUrl = customerConfig.InstagramUrl,
+            Currency = customerConfig.Currency,
             MapUrl = customerConfig.MapUrl,
             CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
@@ -106,7 +107,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         {
             Id = mc.Id,
             Name = mc.Name,
-            Order = mc.Order
+            Order = mc.Order,
+            Description = mc.Description ?? ""
         })
         .ToList();
 

@@ -12,12 +12,14 @@ import { useRouter } from "next/navigation";
 const DataContext = createContext<{
   configs: CustomerConfigResponse[];
   selectedDomain: string;
+  selectedConfig: CustomerConfigResponse | undefined;
   setSelectedDomain: (domain: string) => void;
   customDomain: string;
   refetch: () => Promise<void>;
 }>({
   configs: [],
   selectedDomain: "",
+  selectedConfig: undefined,
   setSelectedDomain: () => null,
   customDomain: "",
   refetch: () => Promise.resolve(),
@@ -55,14 +57,16 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     router.replace("/onboarding");
   }
 
+  const selectedConfig = configs.find((c) => c.domain === selectedDomain);
+
   return (
     <DataContext.Provider
       value={{
         configs,
         setSelectedDomain: setSelectedDomainInternal,
         selectedDomain,
-        customDomain:
-          configs.find((c) => c.domain === selectedDomain)?.customDomain ?? "",
+        selectedConfig,
+        customDomain: selectedConfig?.customDomain ?? "",
         refetch: async () => {
           await refetch();
         },

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -70,11 +71,13 @@ const inputSchema = [
       id: "name",
       label: "Name",
       type: "text",
+      description: "",
     },
     {
       id: "price",
       label: "Price",
       type: "number",
+      description: "",
     },
   ],
   [
@@ -82,6 +85,7 @@ const inputSchema = [
       id: "categoryId",
       label: "Category",
       type: "select",
+      description: "",
     },
   ],
   [
@@ -89,6 +93,7 @@ const inputSchema = [
       id: "description",
       label: "Description",
       type: "textarea",
+      description: "",
     },
   ],
   [
@@ -96,6 +101,7 @@ const inputSchema = [
       id: "image",
       label: "Image",
       type: "file",
+      description: "",
     },
   ],
   [
@@ -103,6 +109,7 @@ const inputSchema = [
       id: "tags",
       label: "Tags",
       type: "text",
+      description: "To create multiple tags, separate words with commas (,)",
     },
   ],
 ] as const;
@@ -123,8 +130,10 @@ const DataLayer = () => {
   return <AdminMenu data={data} />;
 };
 
+const CATEGORY_DEFAULT = { description: "", name: "" };
+
 const AdminMenu = ({ data }: { data: MenuResponse }) => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, selectedConfig } = useDataContext();
   const isMobile = useIsMobile();
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedFieldIndex, setSelectedField] = useState<number>();
@@ -133,7 +142,10 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   );
 
   const [selectedCategory, setSelectedCategory] = useState<number>(-1);
-  const [addCategory, setAddCategory] = useState("");
+  const [addCategory, setAddCategory] = useState<{
+    name: string;
+    description: string;
+  }>(CATEGORY_DEFAULT);
   const { refetch } = useGetPublicGetCustomerMenu(
     {
       key: selectedDomain,
@@ -176,16 +188,20 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   };
 
   const handleUpdateCategory = async () => {
-    if (!addCategory.trim()) return;
+    if (!addCategory.name.trim()) return;
     await updateCategory({
       data: {
         id: selectedCategory,
-        name: addCategory,
+        name: addCategory.name,
+        description: addCategory.description,
       },
       params: { key: selectedDomain },
     });
     if (selectedCategory === -1) {
-      setAddCategory("");
+      setAddCategory({
+        name: "",
+        description: "",
+      });
     }
     toast.success("Categories updated.");
     refetchAndSync();
@@ -196,7 +212,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     });
     refetchAndSync();
     setSelectedCategory(-1);
-    setAddCategory("");
+    setAddCategory(CATEGORY_DEFAULT);
     toast.success("Category deleted.");
   };
 
@@ -264,7 +280,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
           onDelete={handleDeleteCategory}
           onBadgeClick={(payload) => {
             setSelectedCategory(payload.isSelected ? -1 : payload.id);
-            setAddCategory(payload.isSelected ? "" : payload.name);
+            setAddCategory(
+              payload.isSelected
+                ? CATEGORY_DEFAULT
+                : { name: payload.name, description: payload.description },
+            );
           }}
           onOrderChange={(items) => setCategoryList(items)}
         />
@@ -294,7 +314,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
             onDelete={handleDeleteCategory}
             onBadgeClick={(payload) => {
               setSelectedCategory(payload.isSelected ? -1 : payload.id);
-              setAddCategory(payload.isSelected ? "" : payload.name);
+              setAddCategory(
+                payload.isSelected
+                  ? CATEGORY_DEFAULT
+                  : { name: payload.name, description: payload.description },
+              );
             }}
             onOrderChange={(items) => setCategoryList(items)}
           />
@@ -353,9 +377,13 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                           )}
                         </>
                       )}
-                      <div className="grid justify-items-start gap-1">
+                      <div className="grid justify-items-start">
                         <span className="text-base">
                           {form.watch(`menu.${index}.name`)}
+                        </span>
+                        <span className="mb-3 text-muted-foreground">
+                          {form.watch(`menu.${index}.price`)}{" "}
+                          {selectedConfig?.currency}
                         </span>
                         <Badge>
                           {categories[form.watch(`menu.${index}.categoryId`)]}
@@ -535,6 +563,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                               <FormItem className="grid flex-1">
                                 <FormLabel>{input.label}</FormLabel>
                                 <FormControl>{render}</FormControl>
+                                {input?.description && (
+                                  <FormDescription>
+                                    {input?.description}
+                                  </FormDescription>
+                                )}
                                 <FormMessage />
                               </FormItem>
                             );

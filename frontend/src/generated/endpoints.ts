@@ -90,9 +90,9 @@ export type PostCustomerSiteConfigurationAssetsParams = {
 };
 
 export type PostCustomerSiteConfigurationBody = {
-  AboutUsDescription?: string;
   Adress?: string;
   ContactFormVisible?: boolean;
+  Currency?: string;
   Email?: string;
   Font?: string;
   InstagramUrl?: string;
@@ -155,6 +155,8 @@ export interface MenuItemResponse {
 }
 
 export interface MenuCategoryResponse {
+  /** @minLength 1 */
+  description: string;
   id: number;
   /** @minLength 1 */
   name: string;
@@ -167,9 +169,9 @@ export interface MenuResponse {
 }
 
 export interface CustomerConfigResponse {
-  aboutUsDescription?: string;
   /** @nullable */
   adress?: string | null;
+  currency?: string;
   /** @nullable */
   customDomain?: string | null;
   domain?: string;
@@ -197,6 +199,7 @@ export interface CustomerResponse {
   cancelInfo?: CancelInfo;
   customerConfigs?: CustomerConfigResponse[];
   domain?: string;
+  isFirstSignIn?: boolean;
   subscription?: SubscriptionState;
 }
 
@@ -252,6 +255,8 @@ export interface AddOpeningHourRequest {
 }
 
 export interface AddCategoryRequest {
+  /** @nullable */
+  description?: string | null;
   id?: number;
   name?: string;
   /** @nullable */
@@ -299,11 +304,8 @@ export const postCustomerSiteConfiguration = (
   if (postCustomerSiteConfigurationBody.Theme !== undefined) {
     formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
-  if (postCustomerSiteConfigurationBody.AboutUsDescription !== undefined) {
-    formData.append(
-      "AboutUsDescription",
-      postCustomerSiteConfigurationBody.AboutUsDescription,
-    );
+  if (postCustomerSiteConfigurationBody.Currency !== undefined) {
+    formData.append("Currency", postCustomerSiteConfigurationBody.Currency);
   }
   if (postCustomerSiteConfigurationBody.ContactFormVisible !== undefined) {
     formData.append(

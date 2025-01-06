@@ -29,6 +29,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Adress = siteConfiguration.Adress;
         customerConfig.Email = siteConfiguration.Email;
         customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
+        customerConfig.Currency = siteConfiguration.Currency;
         customerConfig.MapUrl = siteConfiguration.MapUrl;
         customerConfig.Phone = siteConfiguration.Phone;
         customerConfig.SectionVisibility.ContactFormVisible = siteConfiguration.ContactFormVisible;
@@ -76,10 +77,11 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             CustomerId = customerId,
             Domain = domain,
             HeroType = 1,
-            Logo = "",
-            SiteMetaTitle = "",
             SiteName = domain,
             Theme = "rustic",
+            Currency = "SEK",
+            Logo = "",
+            SiteMetaTitle = "",
             OpeningHours = defaultOpeningHours,
             SectionVisibility = new SectionVisibility
             {
