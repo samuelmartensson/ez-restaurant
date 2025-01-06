@@ -30,6 +30,8 @@ import { useDataContext } from "@/components/DataContextProvider";
 import FilePreview from "@/components/FilePreview";
 import hasDomain from "@/components/hasDomain";
 import MenuCategories from "@/components/MenuCategories";
+import MobileDrawer from "@/components/MobileDrawer";
+import { Textarea } from "@/components/ui/textarea";
 import {
   MenuResponse,
   useDeleteMenuCategory,
@@ -38,13 +40,26 @@ import {
   usePostMenuCategoryOrder,
   usePostMenuItems,
 } from "@/generated/endpoints";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import MobileDrawer from "@/components/MobileDrawer";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Textarea } from "@/components/ui/textarea";
 
 const ACTIONS = {
   REMOVE: "REMOVE",
@@ -142,6 +157,45 @@ const ImagePreview = ({
     </>
   );
 
+const DraggableItem = ({
+  draggableId,
+  ...props
+}: React.JSX.IntrinsicElements["div"] & {
+  draggableId: number;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: draggableId,
+  });
+  const style: React.CSSProperties = {
+    ...props.style,
+    transform: CSS.Transform.toString(
+      transform && { y: transform.y, scaleY: 1, x: 0, scaleX: 1 },
+    ),
+    transition,
+    cursor: "move",
+    zIndex: isDragging ? 2 : 1,
+  };
+
+  return (
+    <div
+      {...props}
+      style={style}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+    >
+      {props.children}
+    </div>
+  );
+};
+
 const DataLayer = () => {
   const { selectedDomain } = useDataContext();
 
@@ -191,7 +245,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     resolver: zodResolver(formSchema),
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     name: "menu",
     control: form.control,
     keyName: "formId",
@@ -252,11 +306,12 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       params: { key: selectedDomain },
       data: {
         menuItemsJson: JSON.stringify(
-          form.getValues("menu").map((d) => ({
+          form.getValues("menu").map((d, index) => ({
             ...d,
             image: d.image === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
             price: Number(d.price),
             categoryId: Number(d.categoryId),
+            order: index + 1,
           })),
         ),
         files: Object.entries(uploadedImages).map(
@@ -315,6 +370,22 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     />
   );
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (active.id !== over?.id) {
+      const activeIndex = fields.findIndex((i) => i.id === active.id);
+      const overIndex = fields.findIndex((i) => i.id === over?.id);
+
+      move(activeIndex, overIndex);
+    }
+  };
+
   if (categoryList.length === 0) {
     return (
       <div>
@@ -336,98 +407,111 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         <div className="grid grid-rows-[auto_60vh]">
           {Categories}
           <div className="flex flex-col gap-2 overflow-auto p-2">
-            {fields.map((field, index) => {
-              const deleteStaged = deletedItems.includes(index);
-              const saveStaged = !data?.menuItems
-                ?.map((d) => d.id)
-                .includes(field.id);
+            <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+              <SortableContext
+                items={fields}
+                strategy={verticalListSortingStrategy}
+              >
+                {fields.map((field, index) => {
+                  const deleteStaged = deletedItems.includes(index);
+                  const saveStaged = !data?.menuItems
+                    ?.map((d) => d.id)
+                    .includes(field.id);
 
-              if (
-                selectedCategory !== -1 &&
-                form.watch(`menu.${index}.categoryId`)?.toString() !==
-                  selectedCategory.toString()
-              )
-                return null;
+                  if (
+                    selectedCategory !== -1 &&
+                    form.watch(`menu.${index}.categoryId`)?.toString() !==
+                      selectedCategory.toString()
+                  )
+                    return null;
 
-              return (
-                <div
-                  key={field.formId}
-                  className={`relative flex flex-col justify-between gap-2 border-b md:flex-row ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
-                >
-                  <Button
-                    onClick={() => {
-                      setSelectedField((state) =>
-                        state === index ? -1 : index,
-                      );
-                    }}
-                    type="button"
-                    className="block h-auto w-full text-left"
-                    variant={(() => {
-                      if (saveStaged) return "default";
-                      return deleteStaged ? "destructive" : "ghost";
-                    })()}
-                  >
-                    <div className="flex items-center gap-2">
-                      <ImagePreview
-                        file={uploadedImages?.[resolveImageId(field)]}
-                        field={field}
-                        image={form.watch(`menu.${index}.image`)}
-                      />
-                      <div className="grid justify-items-start">
-                        <span className="text-base">
-                          {form.watch(`menu.${index}.name`)}
-                        </span>
-                        <span className="mb-3 text-muted-foreground">
-                          {form.watch(`menu.${index}.price`)}{" "}
-                          {selectedConfig?.currency}
-                        </span>
-                        <Badge>
-                          {categories[form.watch(`menu.${index}.categoryId`)]}
-                        </Badge>
+                  return (
+                    <DraggableItem key={field.formId} draggableId={field.id}>
+                      <div
+                        className={`relative flex flex-col justify-between gap-2 border-b md:flex-row ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
+                      >
+                        <Button
+                          onClick={() => {
+                            setSelectedField((state) =>
+                              state === index ? -1 : index,
+                            );
+                          }}
+                          type="button"
+                          className="block h-auto w-full text-left"
+                          variant={(() => {
+                            if (saveStaged) return "default";
+                            return deleteStaged ? "destructive" : "ghost";
+                          })()}
+                        >
+                          <div className="flex items-center gap-2">
+                            <ImagePreview
+                              file={uploadedImages?.[resolveImageId(field)]}
+                              field={field}
+                              image={form.watch(`menu.${index}.image`)}
+                            />
+                            <div className="grid justify-items-start">
+                              <span className="text-base">
+                                {form.watch(`menu.${index}.name`)}
+                              </span>
+                              <span className="mb-3 text-muted-foreground">
+                                {form.watch(`menu.${index}.price`)}{" "}
+                                {selectedConfig?.currency}
+                              </span>
+                              <Badge>
+                                {
+                                  categories[
+                                    form.watch(`menu.${index}.categoryId`)
+                                  ]
+                                }
+                              </Badge>
+                            </div>
+                          </div>
+                        </Button>
+                        <div className="grid content-start gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            type="button"
+                            onClick={() => {
+                              if (saveStaged) {
+                                remove(index);
+                                return;
+                              }
+                              setDeletedItems((state) =>
+                                state.includes(index)
+                                  ? state.filter((n) => n !== index)
+                                  : [...state, index],
+                              );
+                            }}
+                          >
+                            {deleteStaged ? <X /> : <Trash />} Delete
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            type="button"
+                            onClick={() => {
+                              const item = {
+                                ...form.watch(`menu.${index}`),
+                                tempId: uuidv4(),
+                                id: -1,
+                              };
+                              console.log(form.watch(`menu.${index}`));
+
+                              append({ ...item, index: fields.length });
+                              setSelectedField(fields.length);
+                            }}
+                          >
+                            <Copy /> Copy
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </Button>
-                  <div className="grid content-start gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      type="button"
-                      onClick={() => {
-                        if (saveStaged) {
-                          remove(index);
-                          return;
-                        }
-                        setDeletedItems((state) =>
-                          state.includes(index)
-                            ? state.filter((n) => n !== index)
-                            : [...state, index],
-                        );
-                      }}
-                    >
-                      {deleteStaged ? <X /> : <Trash />} Delete
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      type="button"
-                      onClick={() => {
-                        const item = {
-                          ...form.watch(`menu.${index}`),
-                          tempId: uuidv4(),
-                          id: -1,
-                        };
-                        console.log(form.watch(`menu.${index}`));
+                    </DraggableItem>
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
 
-                        append({ ...item, index: fields.length });
-                        setSelectedField(fields.length);
-                      }}
-                    >
-                      <Copy /> Copy
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
             <Button
               onClick={handleAddMenuItem}
               variant="secondary"

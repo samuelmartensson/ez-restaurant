@@ -113,7 +113,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         .ToList();
 
         var menuItemsResponse = menuCategories
-            .SelectMany(mc => mc.MenuItems)
+            .SelectMany(m => m.MenuItems)
+            .OrderBy(m => m.Order)
             .ToList()
             .Select(m => new MenuItemResponse
             {
@@ -124,6 +125,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 Description = m.Description,
                 Tags = m.Tags,
                 Image = m.Image,
+                Order = m.Order
             })
             .ToList();
 

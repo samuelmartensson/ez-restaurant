@@ -11,6 +11,7 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
     {
         public int Id { get; set; }
         public required string Name { get; set; }
+        public required int Order { get; set; }
         public int CategoryId { get; set; }
         public decimal Price { get; set; }
         public string? TempId { get; set; }
@@ -143,6 +144,7 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
         existingItem.Tags = menuItem.Tags;
         existingItem.MenuCategoryId = menuItem.CategoryId;
         existingItem.Id = menuItem.Id;
+        existingItem.Order = menuItem.Order;
 
         var file = files.FirstOrDefault(f => f.FileName == menuItem.Id.ToString());
         if (file != null)
@@ -169,6 +171,7 @@ public class MenuService(RestaurantContext context, S3Service s3Service)
             Price = menuItem.Price,
             Tags = menuItem.Tags,
             MenuCategoryId = menuItem.CategoryId,
+            Order = menuItem.Order
         };
 
         context.MenuItems.Add(newMenuItem);
