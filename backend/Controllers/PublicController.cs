@@ -54,7 +54,6 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Phone = customerConfig.Phone,
             InstagramUrl = customerConfig.InstagramUrl,
             MapUrl = customerConfig.MapUrl,
-            AboutUsDescription = customerConfig.AboutUsDescription,
             CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
             SectionVisibility = new SectionVisibilityResponse

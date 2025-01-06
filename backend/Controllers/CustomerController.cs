@@ -108,7 +108,6 @@ public class CustomerController(
             Phone = c.Phone,
             Email = c.Email,
             CustomDomain = c.CustomDomain,
-            AboutUsDescription = c.AboutUsDescription,
         }).ToList();
 
         return Ok(

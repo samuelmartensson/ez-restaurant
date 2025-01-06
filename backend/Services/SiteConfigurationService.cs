@@ -31,7 +31,6 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
         customerConfig.MapUrl = siteConfiguration.MapUrl;
         customerConfig.Phone = siteConfiguration.Phone;
-        customerConfig.AboutUsDescription = siteConfiguration.AboutUsDescription;
         customerConfig.SectionVisibility.ContactFormVisible = siteConfiguration.ContactFormVisible;
 
         if (siteConfiguration.Logo == "REMOVE")
@@ -82,7 +81,6 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             SiteName = domain,
             Theme = "rustic",
             OpeningHours = defaultOpeningHours,
-            AboutUsDescription = "",
             SectionVisibility = new SectionVisibility
             {
                 CustomerConfigDomain = domain

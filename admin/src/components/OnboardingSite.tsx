@@ -30,7 +30,6 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
     defaultValues: {
       SiteName: "",
       SiteMetaTitle: "",
-      AboutUsDescription: "",
       Logo: "",
       Theme: "",
       Adress: "",
@@ -52,7 +51,6 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
       data: {
         ...data,
         SiteMetaTitle: "-",
-        AboutUsDescription: "-",
         Theme: "modern",
         Logo: "",
         Font: "",

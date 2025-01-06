@@ -89,16 +89,28 @@ const Domain = () => {
     setSelectedDomain("");
   };
 
+  function containsOnlyLetters(str: string) {
+    const regex = /^[a-zA-Z\d-]+$/;
+    return regex.test(str);
+  }
+
   return (
     <div className="grid max-w-lg gap-4">
-      <p className="text-muted-foreground">Create a new domain</p>
+      <p className="text-muted-foreground">
+        Create a new domain, it can only contain letters, numbers and hypens.
+      </p>
       <div className="grid gap-2">
         <div className="flex gap-2">
           <Input
             placeholder="My restaurant name"
             value={domainNameValue}
             className={isError ? "border border-red-500" : ""}
-            onChange={(e) => setDomainNameValue(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (containsOnlyLetters(value) || value === "") {
+                setDomainNameValue(value);
+              }
+            }}
           />
           <Button disabled={isPending} onClick={() => handleCreateConfig()}>
             Create domain
@@ -122,7 +134,7 @@ const Domain = () => {
                 field below and point your domain to
               </p>
               <code className="rounded bg-gray-100 px-2 py-1 text-black">
-                {selectedDomain}.ezrest.se
+                {selectedDomain.replace(" ", "")}.ezrest.se
               </code>{" "}
               <p>
                 by adding a CNAME record in your providers DNS/Hosting provider

@@ -103,7 +103,6 @@ const Site = () => {
     defaultValues: {
       SiteName: "",
       SiteMetaTitle: "",
-      AboutUsDescription: "",
       Logo: "",
       Theme: "",
       Adress: "",
@@ -145,7 +144,6 @@ const Site = () => {
       Email: customerConfig.email ?? "",
       InstagramUrl: customerConfig.instagramUrl ?? "",
       MapUrl: customerConfig.mapUrl ?? "",
-      AboutUsDescription: customerConfig.aboutUsDescription ?? "",
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
     });
   }, [customerConfig, form]);
@@ -205,7 +203,10 @@ const Site = () => {
               <FormItem>
                 <FormLabel>Theme</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={field.value} />
                     </SelectTrigger>
@@ -226,7 +227,6 @@ const Site = () => {
             );
           }}
         />
-
         <div className="mb-4 flex flex-wrap gap-2">
           {assetsInputSchema.map((input) => (
             <FormField

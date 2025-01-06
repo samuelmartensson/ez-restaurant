@@ -15,15 +15,17 @@ const About = async () => {
       <div className="container mx-auto px-4 md:pt-16">
         <Card>
           <div>
-            <div className="p-2">
-              <Image
-                src={aboutSection?.image ?? ""}
-                alt=""
-                width={600}
-                height={600}
-                className="m-auto w-full max-h-96 object-cover rounded-xl"
-              />
-            </div>
+            {aboutSection?.image && (
+              <div className="p-2">
+                <Image
+                  src={aboutSection?.image ?? ""}
+                  alt=""
+                  width={600}
+                  height={600}
+                  className="m-auto w-full max-h-96 object-cover rounded-xl"
+                />
+              </div>
+            )}
             <CardContent className="p-8">
               <h1 className="font-customer text-4xl font-bold mb-6 text-primary">
                 ABOUT US
