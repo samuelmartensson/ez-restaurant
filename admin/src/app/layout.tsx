@@ -44,7 +44,7 @@ export default function AdminLayout({
                 <SidebarProvider>
                   <AppSidebar />
                   <main className="w-full">
-                    <SidebarTrigger className="ml-1 mt-4" />
+                    <SidebarTrigger className="ml-2 mt-4 md:ml-4" />
                     {children}
                   </main>
                 </SidebarProvider>

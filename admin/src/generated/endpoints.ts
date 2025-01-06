@@ -211,6 +211,7 @@ export interface CustomerResponse {
   cancelInfo?: CancelInfo;
   customerConfigs?: CustomerConfigResponse[];
   domain?: string;
+  isFirstSignIn?: boolean;
   subscription?: SubscriptionState;
 }
 

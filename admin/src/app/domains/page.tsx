@@ -118,7 +118,7 @@ const Domain = () => {
             <h2 className="mb-2 text-2xl">DNS</h2>
             <div className="grid justify-items-start gap-1 text-muted-foreground">
               <p>
-                To use your own domain you must register your domains URL in the
+                To use your own domain you must register your domain URL in the
                 field below and point your domain to
               </p>
               <code className="rounded bg-gray-100 px-2 py-1 text-black">
@@ -178,6 +178,10 @@ const Domain = () => {
                   <strong>Wait for Propagation</strong>: It may take a few
                   minutes to several hours for DNS changes to propagate across
                   the internet.
+                </li>
+                <li>
+                  <strong>Done!</strong>: Your EZ Rest website should now be
+                  available via your own domain.
                 </li>
               </ol>
             )}

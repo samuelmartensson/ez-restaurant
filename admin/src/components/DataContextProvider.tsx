@@ -7,6 +7,7 @@ import {
 import { useUser } from "@clerk/nextjs";
 import { createContext, useContext, useEffect, useState } from "react";
 import AppLoader from "./AppLoader";
+import { useRouter } from "next/navigation";
 
 const DataContext = createContext<{
   configs: CustomerConfigResponse[];
@@ -28,6 +29,7 @@ const domain_key = (userId: string) => `${userId}_domain`;
 
 const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
+  const router = useRouter();
   const domainKey = domain_key(user?.id ?? "");
   const [selectedDomain, setSelectedDomain] = useState(
     sessionStorage.getItem(domainKey) ?? "",
@@ -48,6 +50,10 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   }, [data, selectedDomain]);
 
   if (isLoading) return <AppLoader />;
+
+  if (data?.isFirstSignIn) {
+    router.replace("/onboarding");
+  }
 
   return (
     <DataContext.Provider

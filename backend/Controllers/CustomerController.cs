@@ -51,7 +51,7 @@ public class CustomerController(
 
         if (user == null)
         {
-            var newCustomer = new Customer { Subscription = SubscriptionState.Free };
+            var newCustomer = new Customer { Subscription = SubscriptionState.Free, IsFirstSignIn = true };
             try
             {
                 await context.Customers.AddAsync(newCustomer);
@@ -64,7 +64,12 @@ public class CustomerController(
                 context.Customers.Remove(newCustomer);
                 await context.SaveChangesAsync();
             }
-            return Ok(new List<CustomerResponse>());
+            return Ok(new CustomerResponse
+            {
+                IsFirstSignIn = true,
+                Subscription = SubscriptionState.Free,
+                CustomerConfigs = new List<CustomerConfigResponse>(),
+            });
         }
 
         var clerkUser = await clerkApiClient.Users[user.Id].GetAsync();
@@ -109,9 +114,10 @@ public class CustomerController(
         return Ok(
             new CustomerResponse
             {
+                IsFirstSignIn = false,
                 Subscription = customer?.Subscription ?? SubscriptionState.Free,
                 CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>(),
-                CancelInfo = cancelInfo
+                CancelInfo = cancelInfo,
             }
             );
     }

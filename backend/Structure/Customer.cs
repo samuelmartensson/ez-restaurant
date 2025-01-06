@@ -10,6 +10,7 @@ public class Customer
 {
     public int Id { get; set; }
     required public SubscriptionState Subscription { get; set; }
+    required public bool IsFirstSignIn { get; set; } = true;
     public DateTime? SubscriptionExpireAt { get; set; }
     public ICollection<CustomerConfig> CustomerConfigs { get; set; } = new List<CustomerConfig>();
     public ICollection<User> Users { get; set; } = new List<User>();

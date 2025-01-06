@@ -16,7 +16,7 @@ function FilePreview({ file }: { file: File }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      className="mx-auto h-32 w-32 rounded bg-gray-100 object-contain"
+      className="h-32 w-32 rounded bg-gray-100 object-contain"
       src={previewUrl}
       alt=""
     />

@@ -13,6 +13,7 @@ public class OpeningHourService(RestaurantContext context)
 
         foreach (var day in daysOfWeek)
         {
+            if (day == 0) continue;
             openingHours.Add(new OpeningHour
             {
                 CustomerConfigDomain = domain,
