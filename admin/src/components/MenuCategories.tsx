@@ -57,11 +57,13 @@ const DraggableBadge = ({
   draggableId,
   onMovePrev,
   onMoveNext,
+  onClick,
   ...props
 }: BadgeProps & {
   draggableId: number;
   onMovePrev: () => void;
   onMoveNext: () => void;
+  onClick: () => void;
 }) => {
   const {
     attributes,
@@ -91,6 +93,14 @@ const DraggableBadge = ({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onClick={onClick}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if ((e.key === "Enter" || e.key === " ") && onClick) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className="flex gap-1 whitespace-nowrap rounded-full text-sm"
     >
       <Button
@@ -101,6 +111,7 @@ const DraggableBadge = ({
           e.stopPropagation();
           onMovePrev();
         }}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <ChevronLeft />
       </Button>
@@ -113,6 +124,7 @@ const DraggableBadge = ({
           e.stopPropagation();
           onMoveNext();
         }}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <ChevronRight />
       </Button>
@@ -163,7 +175,41 @@ const MenuCategories = ({
 
   return (
     <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
-      <div className="mb-8 overflow-auto">
+      <div className="mb-4 overflow-auto">
+        <SortableContext items={items} strategy={horizontalListSortingStrategy}>
+          <div
+            style={{ maxWidth: "100%" }}
+            className="mb-4 flex gap-1 overflow-auto py-2"
+          >
+            {items.map(({ id, name, description }) => {
+              const parsedId = Number(id);
+              const isSelected = selectedCategory === parsedId;
+
+              return (
+                <DraggableBadge
+                  onMoveNext={() => onMoveClick({ activeId: id, dir: "right" })}
+                  onMovePrev={() => onMoveClick({ activeId: id, dir: "left" })}
+                  draggableId={id}
+                  variant={
+                    selectedCategory === parsedId ? "default" : "secondary"
+                  }
+                  onClick={() => {
+                    onBadgeClick({
+                      id: parsedId,
+                      isSelected,
+                      name,
+                      description,
+                    });
+                  }}
+                  className="cursor-pointer select-none text-base"
+                  key={parsedId}
+                >
+                  <div className="select-none">{name}</div>
+                </DraggableBadge>
+              );
+            })}
+          </div>
+        </SortableContext>
         <div className="mb-2 flex flex-wrap gap-2 overflow-auto">
           <Input
             className="flex-1"
@@ -217,40 +263,6 @@ const MenuCategories = ({
             {isSelected ? "Update category" : "Add category"}
           </Button>
         </div>
-        <SortableContext items={items} strategy={horizontalListSortingStrategy}>
-          <div
-            style={{ maxWidth: "100%" }}
-            className="flex gap-1 overflow-auto py-2"
-          >
-            {items.map(({ id, name, description }) => {
-              const parsedId = Number(id);
-              const isSelected = selectedCategory === parsedId;
-
-              return (
-                <DraggableBadge
-                  onMoveNext={() => onMoveClick({ activeId: id, dir: "right" })}
-                  onMovePrev={() => onMoveClick({ activeId: id, dir: "left" })}
-                  draggableId={id}
-                  variant={
-                    selectedCategory === parsedId ? "default" : "secondary"
-                  }
-                  onClick={() => {
-                    onBadgeClick({
-                      id: parsedId,
-                      isSelected,
-                      name,
-                      description,
-                    });
-                  }}
-                  className="cursor-pointer select-none text-base"
-                  key={parsedId}
-                >
-                  <div className="select-none">{name}</div>
-                </DraggableBadge>
-              );
-            })}
-          </div>
-        </SortableContext>
       </div>
     </DndContext>
   );

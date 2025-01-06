@@ -92,7 +92,7 @@ const MenuRender = ({
             className="overflow-auto scroll-smooth"
             value={String(selectedCategory)}
             onValueChange={(category) => {
-              router.push(pathname + "?selectedCategory=" + category);
+              router.replace(pathname + "?selectedCategory=" + category);
               if (!ref.current) return;
 
               const scrollDistance =

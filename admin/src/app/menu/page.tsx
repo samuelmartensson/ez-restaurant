@@ -114,6 +114,34 @@ const inputSchema = [
   ],
 ] as const;
 
+const ImagePreview = ({
+  field,
+  file,
+  image,
+}: {
+  field: z.infer<typeof menuItemSchema>;
+  file?: File;
+  image: string;
+}) =>
+  file ? (
+    <FilePreview className="h-20 w-20" file={file} />
+  ) : (
+    <>
+      {field.image && image !== ACTIONS.REMOVE ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className="h-20 w-20 rounded bg-gray-100 object-contain"
+          src={field.image}
+          alt=""
+        />
+      ) : (
+        <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
+          No image
+        </div>
+      )}
+    </>
+  );
+
 const DataLayer = () => {
   const { selectedDomain } = useDataContext();
 
@@ -264,30 +292,34 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const resolveImageId = (field?: z.infer<typeof menuItemSchema>) =>
     field?.id === -1 ? (field?.tempId ?? "") : (field?.id ?? "");
 
+  const Categories = (
+    <MenuCategories
+      category={addCategory}
+      setCategory={setAddCategory}
+      items={categoryList}
+      setItems={setCategoryList}
+      isSelected={selectedCategory !== -1}
+      selectedCategory={selectedCategory}
+      setSelectedCategory={setSelectedCategory}
+      onClick={handleUpdateCategory}
+      onDelete={handleDeleteCategory}
+      onBadgeClick={(payload) => {
+        setSelectedCategory(payload.isSelected ? -1 : payload.id);
+        setAddCategory(
+          payload.isSelected
+            ? CATEGORY_DEFAULT
+            : { name: payload.name, description: payload.description },
+        );
+      }}
+      onOrderChange={(items) => setCategoryList(items)}
+    />
+  );
+
   if (categoryList.length === 0) {
     return (
       <div>
         <h2 className="mb-4">To get started with your menu, add a category.</h2>
-        <MenuCategories
-          category={addCategory}
-          setCategory={setAddCategory}
-          items={categoryList}
-          setItems={setCategoryList}
-          isSelected={selectedCategory !== -1}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          onClick={handleUpdateCategory}
-          onDelete={handleDeleteCategory}
-          onBadgeClick={(payload) => {
-            setSelectedCategory(payload.isSelected ? -1 : payload.id);
-            setAddCategory(
-              payload.isSelected
-                ? CATEGORY_DEFAULT
-                : { name: payload.name, description: payload.description },
-            );
-          }}
-          onOrderChange={(items) => setCategoryList(items)}
-        />
+        {Categories}
       </div>
     );
   }
@@ -302,26 +334,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         }}
       >
         <div className="grid grid-rows-[auto_60vh]">
-          <MenuCategories
-            category={addCategory}
-            setCategory={setAddCategory}
-            items={categoryList}
-            setItems={setCategoryList}
-            isSelected={selectedCategory !== -1}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            onClick={handleUpdateCategory}
-            onDelete={handleDeleteCategory}
-            onBadgeClick={(payload) => {
-              setSelectedCategory(payload.isSelected ? -1 : payload.id);
-              setAddCategory(
-                payload.isSelected
-                  ? CATEGORY_DEFAULT
-                  : { name: payload.name, description: payload.description },
-              );
-            }}
-            onOrderChange={(items) => setCategoryList(items)}
-          />
+          {Categories}
           <div className="flex flex-col gap-2 overflow-auto p-2">
             {fields.map((field, index) => {
               const deleteStaged = deletedItems.includes(index);
@@ -355,28 +368,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                     })()}
                   >
                     <div className="flex items-center gap-2">
-                      {uploadedImages?.[resolveImageId(field)] ? (
-                        <FilePreview
-                          file={uploadedImages[resolveImageId(field)]}
-                        />
-                      ) : (
-                        <>
-                          {field.image &&
-                          form.watch(`menu.${index}.image`) !==
-                            ACTIONS.REMOVE ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              className="h-20 w-20 rounded bg-gray-100 object-contain"
-                              src={field.image}
-                              alt=""
-                            />
-                          ) : (
-                            <div className="grid h-20 w-20 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
-                              No image
-                            </div>
-                          )}
-                        </>
-                      )}
+                      <ImagePreview
+                        file={uploadedImages?.[resolveImageId(field)]}
+                        field={field}
+                        image={form.watch(`menu.${index}.image`)}
+                      />
                       <div className="grid justify-items-start">
                         <span className="text-base">
                           {form.watch(`menu.${index}.name`)}
