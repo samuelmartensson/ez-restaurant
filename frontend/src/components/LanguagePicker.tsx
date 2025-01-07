@@ -1,7 +1,7 @@
 "use client";
 
+import { ChevronDown, Languages } from "lucide-react";
 import * as React from "react";
-import { Check, ChevronDown, Languages } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
