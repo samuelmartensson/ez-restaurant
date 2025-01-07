@@ -25,8 +25,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { VersionSwitcher } from "./ConfigSwitcher";
+import { ConfigSwitcher } from "./ConfigSwitcher";
 import { useEffect } from "react";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const items = [
   {
@@ -57,7 +58,8 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { configs, selectedDomain, customDomain } = useDataContext();
+  const { configs, selectedConfig, selectedDomain, customDomain } =
+    useDataContext();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   const { user } = useUser();
@@ -68,10 +70,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="floating">
-      <SidebarHeader>
-        <VersionSwitcher domains={configs.map((c) => c.domain ?? "")} />
+      <SidebarHeader className="gap-1">
+        <ConfigSwitcher domains={configs.map((c) => c.domain ?? "")} />
+        <LanguageSwitcher languages={selectedConfig?.languages ?? []} />
         <SidebarContent>
           <SidebarGroup>
+            <SidebarGroupLabel>Website</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -113,7 +117,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

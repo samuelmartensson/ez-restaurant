@@ -1,6 +1,7 @@
 public class CustomerConfig
 {
     required public string Domain { get; set; }
+    required public string Languages { get; set; }
     public int CustomerId { get; set; }
     public int HeroType { get; set; }
     required public string Theme { get; set; }
@@ -21,4 +22,5 @@ public class CustomerConfig
     public SiteSectionHero? SiteSectionHero { get; set; }
     public ICollection<MenuCategory> MenuCategorys { get; set; } = new List<MenuCategory>();
     public ICollection<OpeningHour> OpeningHours { get; set; } = new List<OpeningHour>();
+    public ICollection<Translation> Translations { get; set; } = new List<Translation>();
 }

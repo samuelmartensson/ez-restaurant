@@ -40,7 +40,7 @@ const assetsInputSchema = [
 ] as const;
 
 const Hero = () => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, selectedLanguage } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
   );
@@ -55,7 +55,8 @@ const Hero = () => {
   });
 
   const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
-    key: selectedDomain,
+    Key: selectedDomain,
+    Language: selectedLanguage,
   });
 
   const { mutateAsync: uploadHero } = usePostSectionHero();

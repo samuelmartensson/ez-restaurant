@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, Globe } from "lucide-react";
+import { Check, ChevronsUpDown, Languages } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useDataContext } from "./DataContextProvider";
 
-export function ConfigSwitcher({ domains }: { domains: string[] }) {
-  const { selectedDomain, setSelectedDomain } = useDataContext();
+export function LanguageSwitcher({ languages }: { languages: string[] }) {
+  const { selectedLanguage, setSelectedLanguage } = useDataContext();
 
   return (
     <SidebarMenu>
@@ -25,12 +25,11 @@ export function ConfigSwitcher({ domains }: { domains: string[] }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Globe className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center rounded">
+                <Languages className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">Domains</span>
-                <span className="">{selectedDomain}</span>
+                <span className="">{selectedLanguage}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -39,18 +38,18 @@ export function ConfigSwitcher({ domains }: { domains: string[] }) {
             className="w-[--radix-dropdown-menu-trigger-width]"
             align="start"
           >
-            {domains.length === 0 && (
+            {languages.length === 0 && (
               <span className="m-auto block p-2 text-center text-sm text-muted-foreground">
                 No domains yet
               </span>
             )}
-            {domains.map((version) => (
+            {languages.map((lang) => (
               <DropdownMenuItem
-                key={version}
-                onSelect={() => setSelectedDomain(version)}
+                key={lang}
+                onSelect={() => setSelectedLanguage(lang)}
               >
-                {version}{" "}
-                {version === selectedDomain && <Check className="ml-auto" />}
+                {lang}{" "}
+                {lang === selectedLanguage && <Check className="ml-auto" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

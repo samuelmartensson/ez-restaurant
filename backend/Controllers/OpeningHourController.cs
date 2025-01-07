@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Responses;
@@ -18,7 +19,7 @@ public class OpeningHourController(
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(typeof(List<OpeningHourResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOpeningHours([FromQuery] string key)
+    public async Task<IActionResult> GetOpeningHours([FromQuery, Required] string key)
     {
         var openingHours = (await openingHourService.GetOpeningHours(key))
             .Select(o => new OpeningHourResponse
@@ -38,7 +39,7 @@ public class OpeningHourController(
     [HttpPost]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateOpeningHours(List<AddOpeningHourRequest> newOpeningHours, [FromQuery] string key)
+    public async Task<IActionResult> UpdateOpeningHours(List<AddOpeningHourRequest> newOpeningHours, [FromQuery, Required] string key)
     {
         await openingHourService.UpdateOpeningHours(key, newOpeningHours);
         return Ok(new { message = "Success" });

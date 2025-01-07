@@ -84,6 +84,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<SectionConfigurationService>();
 builder.Services.AddScoped<OpeningHourService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<TranslationService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();

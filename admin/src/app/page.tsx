@@ -6,6 +6,15 @@ import FormLayout from "@/components/FormLayout";
 import hasDomain from "@/components/hasDomain";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -30,7 +39,7 @@ import {
   usePostCustomerSiteConfiguration,
   usePostCustomerSiteConfigurationAssets,
 } from "@/generated/endpoints";
-import { Save } from "lucide-react";
+import { Save, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -99,10 +108,13 @@ const ACTIONS = {
 const Wrapper = () => <FormLayout title="Site">{hasDomain(Site)()}</FormLayout>;
 
 const Site = () => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, selectedLanguage, setSelectedLanguage } =
+    useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
   );
+  const [language, setLanguage] = useState("");
+  const [languages, setLanguages] = useState<string[]>([]);
   const form = useForm<PostCustomerSiteConfigurationBody>({
     defaultValues: {
       SiteName: "",
@@ -115,14 +127,16 @@ const Site = () => {
       InstagramUrl: "",
       MapUrl: "",
       Currency: "",
+      Languages: [],
     },
   });
 
   const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig(
     {
-      key: selectedDomain,
+      Key: selectedDomain,
+      Language: selectedLanguage,
     },
-    { query: { enabled: !!selectedDomain } },
+    { query: { enabled: !!selectedDomain && !!selectedLanguage } },
   );
 
   const { mutateAsync: uploadSiteConfiguration, isPending: isPendingData } =
@@ -138,6 +152,7 @@ const Site = () => {
   useEffect(() => {
     if (!customerConfig) return;
 
+    setLanguages(customerConfig?.languages ?? []);
     form.reset({
       SiteName: customerConfig.siteName ?? "",
       SiteMetaTitle: customerConfig.siteMetaTitle ?? "",
@@ -151,11 +166,12 @@ const Site = () => {
       Currency: customerConfig.currency ?? "",
       MapUrl: customerConfig.mapUrl ?? "",
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
+      Languages: customerConfig.languages ?? [],
     });
   }, [customerConfig, form]);
 
   async function onSubmit(data: PostCustomerSiteConfigurationBody) {
-    const params = { key: selectedDomain };
+    const params = { Key: selectedDomain, Language: selectedLanguage };
     await uploadSiteConfigurationAssets({
       data: {
         ...uploadedAssets,
@@ -165,6 +181,7 @@ const Site = () => {
     await uploadSiteConfiguration({
       data: {
         ...data,
+        Languages: languages,
         Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
         Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
       },
@@ -172,6 +189,9 @@ const Site = () => {
     });
 
     const updated = await refetch();
+    if (!updated.data?.languages?.includes(selectedLanguage)) {
+      setSelectedLanguage(updated.data?.languages?.[0] ?? "");
+    }
     // Rerender font preview
     form.setValue("Font", updated.data?.font ?? "");
     toast.success("Site information saved.");
@@ -183,6 +203,58 @@ const Site = () => {
         className="grid max-w-lg gap-4 overflow-auto"
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        <div className="mb-2 flex flex-wrap items-center gap-2 overflow-auto">
+          <div>Languages</div>
+          <div className="flex w-full gap-2">
+            {languages.map((lang) => (
+              <Dialog key={lang}>
+                <DialogTrigger asChild>
+                  <Button disabled={languages.length === 1}>
+                    {languages.length > 1 && <Settings />}
+                    <span>{lang}</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Manage - {lang}</DialogTitle>
+                    <DialogDescription>
+                      This will permanently delete{" "}
+                      <span className="font-bold">{lang}</span> and all its
+                      translations after you click save.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      variant="destructive"
+                      type="button"
+                      onClick={() =>
+                        setLanguages((s) => s.filter((l) => l !== lang))
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            ))}
+          </div>
+          <Input
+            className="flex-1"
+            placeholder="Add language..."
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+          />
+          <Button
+            disabled={language.trim() === ""}
+            type="button"
+            onClick={() => {
+              setLanguages((s) => [...s, language]);
+              setLanguage("");
+            }}
+          >
+            Add language
+          </Button>
+        </div>
         {inputSchema.map((input) => (
           <FormField
             key={input.id}

@@ -8,6 +8,7 @@ namespace Models.Requests
 
     public class UpdateSiteConfigurationRequest
     {
+        required public List<string> Languages { get; set; }
         required public string SiteName { get; set; }
         required public string SiteMetaTitle { get; set; }
         required public string Theme { get; set; }

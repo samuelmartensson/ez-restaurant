@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
 
-public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService)
+public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService, TranslationService translationService)
 {
     private readonly RestaurantContext context = context;
     private readonly S3Service s3Service = s3Service;
+    private TranslationService translationService = translationService;
+
     private readonly OpeningHourService openingHourService = openingHourService;
 
 
-    public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, string key)
+    public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, CommonQueryParameters queryParameters)
     {
-        var customerConfig = context.CustomerConfigs.Include(cf => cf.SectionVisibility).FirstOrDefault((x) => x.Domain == key);
+        var key = queryParameters.Key;
+        var customerConfig = await context.CustomerConfigs.Include(cf => cf.SectionVisibility).FirstOrDefaultAsync((x) => x.Domain == key);
         if (customerConfig == null)
         {
             throw new Exception("CustomerConfig not found for the provided key.");
@@ -23,6 +26,21 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             };
         }
 
+        await translationService.CreateOrUpdateByKey(queryParameters.Language, queryParameters.Key, "site:name", siteConfiguration.SiteName);
+        await translationService.CreateOrUpdateByKey(queryParameters.Language, queryParameters.Key, "site:short_description", siteConfiguration.SiteMetaTitle);
+
+        // Delete translations from removed languages.
+        foreach (string lang in customerConfig.Languages.Split(","))
+        {
+            var exists = siteConfiguration.Languages.Any(l => l == lang);
+            if (!exists)
+            {
+                var translationsToRemove = context.Translations.Where(t => t.LanguageCode == lang && t.CustomerConfigDomain == key);
+                context.Translations.RemoveRange(translationsToRemove);
+            }
+        }
+
+        customerConfig.Languages = string.Join(",", siteConfiguration.Languages);
         customerConfig.SiteName = siteConfiguration.SiteName;
         customerConfig.SiteMetaTitle = siteConfiguration.SiteMetaTitle;
         customerConfig.Theme = siteConfiguration.Theme;
@@ -47,8 +65,9 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateSiteConfigurationAssets(UploadSiteConfigurationAssetsRequest assets, string key)
+    public async Task UpdateSiteConfigurationAssets(UploadSiteConfigurationAssetsRequest assets, CommonQueryParameters queryParameters)
     {
+        var key = queryParameters.Key;
         var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
         if (customerConfig == null)
         {
@@ -83,6 +102,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             Logo = "",
             SiteMetaTitle = "",
             OpeningHours = defaultOpeningHours,
+            Languages = "English",
             SectionVisibility = new SectionVisibility
             {
                 CustomerConfigDomain = domain

@@ -26,7 +26,8 @@ export type PostSectionAboutBody = {
 };
 
 export type PostSectionAboutParams = {
-  key?: string;
+  Key: string;
+  Language: string;
 };
 
 export type PostSectionHeroBody = {
@@ -36,27 +37,28 @@ export type PostSectionHeroBody = {
 };
 
 export type PostSectionHeroParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostPublicContactParams = {
-  key?: string;
+  key: string;
 };
 
 export type GetPublicGetCustomerMenuParams = {
-  key?: string;
+  key: string;
 };
 
 export type GetPublicGetCustomerConfigParams = {
-  key?: string;
+  Key: string;
+  Language?: string;
 };
 
 export type PostOpeningHourParams = {
-  key?: string;
+  key: string;
 };
 
 export type GetOpeningHourParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostMenuImportqoplamenuParams = {
@@ -64,16 +66,16 @@ export type PostMenuImportqoplamenuParams = {
 };
 
 export type PostMenuCategoryOrderParams = {
-  key?: string;
+  key: string;
 };
 
 export type DeleteMenuCategoryParams = {
   id?: number;
-  key?: string;
+  key: string;
 };
 
 export type PostMenuCategoryParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostMenuItemsBody = {
@@ -82,15 +84,15 @@ export type PostMenuItemsBody = {
 };
 
 export type PostMenuItemsParams = {
-  key?: string;
+  key: string;
 };
 
 export type DeleteCustomerDomainParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostCustomerDomainParams = {
-  key?: string;
+  key: string;
   domainName?: string;
 };
 
@@ -100,7 +102,8 @@ export type PostCustomerSiteConfigurationAssetsBody = {
 };
 
 export type PostCustomerSiteConfigurationAssetsParams = {
-  key?: string;
+  Key: string;
+  Language: string;
 };
 
 export type PostCustomerSiteConfigurationBody = {
@@ -110,6 +113,7 @@ export type PostCustomerSiteConfigurationBody = {
   Email?: string;
   Font?: string;
   InstagramUrl?: string;
+  Languages?: string[];
   Logo?: string;
   MapUrl?: string;
   Phone?: string;
@@ -119,11 +123,12 @@ export type PostCustomerSiteConfigurationBody = {
 };
 
 export type PostCustomerSiteConfigurationParams = {
-  key?: string;
+  Key: string;
+  Language: string;
 };
 
 export type DeleteCustomerConfigParams = {
-  key?: string;
+  key: string;
 };
 
 export type SubscriptionState =
@@ -163,6 +168,7 @@ export interface MenuItemResponse {
   image?: string | null;
   /** @minLength 1 */
   name: string;
+  order: number;
   price: number;
   /** @nullable */
   tags?: string | null;
@@ -196,6 +202,7 @@ export interface CustomerConfigResponse {
   heroType?: number;
   /** @nullable */
   instagramUrl?: string | null;
+  languages?: string[];
   logo?: string;
   /** @nullable */
   mapUrl?: string | null;
@@ -465,7 +472,7 @@ export const usePutCustomerConfig = <
   return useMutation(mutationOptions);
 };
 
-export const deleteCustomerConfig = (params?: DeleteCustomerConfigParams) => {
+export const deleteCustomerConfig = (params: DeleteCustomerConfigParams) => {
   return authorizedFetch<void>({
     url: `/Customer/config`,
     method: "DELETE",
@@ -480,20 +487,20 @@ export const getDeleteCustomerConfigMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteCustomerConfig>>,
     TError,
-    { params?: DeleteCustomerConfigParams },
+    { params: DeleteCustomerConfigParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteCustomerConfig>>,
   TError,
-  { params?: DeleteCustomerConfigParams },
+  { params: DeleteCustomerConfigParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteCustomerConfig>>,
-    { params?: DeleteCustomerConfigParams }
+    { params: DeleteCustomerConfigParams }
   > = (props) => {
     const { params } = props ?? {};
 
@@ -516,13 +523,13 @@ export const useDeleteCustomerConfig = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteCustomerConfig>>,
     TError,
-    { params?: DeleteCustomerConfigParams },
+    { params: DeleteCustomerConfigParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof deleteCustomerConfig>>,
   TError,
-  { params?: DeleteCustomerConfigParams },
+  { params: DeleteCustomerConfigParams },
   TContext
 > => {
   const mutationOptions = getDeleteCustomerConfigMutationOptions(options);
@@ -532,10 +539,15 @@ export const useDeleteCustomerConfig = <
 
 export const postCustomerSiteConfiguration = (
   postCustomerSiteConfigurationBody: PostCustomerSiteConfigurationBody,
-  params?: PostCustomerSiteConfigurationParams,
+  params: PostCustomerSiteConfigurationParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
+  if (postCustomerSiteConfigurationBody.Languages !== undefined) {
+    postCustomerSiteConfigurationBody.Languages.forEach((value) =>
+      formData.append("Languages", value),
+    );
+  }
   if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
     formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
   }
@@ -601,7 +613,7 @@ export const getPostCustomerSiteConfigurationMutationOptions = <
     TError,
     {
       data: PostCustomerSiteConfigurationBody;
-      params?: PostCustomerSiteConfigurationParams;
+      params: PostCustomerSiteConfigurationParams;
     },
     TContext
   >;
@@ -610,7 +622,7 @@ export const getPostCustomerSiteConfigurationMutationOptions = <
   TError,
   {
     data: PostCustomerSiteConfigurationBody;
-    params?: PostCustomerSiteConfigurationParams;
+    params: PostCustomerSiteConfigurationParams;
   },
   TContext
 > => {
@@ -620,7 +632,7 @@ export const getPostCustomerSiteConfigurationMutationOptions = <
     Awaited<ReturnType<typeof postCustomerSiteConfiguration>>,
     {
       data: PostCustomerSiteConfigurationBody;
-      params?: PostCustomerSiteConfigurationParams;
+      params: PostCustomerSiteConfigurationParams;
     }
   > = (props) => {
     const { data, params } = props ?? {};
@@ -647,7 +659,7 @@ export const usePostCustomerSiteConfiguration = <
     TError,
     {
       data: PostCustomerSiteConfigurationBody;
-      params?: PostCustomerSiteConfigurationParams;
+      params: PostCustomerSiteConfigurationParams;
     },
     TContext
   >;
@@ -656,7 +668,7 @@ export const usePostCustomerSiteConfiguration = <
   TError,
   {
     data: PostCustomerSiteConfigurationBody;
-    params?: PostCustomerSiteConfigurationParams;
+    params: PostCustomerSiteConfigurationParams;
   },
   TContext
 > => {
@@ -668,7 +680,7 @@ export const usePostCustomerSiteConfiguration = <
 
 export const postCustomerSiteConfigurationAssets = (
   postCustomerSiteConfigurationAssetsBody: PostCustomerSiteConfigurationAssetsBody,
-  params?: PostCustomerSiteConfigurationAssetsParams,
+  params: PostCustomerSiteConfigurationAssetsParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
@@ -698,7 +710,7 @@ export const getPostCustomerSiteConfigurationAssetsMutationOptions = <
     TError,
     {
       data: PostCustomerSiteConfigurationAssetsBody;
-      params?: PostCustomerSiteConfigurationAssetsParams;
+      params: PostCustomerSiteConfigurationAssetsParams;
     },
     TContext
   >;
@@ -707,7 +719,7 @@ export const getPostCustomerSiteConfigurationAssetsMutationOptions = <
   TError,
   {
     data: PostCustomerSiteConfigurationAssetsBody;
-    params?: PostCustomerSiteConfigurationAssetsParams;
+    params: PostCustomerSiteConfigurationAssetsParams;
   },
   TContext
 > => {
@@ -717,7 +729,7 @@ export const getPostCustomerSiteConfigurationAssetsMutationOptions = <
     Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>,
     {
       data: PostCustomerSiteConfigurationAssetsBody;
-      params?: PostCustomerSiteConfigurationAssetsParams;
+      params: PostCustomerSiteConfigurationAssetsParams;
     }
   > = (props) => {
     const { data, params } = props ?? {};
@@ -744,7 +756,7 @@ export const usePostCustomerSiteConfigurationAssets = <
     TError,
     {
       data: PostCustomerSiteConfigurationAssetsBody;
-      params?: PostCustomerSiteConfigurationAssetsParams;
+      params: PostCustomerSiteConfigurationAssetsParams;
     },
     TContext
   >;
@@ -753,7 +765,7 @@ export const usePostCustomerSiteConfigurationAssets = <
   TError,
   {
     data: PostCustomerSiteConfigurationAssetsBody;
-    params?: PostCustomerSiteConfigurationAssetsParams;
+    params: PostCustomerSiteConfigurationAssetsParams;
   },
   TContext
 > => {
@@ -764,7 +776,7 @@ export const usePostCustomerSiteConfigurationAssets = <
 };
 
 export const postCustomerDomain = (
-  params?: PostCustomerDomainParams,
+  params: PostCustomerDomainParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<void>({
@@ -782,20 +794,20 @@ export const getPostCustomerDomainMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postCustomerDomain>>,
     TError,
-    { params?: PostCustomerDomainParams },
+    { params: PostCustomerDomainParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postCustomerDomain>>,
   TError,
-  { params?: PostCustomerDomainParams },
+  { params: PostCustomerDomainParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postCustomerDomain>>,
-    { params?: PostCustomerDomainParams }
+    { params: PostCustomerDomainParams }
   > = (props) => {
     const { params } = props ?? {};
 
@@ -818,13 +830,13 @@ export const usePostCustomerDomain = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postCustomerDomain>>,
     TError,
-    { params?: PostCustomerDomainParams },
+    { params: PostCustomerDomainParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postCustomerDomain>>,
   TError,
-  { params?: PostCustomerDomainParams },
+  { params: PostCustomerDomainParams },
   TContext
 > => {
   const mutationOptions = getPostCustomerDomainMutationOptions(options);
@@ -832,7 +844,7 @@ export const usePostCustomerDomain = <
   return useMutation(mutationOptions);
 };
 
-export const deleteCustomerDomain = (params?: DeleteCustomerDomainParams) => {
+export const deleteCustomerDomain = (params: DeleteCustomerDomainParams) => {
   return authorizedFetch<void>({
     url: `/Customer/domain`,
     method: "DELETE",
@@ -847,20 +859,20 @@ export const getDeleteCustomerDomainMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteCustomerDomain>>,
     TError,
-    { params?: DeleteCustomerDomainParams },
+    { params: DeleteCustomerDomainParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteCustomerDomain>>,
   TError,
-  { params?: DeleteCustomerDomainParams },
+  { params: DeleteCustomerDomainParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteCustomerDomain>>,
-    { params?: DeleteCustomerDomainParams }
+    { params: DeleteCustomerDomainParams }
   > = (props) => {
     const { params } = props ?? {};
 
@@ -883,13 +895,13 @@ export const useDeleteCustomerDomain = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteCustomerDomain>>,
     TError,
-    { params?: DeleteCustomerDomainParams },
+    { params: DeleteCustomerDomainParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof deleteCustomerDomain>>,
   TError,
-  { params?: DeleteCustomerDomainParams },
+  { params: DeleteCustomerDomainParams },
   TContext
 > => {
   const mutationOptions = getDeleteCustomerDomainMutationOptions(options);
@@ -899,7 +911,7 @@ export const useDeleteCustomerDomain = <
 
 export const postMenuItems = (
   postMenuItemsBody: PostMenuItemsBody,
-  params?: PostMenuItemsParams,
+  params: PostMenuItemsParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
@@ -927,20 +939,20 @@ export const getPostMenuItemsMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMenuItems>>,
     TError,
-    { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+    { data: PostMenuItemsBody; params: PostMenuItemsParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postMenuItems>>,
   TError,
-  { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+  { data: PostMenuItemsBody; params: PostMenuItemsParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postMenuItems>>,
-    { data: PostMenuItemsBody; params?: PostMenuItemsParams }
+    { data: PostMenuItemsBody; params: PostMenuItemsParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -963,13 +975,13 @@ export const usePostMenuItems = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMenuItems>>,
     TError,
-    { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+    { data: PostMenuItemsBody; params: PostMenuItemsParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postMenuItems>>,
   TError,
-  { data: PostMenuItemsBody; params?: PostMenuItemsParams },
+  { data: PostMenuItemsBody; params: PostMenuItemsParams },
   TContext
 > => {
   const mutationOptions = getPostMenuItemsMutationOptions(options);
@@ -979,7 +991,7 @@ export const usePostMenuItems = <
 
 export const postMenuCategory = (
   addCategoryRequest: AddCategoryRequest,
-  params?: PostMenuCategoryParams,
+  params: PostMenuCategoryParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<void>({
@@ -999,20 +1011,20 @@ export const getPostMenuCategoryMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMenuCategory>>,
     TError,
-    { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+    { data: AddCategoryRequest; params: PostMenuCategoryParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postMenuCategory>>,
   TError,
-  { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+  { data: AddCategoryRequest; params: PostMenuCategoryParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postMenuCategory>>,
-    { data: AddCategoryRequest; params?: PostMenuCategoryParams }
+    { data: AddCategoryRequest; params: PostMenuCategoryParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -1035,13 +1047,13 @@ export const usePostMenuCategory = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMenuCategory>>,
     TError,
-    { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+    { data: AddCategoryRequest; params: PostMenuCategoryParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postMenuCategory>>,
   TError,
-  { data: AddCategoryRequest; params?: PostMenuCategoryParams },
+  { data: AddCategoryRequest; params: PostMenuCategoryParams },
   TContext
 > => {
   const mutationOptions = getPostMenuCategoryMutationOptions(options);
@@ -1049,7 +1061,7 @@ export const usePostMenuCategory = <
   return useMutation(mutationOptions);
 };
 
-export const deleteMenuCategory = (params?: DeleteMenuCategoryParams) => {
+export const deleteMenuCategory = (params: DeleteMenuCategoryParams) => {
   return authorizedFetch<void>({
     url: `/Menu/category`,
     method: "DELETE",
@@ -1064,20 +1076,20 @@ export const getDeleteMenuCategoryMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteMenuCategory>>,
     TError,
-    { params?: DeleteMenuCategoryParams },
+    { params: DeleteMenuCategoryParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteMenuCategory>>,
   TError,
-  { params?: DeleteMenuCategoryParams },
+  { params: DeleteMenuCategoryParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteMenuCategory>>,
-    { params?: DeleteMenuCategoryParams }
+    { params: DeleteMenuCategoryParams }
   > = (props) => {
     const { params } = props ?? {};
 
@@ -1100,13 +1112,13 @@ export const useDeleteMenuCategory = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteMenuCategory>>,
     TError,
-    { params?: DeleteMenuCategoryParams },
+    { params: DeleteMenuCategoryParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof deleteMenuCategory>>,
   TError,
-  { params?: DeleteMenuCategoryParams },
+  { params: DeleteMenuCategoryParams },
   TContext
 > => {
   const mutationOptions = getDeleteMenuCategoryMutationOptions(options);
@@ -1116,7 +1128,7 @@ export const useDeleteMenuCategory = <
 
 export const postMenuCategoryOrder = (
   addCategoryRequest: AddCategoryRequest[],
-  params?: PostMenuCategoryOrderParams,
+  params: PostMenuCategoryOrderParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<void>({
@@ -1136,20 +1148,20 @@ export const getPostMenuCategoryOrderMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMenuCategoryOrder>>,
     TError,
-    { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+    { data: AddCategoryRequest[]; params: PostMenuCategoryOrderParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postMenuCategoryOrder>>,
   TError,
-  { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+  { data: AddCategoryRequest[]; params: PostMenuCategoryOrderParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postMenuCategoryOrder>>,
-    { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams }
+    { data: AddCategoryRequest[]; params: PostMenuCategoryOrderParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -1172,13 +1184,13 @@ export const usePostMenuCategoryOrder = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMenuCategoryOrder>>,
     TError,
-    { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+    { data: AddCategoryRequest[]; params: PostMenuCategoryOrderParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postMenuCategoryOrder>>,
   TError,
-  { data: AddCategoryRequest[]; params?: PostMenuCategoryOrderParams },
+  { data: AddCategoryRequest[]; params: PostMenuCategoryOrderParams },
   TContext
 > => {
   const mutationOptions = getPostMenuCategoryOrderMutationOptions(options);
@@ -1256,7 +1268,7 @@ export const usePostMenuImportqoplamenu = <
 };
 
 export const getOpeningHour = (
-  params?: GetOpeningHourParams,
+  params: GetOpeningHourParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<OpeningHourResponse[]>({
@@ -1267,7 +1279,7 @@ export const getOpeningHour = (
   });
 };
 
-export const getGetOpeningHourQueryKey = (params?: GetOpeningHourParams) => {
+export const getGetOpeningHourQueryKey = (params: GetOpeningHourParams) => {
   return [`/OpeningHour`, ...(params ? [params] : [])] as const;
 };
 
@@ -1275,7 +1287,7 @@ export const getGetOpeningHourQueryOptions = <
   TData = Awaited<ReturnType<typeof getOpeningHour>>,
   TError = unknown,
 >(
-  params?: GetOpeningHourParams,
+  params: GetOpeningHourParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
@@ -1306,7 +1318,7 @@ export function useGetOpeningHour<
   TData = Awaited<ReturnType<typeof getOpeningHour>>,
   TError = unknown,
 >(
-  params: undefined | GetOpeningHourParams,
+  params: GetOpeningHourParams,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
@@ -1327,7 +1339,7 @@ export function useGetOpeningHour<
   TData = Awaited<ReturnType<typeof getOpeningHour>>,
   TError = unknown,
 >(
-  params?: GetOpeningHourParams,
+  params: GetOpeningHourParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
@@ -1346,7 +1358,7 @@ export function useGetOpeningHour<
   TData = Awaited<ReturnType<typeof getOpeningHour>>,
   TError = unknown,
 >(
-  params?: GetOpeningHourParams,
+  params: GetOpeningHourParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
@@ -1358,7 +1370,7 @@ export function useGetOpeningHour<
   TData = Awaited<ReturnType<typeof getOpeningHour>>,
   TError = unknown,
 >(
-  params?: GetOpeningHourParams,
+  params: GetOpeningHourParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getOpeningHour>>, TError, TData>
@@ -1378,7 +1390,7 @@ export function useGetOpeningHour<
 
 export const postOpeningHour = (
   addOpeningHourRequest: AddOpeningHourRequest[],
-  params?: PostOpeningHourParams,
+  params: PostOpeningHourParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<void>({
@@ -1398,20 +1410,20 @@ export const getPostOpeningHourMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postOpeningHour>>,
     TError,
-    { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+    { data: AddOpeningHourRequest[]; params: PostOpeningHourParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postOpeningHour>>,
   TError,
-  { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+  { data: AddOpeningHourRequest[]; params: PostOpeningHourParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postOpeningHour>>,
-    { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams }
+    { data: AddOpeningHourRequest[]; params: PostOpeningHourParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -1434,13 +1446,13 @@ export const usePostOpeningHour = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postOpeningHour>>,
     TError,
-    { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+    { data: AddOpeningHourRequest[]; params: PostOpeningHourParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postOpeningHour>>,
   TError,
-  { data: AddOpeningHourRequest[]; params?: PostOpeningHourParams },
+  { data: AddOpeningHourRequest[]; params: PostOpeningHourParams },
   TContext
 > => {
   const mutationOptions = getPostOpeningHourMutationOptions(options);
@@ -1449,7 +1461,7 @@ export const usePostOpeningHour = <
 };
 
 export const getPublicGetCustomerConfig = (
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<CustomerConfigResponse>({
@@ -1461,7 +1473,7 @@ export const getPublicGetCustomerConfig = (
 };
 
 export const getGetPublicGetCustomerConfigQueryKey = (
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
 ) => {
   return [`/Public/get-customer-config`, ...(params ? [params] : [])] as const;
 };
@@ -1470,7 +1482,7 @@ export const getGetPublicGetCustomerConfigQueryOptions = <
   TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1506,7 +1518,7 @@ export function useGetPublicGetCustomerConfig<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
   TError = unknown,
 >(
-  params: undefined | GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -1531,7 +1543,7 @@ export function useGetPublicGetCustomerConfig<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1554,7 +1566,7 @@ export function useGetPublicGetCustomerConfig<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1570,7 +1582,7 @@ export function useGetPublicGetCustomerConfig<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerConfig>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1596,7 +1608,7 @@ export function useGetPublicGetCustomerConfig<
 }
 
 export const getPublicGetCustomerMenu = (
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<MenuResponse>({
@@ -1608,7 +1620,7 @@ export const getPublicGetCustomerMenu = (
 };
 
 export const getGetPublicGetCustomerMenuQueryKey = (
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
 ) => {
   return [`/Public/get-customer-menu`, ...(params ? [params] : [])] as const;
 };
@@ -1617,7 +1629,7 @@ export const getGetPublicGetCustomerMenuQueryOptions = <
   TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1653,7 +1665,7 @@ export function useGetPublicGetCustomerMenu<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
   TError = unknown,
 >(
-  params: undefined | GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -1678,7 +1690,7 @@ export function useGetPublicGetCustomerMenu<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1701,7 +1713,7 @@ export function useGetPublicGetCustomerMenu<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1717,7 +1729,7 @@ export function useGetPublicGetCustomerMenu<
   TData = Awaited<ReturnType<typeof getPublicGetCustomerMenu>>,
   TError = unknown,
 >(
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1741,7 +1753,7 @@ export function useGetPublicGetCustomerMenu<
 
 export const postPublicContact = (
   contactRequest: ContactRequest,
-  params?: PostPublicContactParams,
+  params: PostPublicContactParams,
   signal?: AbortSignal,
 ) => {
   return authorizedFetch<void>({
@@ -1761,20 +1773,20 @@ export const getPostPublicContactMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPublicContact>>,
     TError,
-    { data: ContactRequest; params?: PostPublicContactParams },
+    { data: ContactRequest; params: PostPublicContactParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPublicContact>>,
   TError,
-  { data: ContactRequest; params?: PostPublicContactParams },
+  { data: ContactRequest; params: PostPublicContactParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPublicContact>>,
-    { data: ContactRequest; params?: PostPublicContactParams }
+    { data: ContactRequest; params: PostPublicContactParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -1797,13 +1809,13 @@ export const usePostPublicContact = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPublicContact>>,
     TError,
-    { data: ContactRequest; params?: PostPublicContactParams },
+    { data: ContactRequest; params: PostPublicContactParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postPublicContact>>,
   TError,
-  { data: ContactRequest; params?: PostPublicContactParams },
+  { data: ContactRequest; params: PostPublicContactParams },
   TContext
 > => {
   const mutationOptions = getPostPublicContactMutationOptions(options);
@@ -1813,7 +1825,7 @@ export const usePostPublicContact = <
 
 export const postSectionHero = (
   postSectionHeroBody: PostSectionHeroBody,
-  params?: PostSectionHeroParams,
+  params: PostSectionHeroParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
@@ -1846,20 +1858,20 @@ export const getPostSectionHeroMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionHero>>,
     TError,
-    { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+    { data: PostSectionHeroBody; params: PostSectionHeroParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postSectionHero>>,
   TError,
-  { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+  { data: PostSectionHeroBody; params: PostSectionHeroParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postSectionHero>>,
-    { data: PostSectionHeroBody; params?: PostSectionHeroParams }
+    { data: PostSectionHeroBody; params: PostSectionHeroParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -1882,13 +1894,13 @@ export const usePostSectionHero = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionHero>>,
     TError,
-    { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+    { data: PostSectionHeroBody; params: PostSectionHeroParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postSectionHero>>,
   TError,
-  { data: PostSectionHeroBody; params?: PostSectionHeroParams },
+  { data: PostSectionHeroBody; params: PostSectionHeroParams },
   TContext
 > => {
   const mutationOptions = getPostSectionHeroMutationOptions(options);
@@ -1898,7 +1910,7 @@ export const usePostSectionHero = <
 
 export const postSectionAbout = (
   postSectionAboutBody: PostSectionAboutBody,
-  params?: PostSectionAboutParams,
+  params: PostSectionAboutParams,
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
@@ -1931,20 +1943,20 @@ export const getPostSectionAboutMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionAbout>>,
     TError,
-    { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+    { data: PostSectionAboutBody; params: PostSectionAboutParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postSectionAbout>>,
   TError,
-  { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+  { data: PostSectionAboutBody; params: PostSectionAboutParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postSectionAbout>>,
-    { data: PostSectionAboutBody; params?: PostSectionAboutParams }
+    { data: PostSectionAboutBody; params: PostSectionAboutParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -1967,13 +1979,13 @@ export const usePostSectionAbout = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionAbout>>,
     TError,
-    { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+    { data: PostSectionAboutBody; params: PostSectionAboutParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postSectionAbout>>,
   TError,
-  { data: PostSectionAboutBody; params?: PostSectionAboutParams },
+  { data: PostSectionAboutBody; params: PostSectionAboutParams },
   TContext
 > => {
   const mutationOptions = getPostSectionAboutMutationOptions(options);

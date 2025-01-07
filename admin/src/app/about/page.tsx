@@ -41,7 +41,7 @@ const assetsInputSchema = [
 ] as const;
 
 const About = () => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, selectedLanguage } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
   );
@@ -56,7 +56,8 @@ const About = () => {
   });
 
   const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
-    key: selectedDomain,
+    Key: selectedDomain,
+    Language: selectedLanguage,
   });
 
   const { mutateAsync: uploadAbout } = usePostSectionAbout();
@@ -77,7 +78,7 @@ const About = () => {
         removedAssets: Object.keys(deletedAssets),
         Description: data.Description,
       },
-      params: { key: selectedDomain },
+      params: { Key: selectedDomain, Language: selectedLanguage },
     });
     toast.success("About saved.");
     const updated = await refetch();

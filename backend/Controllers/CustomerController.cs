@@ -5,6 +5,7 @@ using Models.Responses;
 using Models.Requests;
 using Stripe;
 using Clerk.Net.Client;
+using System.ComponentModel.DataAnnotations;
 
 namespace webapi.Controllers;
 
@@ -99,6 +100,7 @@ public class CustomerController(
         var customerConfigs = customer?.CustomerConfigs.Select(c => new CustomerConfigResponse
         {
             Domain = c.Domain,
+            Languages = c.Languages.Split(",").ToList(),
             HeroType = c.HeroType,
             Theme = c.Theme,
             SiteName = c.SiteName,
@@ -164,7 +166,7 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> RemoveConfig([FromQuery] string key)
+    public async Task<IActionResult> RemoveConfig([FromQuery, Required] string key)
     {
         try
         {
@@ -182,9 +184,9 @@ public class CustomerController(
     [HttpPost("site-configuration")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadSiteConfiguration([FromForm] UpdateSiteConfigurationRequest siteConfiguration, [FromQuery] string key)
+    public async Task<IActionResult> UploadSiteConfiguration([FromForm] UpdateSiteConfigurationRequest siteConfiguration, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        await siteConfigurationService.UpdateSiteConfiguration(siteConfiguration, key);
+        await siteConfigurationService.UpdateSiteConfiguration(siteConfiguration, queryParameters);
         return Ok(new { message = "Success" });
     }
 
@@ -193,9 +195,9 @@ public class CustomerController(
     [HttpPost("site-configuration-assets")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery] string key)
+    public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        await siteConfigurationService.UpdateSiteConfigurationAssets(assets, key);
+        await siteConfigurationService.UpdateSiteConfigurationAssets(assets, queryParameters);
         return Ok(new { message = "Success" });
     }
 
@@ -207,7 +209,7 @@ public class CustomerController(
     [HttpPost("domain")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> RegisterDomain([FromQuery] string key, [FromQuery] string domainName)
+    public async Task<IActionResult> RegisterDomain([FromQuery, Required] string key, [FromQuery] string domainName)
     {
         var customerConfig = await context.CustomerConfigs
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
@@ -240,7 +242,7 @@ public class CustomerController(
     [HttpDelete("domain")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteDomain([FromQuery] string key)
+    public async Task<IActionResult> DeleteDomain([FromQuery, Required] string key)
     {
         var customerConfig = await context.CustomerConfigs
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());

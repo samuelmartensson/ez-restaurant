@@ -12,7 +12,8 @@ export type PostSectionAboutBody = {
 };
 
 export type PostSectionAboutParams = {
-  key?: string;
+  Key: string;
+  Language: string;
 };
 
 export type PostSectionHeroBody = {
@@ -22,27 +23,28 @@ export type PostSectionHeroBody = {
 };
 
 export type PostSectionHeroParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostPublicContactParams = {
-  key?: string;
+  key: string;
 };
 
 export type GetPublicGetCustomerMenuParams = {
-  key?: string;
+  key: string;
 };
 
 export type GetPublicGetCustomerConfigParams = {
-  key?: string;
+  Key: string;
+  Language?: string;
 };
 
 export type PostOpeningHourParams = {
-  key?: string;
+  key: string;
 };
 
 export type GetOpeningHourParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostMenuImportqoplamenuParams = {
@@ -50,16 +52,16 @@ export type PostMenuImportqoplamenuParams = {
 };
 
 export type PostMenuCategoryOrderParams = {
-  key?: string;
+  key: string;
 };
 
 export type DeleteMenuCategoryParams = {
   id?: number;
-  key?: string;
+  key: string;
 };
 
 export type PostMenuCategoryParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostMenuItemsBody = {
@@ -68,15 +70,15 @@ export type PostMenuItemsBody = {
 };
 
 export type PostMenuItemsParams = {
-  key?: string;
+  key: string;
 };
 
 export type DeleteCustomerDomainParams = {
-  key?: string;
+  key: string;
 };
 
 export type PostCustomerDomainParams = {
-  key?: string;
+  key: string;
   domainName?: string;
 };
 
@@ -86,7 +88,8 @@ export type PostCustomerSiteConfigurationAssetsBody = {
 };
 
 export type PostCustomerSiteConfigurationAssetsParams = {
-  key?: string;
+  Key: string;
+  Language: string;
 };
 
 export type PostCustomerSiteConfigurationBody = {
@@ -96,6 +99,7 @@ export type PostCustomerSiteConfigurationBody = {
   Email?: string;
   Font?: string;
   InstagramUrl?: string;
+  Languages?: string[];
   Logo?: string;
   MapUrl?: string;
   Phone?: string;
@@ -105,11 +109,12 @@ export type PostCustomerSiteConfigurationBody = {
 };
 
 export type PostCustomerSiteConfigurationParams = {
-  key?: string;
+  Key: string;
+  Language: string;
 };
 
 export type DeleteCustomerConfigParams = {
-  key?: string;
+  key: string;
 };
 
 export type SubscriptionState =
@@ -149,6 +154,7 @@ export interface MenuItemResponse {
   image?: string | null;
   /** @minLength 1 */
   name: string;
+  order: number;
   price: number;
   /** @nullable */
   tags?: string | null;
@@ -182,6 +188,7 @@ export interface CustomerConfigResponse {
   heroType?: number;
   /** @nullable */
   instagramUrl?: string | null;
+  languages?: string[];
   logo?: string;
   /** @nullable */
   mapUrl?: string | null;
@@ -279,7 +286,7 @@ export const putCustomerConfig = (createConfigRequest: CreateConfigRequest) => {
   });
 };
 
-export const deleteCustomerConfig = (params?: DeleteCustomerConfigParams) => {
+export const deleteCustomerConfig = (params: DeleteCustomerConfigParams) => {
   return authorizedFetch<void>({
     url: `/Customer/config`,
     method: "DELETE",
@@ -289,9 +296,14 @@ export const deleteCustomerConfig = (params?: DeleteCustomerConfigParams) => {
 
 export const postCustomerSiteConfiguration = (
   postCustomerSiteConfigurationBody: PostCustomerSiteConfigurationBody,
-  params?: PostCustomerSiteConfigurationParams,
+  params: PostCustomerSiteConfigurationParams,
 ) => {
   const formData = new FormData();
+  if (postCustomerSiteConfigurationBody.Languages !== undefined) {
+    postCustomerSiteConfigurationBody.Languages.forEach((value) =>
+      formData.append("Languages", value),
+    );
+  }
   if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
     formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
   }
@@ -349,7 +361,7 @@ export const postCustomerSiteConfiguration = (
 
 export const postCustomerSiteConfigurationAssets = (
   postCustomerSiteConfigurationAssetsBody: PostCustomerSiteConfigurationAssetsBody,
-  params?: PostCustomerSiteConfigurationAssetsParams,
+  params: PostCustomerSiteConfigurationAssetsParams,
 ) => {
   const formData = new FormData();
   if (postCustomerSiteConfigurationAssetsBody.Logo !== undefined) {
@@ -368,7 +380,7 @@ export const postCustomerSiteConfigurationAssets = (
   });
 };
 
-export const postCustomerDomain = (params?: PostCustomerDomainParams) => {
+export const postCustomerDomain = (params: PostCustomerDomainParams) => {
   return authorizedFetch<void>({
     url: `/Customer/domain`,
     method: "POST",
@@ -376,7 +388,7 @@ export const postCustomerDomain = (params?: PostCustomerDomainParams) => {
   });
 };
 
-export const deleteCustomerDomain = (params?: DeleteCustomerDomainParams) => {
+export const deleteCustomerDomain = (params: DeleteCustomerDomainParams) => {
   return authorizedFetch<void>({
     url: `/Customer/domain`,
     method: "DELETE",
@@ -386,7 +398,7 @@ export const deleteCustomerDomain = (params?: DeleteCustomerDomainParams) => {
 
 export const postMenuItems = (
   postMenuItemsBody: PostMenuItemsBody,
-  params?: PostMenuItemsParams,
+  params: PostMenuItemsParams,
 ) => {
   const formData = new FormData();
   if (postMenuItemsBody.menuItemsJson !== undefined) {
@@ -407,7 +419,7 @@ export const postMenuItems = (
 
 export const postMenuCategory = (
   addCategoryRequest: AddCategoryRequest,
-  params?: PostMenuCategoryParams,
+  params: PostMenuCategoryParams,
 ) => {
   return authorizedFetch<void>({
     url: `/Menu/category`,
@@ -418,7 +430,7 @@ export const postMenuCategory = (
   });
 };
 
-export const deleteMenuCategory = (params?: DeleteMenuCategoryParams) => {
+export const deleteMenuCategory = (params: DeleteMenuCategoryParams) => {
   return authorizedFetch<void>({
     url: `/Menu/category`,
     method: "DELETE",
@@ -428,7 +440,7 @@ export const deleteMenuCategory = (params?: DeleteMenuCategoryParams) => {
 
 export const postMenuCategoryOrder = (
   addCategoryRequest: AddCategoryRequest[],
-  params?: PostMenuCategoryOrderParams,
+  params: PostMenuCategoryOrderParams,
 ) => {
   return authorizedFetch<void>({
     url: `/Menu/category/order`,
@@ -449,7 +461,7 @@ export const postMenuImportqoplamenu = (
   });
 };
 
-export const getOpeningHour = (params?: GetOpeningHourParams) => {
+export const getOpeningHour = (params: GetOpeningHourParams) => {
   return authorizedFetch<OpeningHourResponse[]>({
     url: `/OpeningHour`,
     method: "GET",
@@ -459,7 +471,7 @@ export const getOpeningHour = (params?: GetOpeningHourParams) => {
 
 export const postOpeningHour = (
   addOpeningHourRequest: AddOpeningHourRequest[],
-  params?: PostOpeningHourParams,
+  params: PostOpeningHourParams,
 ) => {
   return authorizedFetch<void>({
     url: `/OpeningHour`,
@@ -471,7 +483,7 @@ export const postOpeningHour = (
 };
 
 export const getPublicGetCustomerConfig = (
-  params?: GetPublicGetCustomerConfigParams,
+  params: GetPublicGetCustomerConfigParams,
 ) => {
   return authorizedFetch<CustomerConfigResponse>({
     url: `/Public/get-customer-config`,
@@ -481,7 +493,7 @@ export const getPublicGetCustomerConfig = (
 };
 
 export const getPublicGetCustomerMenu = (
-  params?: GetPublicGetCustomerMenuParams,
+  params: GetPublicGetCustomerMenuParams,
 ) => {
   return authorizedFetch<MenuResponse>({
     url: `/Public/get-customer-menu`,
@@ -492,7 +504,7 @@ export const getPublicGetCustomerMenu = (
 
 export const postPublicContact = (
   contactRequest: ContactRequest,
-  params?: PostPublicContactParams,
+  params: PostPublicContactParams,
 ) => {
   return authorizedFetch<void>({
     url: `/Public/contact`,
@@ -505,7 +517,7 @@ export const postPublicContact = (
 
 export const postSectionHero = (
   postSectionHeroBody: PostSectionHeroBody,
-  params?: PostSectionHeroParams,
+  params: PostSectionHeroParams,
 ) => {
   const formData = new FormData();
   if (postSectionHeroBody.Image !== undefined) {
@@ -531,7 +543,7 @@ export const postSectionHero = (
 
 export const postSectionAbout = (
   postSectionAboutBody: PostSectionAboutBody,
-  params?: PostSectionAboutParams,
+  params: PostSectionAboutParams,
 ) => {
   const formData = new FormData();
   if (postSectionAboutBody.Image !== undefined) {

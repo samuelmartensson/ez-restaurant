@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Requests;
@@ -17,7 +18,7 @@ public class MenuController(
     [HttpPost("items")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery] string key)
+    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery, Required] string key)
     {
         await menuService.UploadCustomerMenu(menuItemsJson, files, key);
         return Ok(new { message = "Success" });
@@ -28,7 +29,7 @@ public class MenuController(
     [HttpPost("category")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AddCategory(AddCategoryRequest request, [FromQuery] string key)
+    public async Task<IActionResult> AddCategory(AddCategoryRequest request, [FromQuery, Required] string key)
     {
         await menuService.UpdateOrCreateCategory(request, key);
         return Ok(new { message = "Success" });
@@ -39,7 +40,7 @@ public class MenuController(
     [HttpPost("category/order")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateCategoryOrder(List<AddCategoryRequest> request, [FromQuery] string key)
+    public async Task<IActionResult> UpdateCategoryOrder(List<AddCategoryRequest> request, [FromQuery, Required] string key)
     {
         await menuService.UpdateCategoryOrder(request, key);
         return Ok(new { message = "Success" });
@@ -50,7 +51,7 @@ public class MenuController(
     [HttpDelete("category")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteCategory([FromQuery] int id, [FromQuery] string key)
+    public async Task<IActionResult> DeleteCategory([FromQuery] int id, [FromQuery, Required] string key)
     {
         await menuService.DeleteCategory(id, key);
         return Ok(new { message = "Success" });

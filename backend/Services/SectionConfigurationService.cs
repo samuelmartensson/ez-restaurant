@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
 
-public class SectionConfigurationService(RestaurantContext context, S3Service s3Service)
+public class SectionConfigurationService(RestaurantContext context, S3Service s3Service, TranslationService translationService)
 {
     private RestaurantContext context = context;
+    private TranslationService translationService = translationService;
     private readonly S3Service s3Service = s3Service;
 
     public async Task UpdateHero(UploadHeroAssetsRequest assets, List<string> removedAssets, UploadHeroRequest fields, string key)
@@ -53,9 +54,12 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateAbout(UploadAboutAssetsRequest assets, List<string> removedAssets, UploadAboutRequest fields, string key)
+    public async Task UpdateAbout(UploadAboutAssetsRequest assets, List<string> removedAssets, UploadAboutRequest fields, CommonQueryParameters queryParameters)
     {
-        var customerConfig = await context.CustomerConfigs.Include(cf => cf.SiteSectionAbout).FirstOrDefaultAsync((x) => x.Domain == key);
+        string tKey = "about:description";
+        var customerConfig = await context.CustomerConfigs
+            .Include(cf => cf.SiteSectionAbout)
+            .FirstOrDefaultAsync((x) => x.Domain == queryParameters.Key);
 
         if (customerConfig == null)
         {
@@ -64,17 +68,23 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
 
         if (customerConfig.SiteSectionAbout == null)
         {
-            var newAbout = new SiteSectionAbout { CustomerConfigDomain = customerConfig.Domain, Image = "" };
+            var newAbout = new SiteSectionAbout { CustomerConfigDomain = customerConfig.Domain, Image = "", Description = tKey };
             await context.SiteSectionAbouts.AddAsync(newAbout);
             customerConfig.SiteSectionAbout = newAbout;
         }
 
+        await translationService.CreateOrUpdateByKey(
+            queryParameters.Language,
+            queryParameters.Key,
+            tKey,
+            fields?.Description
+        );
         customerConfig.SiteSectionAbout.Description = fields?.Description ?? "";
 
         var siteSectionAboutType = customerConfig.SiteSectionAbout.GetType();
         foreach (var name in removedAssets)
         {
-            await s3Service.DeleteFileAsync($"{key}/about/{name}");
+            await s3Service.DeleteFileAsync($"{queryParameters.Key}/about/{name}");
             var matchingProperty = siteSectionAboutType.GetProperty(name);
             if (matchingProperty != null)
             {
@@ -88,7 +98,7 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
             var file = property.GetValue(assets) as IFormFile;
             if (file != null)
             {
-                string url = await s3Service.UploadFileAsync(file, $"{key}/about/{property.Name.ToLowerInvariant()}");
+                string url = await s3Service.UploadFileAsync(file, $"{queryParameters.Key}/about/{property.Name.ToLowerInvariant()}");
                 var matchingProperty = siteSectionAboutType.GetProperty(property.Name);
                 if (matchingProperty != null)
                 {

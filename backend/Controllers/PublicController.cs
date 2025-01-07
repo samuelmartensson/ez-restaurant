@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
@@ -12,19 +13,34 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     private RestaurantContext context = context;
     private EmailService emailService = emailService;
 
+    private string? t(ICollection<Translation> translations, string key)
+    {
+        return translations.FirstOrDefault(t => t.Key == key)?.Value;
+    }
+
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerConfig([FromQuery] string key)
+    public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery] string Language)
     {
+        var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
+                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
+                x.CustomDomain == Key
+            );
+        var resolvedLanguage = Language ?? cf?.Languages.Split(",").First();
+
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
             .Include(cf => cf.SiteSectionAbout)
             .Include(cf => cf.SectionVisibility)
             .Include(cf => cf.OpeningHours)
-            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
+            .Include(cf => cf.Translations.Where(t => t.LanguageCode == resolvedLanguage))
+            .FirstOrDefaultAsync((x) =>
+                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
+                x.CustomDomain == Key
+            );
 
-        if (string.IsNullOrEmpty(key) || customerConfig == null)
+        if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
@@ -43,11 +59,12 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         var response = new CustomerConfigResponse
         {
             Domain = customerConfig.Domain,
+            Languages = customerConfig.Languages.Split(",").ToList(),
             Logo = customerConfig.Logo,
             Font = customerConfig.Font,
             Theme = customerConfig.Theme,
-            SiteMetaTitle = customerConfig.SiteMetaTitle,
-            SiteName = customerConfig.SiteName,
+            SiteMetaTitle = t(customerConfig.Translations, "site:short_description"),
+            SiteName = t(customerConfig.Translations, "site:name") ?? customerConfig.SiteName,
             HeroType = customerConfig.HeroType,
             Adress = customerConfig.Adress,
             Email = customerConfig.Email,
@@ -71,7 +88,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 About = new SiteSectionAboutResponse
                 {
                     Image = customerConfig?.SiteSectionAbout?.Image ?? "",
-                    Description = customerConfig?.SiteSectionAbout?.Description ?? ""
+                    Description = t(customerConfig.Translations, "about:description")
                 }
             }
         };
@@ -83,7 +100,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerMenu([FromQuery] string key)
+    public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] string key)
     {
         var customerConfig = await context.CustomerConfigs
             .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
@@ -139,7 +156,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [HttpPost("contact")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> ContactForm([FromBody] ContactRequest request, [FromQuery] string key)
+    public async Task<IActionResult> ContactForm([FromBody] ContactRequest request, [FromQuery, Required] string key)
     {
         await emailService.SendEmail(request, key);
 
