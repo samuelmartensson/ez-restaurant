@@ -25,7 +25,7 @@ const inputSchema = [
 ] as const;
 
 const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, selectedLanguage } = useDataContext();
   const form = useForm<PostCustomerSiteConfigurationBody>({
     defaultValues: {
       SiteName: "",
@@ -46,7 +46,7 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
   const isPending = isPendingData;
 
   async function onSubmit(data: PostCustomerSiteConfigurationBody) {
-    const params = { key: selectedDomain };
+    const params = { Key: selectedDomain, Language: selectedLanguage };
     await uploadSiteConfiguration({
       data: {
         ...data,
