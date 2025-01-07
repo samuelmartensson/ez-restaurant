@@ -3,6 +3,11 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCustomerConfig } from "@/mock_db";
 import { Fragment } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About",
+};
 
 const About = async () => {
   const data = await getCustomerConfig();

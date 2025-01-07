@@ -4,7 +4,9 @@ import { getCustomerConfig } from "@/mock_db";
 import "./globals.css";
 import DomainNotFound from "@/components/DomainNotFound";
 import Footer from "@/components/Footer";
-import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import { GoogleTagManager } from "@next/third-parties/google";
+import { Metadata } from "next";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 const themes = (font: string) =>
   ({
@@ -63,6 +65,17 @@ const FontInitializer = ({
   );
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getCustomerConfig();
+
+  return {
+    title: {
+      template: `%s | ${data?.siteName}`,
+      default: data?.siteName ?? "",
+    },
+  };
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -76,7 +89,7 @@ export default async function RootLayout({
   return (
     <html lang="en" style={themes(resolvedFont)[data.theme ?? "rustic"]}>
       <title>{data?.siteName}</title>
-      <GoogleAnalytics gaId="G-6EEDB0K566" />
+      <GoogleAnalytics gaId="G-6EEDB0K566" domain={data?.domain ?? ""} />
       <GoogleTagManager gtmId="GTM-5FCPD5P9" />
       <FontInitializer fontUrl={data.font} />
       <body className="antialiased relative">
