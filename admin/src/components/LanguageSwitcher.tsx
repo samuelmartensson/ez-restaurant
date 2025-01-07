@@ -12,14 +12,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useDataContext } from "./DataContextProvider";
+import { useState } from "react";
 
 export function LanguageSwitcher({ languages }: { languages: string[] }) {
   const { selectedLanguage, setSelectedLanguage } = useDataContext();
+  const [open, setOpen] = useState(false);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -35,6 +37,7 @@ export function LanguageSwitcher({ languages }: { languages: string[] }) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
+            onFocusOutside={() => setOpen(false)}
             className="w-[--radix-dropdown-menu-trigger-width]"
             align="start"
           >

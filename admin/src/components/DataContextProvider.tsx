@@ -17,6 +17,7 @@ const DataContext = createContext<{
   selectedConfig: CustomerConfigResponse | undefined;
   setSelectedDomain: (domain: string) => void;
   setSelectedLanguage: (language: string) => void;
+  cycleLanguage: () => void;
   customDomain: string;
   refetch: () => Promise<void>;
 }>({
@@ -26,6 +27,7 @@ const DataContext = createContext<{
   selectedConfig: undefined,
   setSelectedDomain: () => null,
   setSelectedLanguage: () => null,
+  cycleLanguage: () => null,
   customDomain: "",
   refetch: () => Promise.resolve(),
 });
@@ -46,14 +48,13 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const { data, isLoading, refetch } = useGetCustomerCustomer();
-  const { data: selectedConfig, isLoading: isLoadingConfig } =
-    useGetPublicGetCustomerConfig(
-      {
-        Key: selectedDomain,
-        Language: selectedLanguage,
-      },
-      { query: { enabled: !!selectedDomain && !!selectedLanguage } },
-    );
+  const { data: selectedConfig } = useGetPublicGetCustomerConfig(
+    {
+      Key: selectedDomain,
+      Language: selectedLanguage,
+    },
+    { query: { enabled: !!selectedDomain && !!selectedLanguage } },
+  );
   const configs = data?.customerConfigs ?? [];
 
   const setSelectedLanguageInternal = (language: string) => {
@@ -65,6 +66,18 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedDomain(domain);
     setSelectedLanguage(data?.customerConfigs?.[0]?.languages?.[0] ?? "");
     sessionStorage.setItem(domainKey, domain);
+  };
+
+  const cycleLanguage = () => {
+    if (!selectedConfig?.languages) return;
+    const index = selectedConfig?.languages?.findIndex(
+      (l) => l === selectedLanguage,
+    );
+    setSelectedLanguage(
+      (index >= selectedConfig.languages.length - 1
+        ? selectedConfig.languages[0]
+        : selectedConfig.languages[index + 1]) ?? "",
+    );
   };
 
   useEffect(() => {
@@ -85,7 +98,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [data, languageKey, selectedDomain, selectedLanguage]);
 
-  if (isLoading || isLoadingConfig) return <AppLoader />;
+  if (isLoading) return <AppLoader />;
 
   if (data?.isFirstSignIn) {
     router.replace("/onboarding");
@@ -101,6 +114,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
         selectedLanguage,
         selectedConfig,
         customDomain: selectedConfig?.customDomain ?? "",
+        cycleLanguage,
         refetch: async () => {
           await refetch();
         },

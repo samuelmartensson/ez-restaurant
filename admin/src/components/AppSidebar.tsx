@@ -69,7 +69,7 @@ export function AppSidebar() {
   }, [setOpenMobile]);
 
   return (
-    <Sidebar variant="floating">
+    <Sidebar>
       <SidebarHeader className="gap-1">
         <ConfigSwitcher domains={configs.map((c) => c.domain ?? "")} />
         <LanguageSwitcher languages={selectedConfig?.languages ?? []} />

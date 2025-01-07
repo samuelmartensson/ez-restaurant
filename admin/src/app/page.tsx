@@ -200,7 +200,7 @@ const Site = () => {
   return (
     <Form {...form}>
       <form
-        className="grid max-w-lg gap-4 overflow-auto"
+        className="relative grid max-w-lg gap-4 overflow-auto pb-20"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="mb-2 flex flex-wrap items-center gap-2 overflow-auto">
@@ -449,7 +449,11 @@ const Site = () => {
             />
           ))}
         </div>
-        <Button disabled={isPending} type="submit">
+        <Button
+          className="fixed inset-x-3 bottom-1 md:left-[--sidebar-width]"
+          disabled={isPending}
+          type="submit"
+        >
           <Save /> Save
         </Button>
       </form>

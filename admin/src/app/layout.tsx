@@ -1,7 +1,9 @@
 "use client";
 
 import { AppSidebar } from "@/components/AppSidebar";
-import DataContextProvider from "@/components/DataContextProvider";
+import DataContextProvider, {
+  useDataContext,
+} from "@/components/DataContextProvider";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -16,6 +18,7 @@ import React from "react";
 import { toast } from "sonner";
 import "./globals.css";
 import AppLoader from "@/components/AppLoader";
+import { Button } from "@/components/ui/button";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +29,31 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const Content = ({ children }: { children: React.ReactNode }) => {
+  const { selectedLanguage, selectedDomain, cycleLanguage } = useDataContext();
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main className="w-full">
+        <div className="sticky top-0 z-10 flex items-center gap-1 border-b bg-white py-4 pl-2 md:pl-4">
+          <SidebarTrigger />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => cycleLanguage()}
+            className="grid gap-0 text-left text-sm leading-none"
+          >
+            <span>{selectedDomain}</span>
+            <span className="text-muted-foreground">{selectedLanguage}</span>
+          </Button>
+        </div>
+        {children}
+      </main>
+    </SidebarProvider>
+  );
+};
 
 export default function AdminLayout({
   children,
@@ -41,13 +69,7 @@ export default function AdminLayout({
           <QueryClientProvider client={queryClient}>
             <SignedIn>
               <DataContextProvider>
-                <SidebarProvider>
-                  <AppSidebar />
-                  <main className="w-full">
-                    <SidebarTrigger className="ml-2 mt-4 md:ml-4" />
-                    {children}
-                  </main>
-                </SidebarProvider>
+                <Content>{children}</Content>
               </DataContextProvider>
             </SignedIn>
             <ClerkLoading>

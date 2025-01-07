@@ -12,14 +12,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useDataContext } from "./DataContextProvider";
+import { useState } from "react";
 
 export function ConfigSwitcher({ domains }: { domains: string[] }) {
   const { selectedDomain, setSelectedDomain } = useDataContext();
+  const [open, setOpen] = useState(false);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -36,6 +38,7 @@ export function ConfigSwitcher({ domains }: { domains: string[] }) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
+            onFocusOutside={() => setOpen(false)}
             className="w-[--radix-dropdown-menu-trigger-width]"
             align="start"
           >
