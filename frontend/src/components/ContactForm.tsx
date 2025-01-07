@@ -72,7 +72,7 @@ export default function ContactForm({
                         name,
                         email,
                       },
-                      { key: data.domain }
+                      { key: data.domain ?? "" }
                     )
                       .then(() => {
                         setSubmitted(true);
