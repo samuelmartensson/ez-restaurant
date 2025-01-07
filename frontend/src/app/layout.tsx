@@ -4,7 +4,7 @@ import { getCustomerConfig } from "@/mock_db";
 import "./globals.css";
 import DomainNotFound from "@/components/DomainNotFound";
 import Footer from "@/components/Footer";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 
 const themes = (font: string) =>
   ({
@@ -77,6 +77,7 @@ export default async function RootLayout({
     <html lang="en" style={themes(resolvedFont)[data.theme ?? "rustic"]}>
       <title>{data?.siteName}</title>
       <GoogleAnalytics gaId="G-6EEDB0K566" />
+      <GoogleTagManager gtmId="GTM-5FCPD5P9" />
       <FontInitializer fontUrl={data.font} />
       <body className="antialiased relative">
         <Navigation data={data} />
