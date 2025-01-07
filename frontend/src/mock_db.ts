@@ -20,7 +20,7 @@ export const getCustomerConfig = async () => {
   const customerId = headerList.get(CUSTOMER_ID_HEADER);
   if (!customerId) return null;
 
-  let selectedLanguage = cookieList.get("lang")?.value ?? "";
+  let selectedLanguage = cookieList.get("lang")?.value ?? "-";
   let configResponse = await getPublicGetCustomerConfig({
     Key: customerId,
     Language: selectedLanguage,
