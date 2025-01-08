@@ -450,7 +450,7 @@ const Site = () => {
           ))}
         </div>
         <Button
-          className="fixed inset-x-3 bottom-1 md:left-[--sidebar-width]"
+          className="fixed inset-x-3 bottom-4 md:left-[--sidebar-width]"
           disabled={isPending}
           type="submit"
         >

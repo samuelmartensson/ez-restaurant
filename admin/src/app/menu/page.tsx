@@ -179,7 +179,7 @@ const DraggableItem = ({
       transform && { y: transform.y, scaleY: 1, x: 0, scaleX: 1 },
     ),
     transition,
-    cursor: "move",
+    cursor: "grab",
     zIndex: isDragging ? 2 : 1,
   };
 
@@ -256,6 +256,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
   useEffect(() => {
     if (!data) return;
+    setCategoryList(data.categories);
     form.reset({ menu: data.menuItems?.map((d, i) => ({ ...d, index: i })) });
   }, [data, form]);
 
@@ -371,7 +372,9 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   );
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 10 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -382,6 +385,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       const activeIndex = fields.findIndex((i) => i.id === active.id);
       const overIndex = fields.findIndex((i) => i.id === over?.id);
 
+      setSelectedField(overIndex);
       move(activeIndex, overIndex);
     }
   };
@@ -428,7 +432,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                   return (
                     <DraggableItem key={field.formId} draggableId={field.id}>
                       <div
-                        className={`relative flex flex-col justify-between gap-2 border-b md:flex-row ${selectedField?.index === field.index ? "border-l-4 border-l-primary" : ""}`}
+                        className={`relative flex flex-col justify-between gap-2 border-b md:flex-row ${selectedFieldIndex === index ? "border-l-4 border-l-primary" : ""}`}
                       >
                         <Button
                           onClick={() => {
@@ -528,136 +532,141 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
             setIsOpen={(open) => !open && setSelectedField(-1)}
           >
             <Form {...form}>
-              {selectedField && (
-                <div
-                  className="grid gap-4 p-4 animate-in fade-in"
-                  key={selectedFieldIndex}
-                >
-                  {inputSchema.map((inputRow) => (
-                    <div key={inputRow[0].id} className="flex gap-2">
-                      {inputRow.map((input) => (
-                        <FormField
-                          key={input.id}
-                          control={form.control}
-                          name={
-                            `menu.${selectedField.index}.${input.id}` as const
-                          }
-                          render={({ field }) => {
-                            let render = (
-                              <Input {...field} value={field.value ?? ""} />
-                            );
-
-                            if (input.type === "textarea") {
-                              render = <Textarea {...field} />;
+              {selectedField &&
+                selectedFieldIndex !== -1 &&
+                selectedFieldIndex !== undefined && (
+                  <div
+                    className="grid gap-4 p-4 animate-in fade-in"
+                    key={selectedFieldIndex}
+                  >
+                    {inputSchema.map((inputRow) => (
+                      <div key={inputRow[0].id} className="flex gap-2">
+                        {inputRow.map((input) => (
+                          <FormField
+                            key={input.id}
+                            control={form.control}
+                            name={
+                              `menu.${selectedFieldIndex}.${input.id}` as const
                             }
-
-                            if (input.type === "number") {
-                              render = (
-                                <Input
-                                  {...field}
-                                  value={field.value ?? ""}
-                                  onChange={(e) =>
-                                    field.onChange(Number(e.target.value))
-                                  }
-                                  type={input.type}
-                                />
+                            render={({ field }) => {
+                              let render = (
+                                <Input {...field} value={field.value ?? ""} />
                               );
-                            }
 
-                            if (input.type === "file") {
-                              render =
-                                field.value &&
-                                field.value !== ACTIONS.REMOVE ? (
-                                  <Button
-                                    className="block"
-                                    variant="destructive"
-                                    type="button"
-                                    onClick={() => {
-                                      form.setValue(
-                                        `menu.${selectedField.index}.${input.id}` as const,
-                                        selectedField.image
-                                          ? ACTIONS.REMOVE
-                                          : "",
-                                      );
+                              if (input.type === "textarea") {
+                                render = <Textarea {...field} />;
+                              }
 
-                                      setUploadedImages((state) => {
-                                        const newState = { ...state };
-                                        delete newState[
-                                          resolveImageId(selectedField)
-                                        ];
-
-                                        return newState;
-                                      });
-                                    }}
-                                  >
-                                    Remove file
-                                  </Button>
-                                ) : (
+                              if (input.type === "number") {
+                                render = (
                                   <Input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(event) => {
-                                      const file = event.target.files?.[0];
-                                      if (file) {
-                                        setUploadedImages((state) => ({
-                                          ...state,
-                                          [resolveImageId(selectedField)]: file,
-                                        }));
-                                        form.setValue(
-                                          `menu.${selectedField.index}.${input.id}` as const,
-                                          file as unknown as string,
-                                        );
-                                      }
-                                    }}
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    onChange={(e) =>
+                                      field.onChange(Number(e.target.value))
+                                    }
+                                    type={input.type}
                                   />
                                 );
-                            }
+                              }
 
-                            if (input.type === "select") {
-                              render = (
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={String(field.value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="-" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectGroup>
-                                      <SelectLabel>{input.label}</SelectLabel>
-                                      {categoryList.filter(Boolean).map((c) => (
-                                        <SelectItem
-                                          key={c.id}
-                                          value={c.id.toString()}
-                                        >
-                                          {c.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                  </SelectContent>
-                                </Select>
+                              if (input.type === "file") {
+                                render =
+                                  field.value &&
+                                  field.value !== ACTIONS.REMOVE ? (
+                                    <Button
+                                      className="block"
+                                      variant="destructive"
+                                      type="button"
+                                      onClick={() => {
+                                        form.setValue(
+                                          `menu.${selectedField.index}.${input.id}` as const,
+                                          selectedField.image
+                                            ? ACTIONS.REMOVE
+                                            : "",
+                                        );
+
+                                        setUploadedImages((state) => {
+                                          const newState = { ...state };
+                                          delete newState[
+                                            resolveImageId(selectedField)
+                                          ];
+
+                                          return newState;
+                                        });
+                                      }}
+                                    >
+                                      Remove file
+                                    </Button>
+                                  ) : (
+                                    <Input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(event) => {
+                                        const file = event.target.files?.[0];
+                                        if (file) {
+                                          setUploadedImages((state) => ({
+                                            ...state,
+                                            [resolveImageId(selectedField)]:
+                                              file,
+                                          }));
+                                          form.setValue(
+                                            `menu.${selectedField.index}.${input.id}` as const,
+                                            file as unknown as string,
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  );
+                              }
+
+                              if (input.type === "select") {
+                                render = (
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={String(field.value)}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="-" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectGroup>
+                                        <SelectLabel>{input.label}</SelectLabel>
+                                        {categoryList
+                                          .filter(Boolean)
+                                          .map((c) => (
+                                            <SelectItem
+                                              key={c.id}
+                                              value={c.id.toString()}
+                                            >
+                                              {c.name}
+                                            </SelectItem>
+                                          ))}
+                                      </SelectGroup>
+                                    </SelectContent>
+                                  </Select>
+                                );
+                              }
+
+                              return (
+                                <FormItem className="grid flex-1">
+                                  <FormLabel>{input.label}</FormLabel>
+                                  <FormControl>{render}</FormControl>
+                                  {input?.description && (
+                                    <FormDescription>
+                                      {input?.description}
+                                    </FormDescription>
+                                  )}
+                                  <FormMessage />
+                                </FormItem>
                               );
-                            }
-
-                            return (
-                              <FormItem className="grid flex-1">
-                                <FormLabel>{input.label}</FormLabel>
-                                <FormControl>{render}</FormControl>
-                                {input?.description && (
-                                  <FormDescription>
-                                    {input?.description}
-                                  </FormDescription>
-                                )}
-                                <FormMessage />
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
             </Form>
           </MobileDrawer>
         </div>
