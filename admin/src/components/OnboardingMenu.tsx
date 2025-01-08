@@ -43,26 +43,21 @@ const menuItemSchema = z.object({
 
 const OnboardingMenu = ({ onNextClick }: { onNextClick: () => void }) => {
   const [step, setStep] = useState<"category" | "menu">("category");
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, params } = useDataContext();
   const form = useForm<z.infer<typeof menuItemSchema>>({
     defaultValues: {},
   });
 
   const [addCategory, setAddCategory] = useState("");
   const { data: menuData = { categories: [], menuItems: [] }, refetch } =
-    useGetPublicGetCustomerMenu(
-      {
-        key: selectedDomain,
-      },
-      { query: { enabled: !!selectedDomain } },
-    );
+    useGetPublicGetCustomerMenu(params, {
+      query: { enabled: !!selectedDomain },
+    });
   const { mutateAsync: updateCategory, isPending: isPendingCategory } =
     usePostMenuCategory();
   const { mutateAsync: updateMenu, isPending } = usePostMenuItems();
 
   async function onSubmit(data: z.infer<typeof menuItemSchema>) {
-    const params = { key: selectedDomain };
-
     await updateMenu({
       data: {
         menuItemsJson: JSON.stringify([
@@ -98,7 +93,7 @@ const OnboardingMenu = ({ onNextClick }: { onNextClick: () => void }) => {
             onClick={async () => {
               await updateCategory({
                 data: { name: addCategory, id: -1 },
-                params: { key: selectedDomain },
+                params,
               });
               await refetch();
               setStep("menu");
