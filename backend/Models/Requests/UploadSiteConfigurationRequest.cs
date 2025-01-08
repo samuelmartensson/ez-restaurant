@@ -6,9 +6,15 @@ namespace Models.Requests
         public IFormFile? Font { get; set; }
     };
 
-    public class UpdateSiteConfigurationRequest
+
+    public class UpdateSiteLanguagesRequest
     {
         required public List<string> Languages { get; set; }
+        required public string DefaultLanguage { get; set; }
+    }
+
+    public class UpdateSiteConfigurationRequest
+    {
         required public string SiteName { get; set; }
         required public string SiteMetaTitle { get; set; }
         required public string Theme { get; set; }

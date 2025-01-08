@@ -4,12 +4,12 @@ import { useDataContext } from "@/components/DataContextProvider";
 import FilePreview from "@/components/FilePreview";
 import FormLayout from "@/components/FormLayout";
 import hasDomain from "@/components/hasDomain";
+import LanguageManager from "@/components/LanguageManager";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -113,8 +113,6 @@ const Site = () => {
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
   );
-  const [language, setLanguage] = useState("");
-  const [languages, setLanguages] = useState<string[]>([]);
   const form = useForm<PostCustomerSiteConfigurationBody>({
     defaultValues: {
       SiteName: "",
@@ -127,7 +125,6 @@ const Site = () => {
       InstagramUrl: "",
       MapUrl: "",
       Currency: "",
-      Languages: [],
     },
   });
 
@@ -152,7 +149,6 @@ const Site = () => {
   useEffect(() => {
     if (!customerConfig) return;
 
-    setLanguages(customerConfig?.languages ?? []);
     form.reset({
       SiteName: customerConfig.siteName ?? "",
       SiteMetaTitle: customerConfig.siteMetaTitle ?? "",
@@ -166,7 +162,6 @@ const Site = () => {
       Currency: customerConfig.currency ?? "",
       MapUrl: customerConfig.mapUrl ?? "",
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
-      Languages: customerConfig.languages ?? [],
     });
   }, [customerConfig, form]);
 
@@ -181,7 +176,6 @@ const Site = () => {
     await uploadSiteConfiguration({
       data: {
         ...data,
-        Languages: languages,
         Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
         Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
       },
@@ -206,54 +200,24 @@ const Site = () => {
         <div className="mb-2 flex flex-wrap items-center gap-2 overflow-auto">
           <div>Languages</div>
           <div className="flex w-full gap-2">
-            {languages.map((lang) => (
-              <Dialog key={lang}>
-                <DialogTrigger asChild>
-                  <Button disabled={languages.length === 1}>
-                    {languages.length > 1 && <Settings />}
-                    <span>{lang}</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Manage - {lang}</DialogTitle>
-                    <DialogDescription>
-                      This will permanently delete{" "}
-                      <span className="font-bold">{lang}</span> and all its
-                      translations after you click save.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      variant="destructive"
-                      type="button"
-                      onClick={() =>
-                        setLanguages((s) => s.filter((l) => l !== lang))
-                      }
-                    >
-                      Delete
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            ))}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Settings />
+                  <span>Manage languages</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Languages</DialogTitle>
+                  <DialogDescription>
+                    Enable the languages you want to display on your website.
+                  </DialogDescription>
+                </DialogHeader>
+                <LanguageManager />
+              </DialogContent>
+            </Dialog>
           </div>
-          <Input
-            className="flex-1"
-            placeholder="Add language..."
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          />
-          <Button
-            disabled={language.trim() === ""}
-            type="button"
-            onClick={() => {
-              setLanguages((s) => [...s, language]);
-              setLanguage("");
-            }}
-          >
-            Add language
-          </Button>
         </div>
         {inputSchema.map((input) => (
           <FormField

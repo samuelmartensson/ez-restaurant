@@ -16,7 +16,8 @@ public class CustomerController(
     SiteConfigurationService siteConfigurationService,
     UserService userService,
     VercelService vercelService,
-    ClerkApiClient clerkApiClient
+    ClerkApiClient clerkApiClient,
+    TranslationContext translationContext
 ) : ControllerBase
 {
     private RestaurantContext context = context;
@@ -24,7 +25,7 @@ public class CustomerController(
     private VercelService vercelService = vercelService;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
     private ClerkApiClient clerkApiClient = clerkApiClient;
-
+    private TranslationContext translationContext = translationContext;
 
     private async Task<Database.Models.User> assertUser()
     {
@@ -111,6 +112,8 @@ public class CustomerController(
             Email = c.Email,
             CustomDomain = c.CustomDomain,
             Currency = c.Currency,
+            AvailableLanguages = translationContext.languages,
+            DefaultLanguage = c.DefaultLanguage
         }).ToList();
 
         return Ok(
@@ -198,6 +201,17 @@ public class CustomerController(
     public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
         await siteConfigurationService.UpdateSiteConfigurationAssets(assets, queryParameters);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPost("languages")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateSiteLanguages([FromForm] UpdateSiteLanguagesRequest request, [FromQuery, Required] CommonQueryParameters queryParameters)
+    {
+        await siteConfigurationService.UpdateSiteLanguages(request, queryParameters);
         return Ok(new { message = "Success" });
     }
 

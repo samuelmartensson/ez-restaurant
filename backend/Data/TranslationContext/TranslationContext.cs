@@ -3,12 +3,13 @@ using Models.Responses;
 public class TranslationContext
 {
     private readonly Dictionary<string, Dictionary<string, string>> _translations;
+    public readonly List<string> languages = new List<string> { "English", "Svenska" };
 
     public TranslationContext()
     {
         _translations = new Dictionary<string, Dictionary<string, string>>();
-        _translations["English"] = TranslationsEnglish.Translations;
-        _translations["Svenska"] = TranslationsSwedish.Translations;
+        _translations[languages[0]] = TranslationsEnglish.Translations;
+        _translations[languages[1]] = TranslationsSwedish.Translations;
     }
 
     public SiteTranslationsResponse GetBaseTranslations(string language)

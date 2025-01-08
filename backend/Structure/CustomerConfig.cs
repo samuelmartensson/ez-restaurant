@@ -2,6 +2,7 @@ public class CustomerConfig
 {
     required public string Domain { get; set; }
     required public string Languages { get; set; }
+    required public string DefaultLanguage { get; set; }
     public int CustomerId { get; set; }
     public int HeroType { get; set; }
     required public string Theme { get; set; }

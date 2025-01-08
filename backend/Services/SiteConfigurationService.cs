@@ -10,6 +10,20 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
     private readonly OpeningHourService openingHourService = openingHourService;
 
 
+    public async Task UpdateSiteLanguages(UpdateSiteLanguagesRequest request, CommonQueryParameters queryParameters)
+    {
+        var key = queryParameters.Key;
+        var customerConfig = await context.CustomerConfigs.FirstOrDefaultAsync((x) => x.Domain == key);
+        if (customerConfig == null)
+        {
+            throw new Exception("CustomerConfig not found for the provided key.");
+        }
+
+        customerConfig.Languages = string.Join(",", request.Languages);
+        customerConfig.DefaultLanguage = request.DefaultLanguage;
+        await context.SaveChangesAsync();
+    }
+
     public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, CommonQueryParameters queryParameters)
     {
         var key = queryParameters.Key;
@@ -29,18 +43,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         await translationService.CreateOrUpdateByKey(queryParameters.Language, queryParameters.Key, "site:name", siteConfiguration.SiteName);
         await translationService.CreateOrUpdateByKey(queryParameters.Language, queryParameters.Key, "site:short_description", siteConfiguration.SiteMetaTitle);
 
-        // Delete translations from removed languages.
-        foreach (string lang in customerConfig.Languages.Split(","))
-        {
-            var exists = siteConfiguration.Languages.Any(l => l == lang);
-            if (!exists)
-            {
-                var translationsToRemove = context.Translations.Where(t => t.LanguageCode == lang && t.CustomerConfigDomain == key);
-                context.Translations.RemoveRange(translationsToRemove);
-            }
-        }
 
-        customerConfig.Languages = string.Join(",", siteConfiguration.Languages);
         customerConfig.SiteName = siteConfiguration.SiteName;
         customerConfig.SiteMetaTitle = siteConfiguration.SiteMetaTitle;
         customerConfig.Theme = siteConfiguration.Theme;
@@ -103,6 +106,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             SiteMetaTitle = "",
             OpeningHours = defaultOpeningHours,
             Languages = "English",
+            DefaultLanguage = "English",
             SectionVisibility = new SectionVisibility
             {
                 CustomerConfigDomain = domain

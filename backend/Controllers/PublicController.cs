@@ -80,6 +80,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             MapUrl = customerConfig.MapUrl,
             CustomDomain = customerConfig.CustomDomain,
             OpeningHours = openingHours,
+            AvailableLanguages = translationContext.languages,
+            DefaultLanguage = customerConfig.DefaultLanguage,
             SectionVisibility = new SectionVisibilityResponse
             {
                 ContactFormVisible = customerConfig?.SectionVisibility?.ContactFormVisible ?? false

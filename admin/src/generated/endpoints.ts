@@ -96,6 +96,16 @@ export type PostCustomerDomainParams = {
   domainName?: string;
 };
 
+export type PostCustomerLanguagesBody = {
+  DefaultLanguage?: string;
+  Languages?: string[];
+};
+
+export type PostCustomerLanguagesParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostCustomerSiteConfigurationAssetsBody = {
   Font?: Blob;
   Logo?: Blob;
@@ -113,7 +123,6 @@ export type PostCustomerSiteConfigurationBody = {
   Email?: string;
   Font?: string;
   InstagramUrl?: string;
-  Languages?: string[];
   Logo?: string;
   MapUrl?: string;
   Phone?: string;
@@ -140,12 +149,29 @@ export const SubscriptionState = {
   NUMBER_1: 1,
 } as const;
 
+export interface SiteTranslationsResponse {
+  aboutTitle?: string;
+  allRightsReserved?: string;
+  contactUs?: string;
+  friday?: string;
+  menu?: string;
+  monday?: string;
+  openHours?: string;
+  orderNow?: string;
+  saturday?: string;
+  sunday?: string;
+  thursday?: string;
+  tuesday?: string;
+  wednesday?: string;
+}
+
 export interface SiteSectionHeroResponse {
   heroImage?: string;
   orderUrl?: string;
 }
 
 export interface SiteSectionAboutResponse {
+  aboutTitle?: string;
   description?: string;
   image?: string;
 }
@@ -191,9 +217,12 @@ export interface MenuResponse {
 export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
+  availableLanguages?: string[];
   currency?: string;
   /** @nullable */
   customDomain?: string | null;
+  /** @nullable */
+  defaultLanguage?: string | null;
   domain?: string;
   /** @nullable */
   email?: string | null;
@@ -213,6 +242,7 @@ export interface CustomerConfigResponse {
   sectionVisibility?: SectionVisibilityResponse;
   siteMetaTitle?: string;
   siteName?: string;
+  siteTranslations?: SiteTranslationsResponse;
   theme?: string;
 }
 
@@ -543,11 +573,6 @@ export const postCustomerSiteConfiguration = (
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (postCustomerSiteConfigurationBody.Languages !== undefined) {
-    postCustomerSiteConfigurationBody.Languages.forEach((value) =>
-      formData.append("Languages", value),
-    );
-  }
   if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
     formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
   }
@@ -771,6 +796,91 @@ export const usePostCustomerSiteConfigurationAssets = <
 > => {
   const mutationOptions =
     getPostCustomerSiteConfigurationAssetsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postCustomerLanguages = (
+  postCustomerLanguagesBody: PostCustomerLanguagesBody,
+  params: PostCustomerLanguagesParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postCustomerLanguagesBody.Languages !== undefined) {
+    postCustomerLanguagesBody.Languages.forEach((value) =>
+      formData.append("Languages", value),
+    );
+  }
+  if (postCustomerLanguagesBody.DefaultLanguage !== undefined) {
+    formData.append(
+      "DefaultLanguage",
+      postCustomerLanguagesBody.DefaultLanguage,
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/Customer/languages`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostCustomerLanguagesMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerLanguages>>,
+    TError,
+    { data: PostCustomerLanguagesBody; params: PostCustomerLanguagesParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postCustomerLanguages>>,
+  TError,
+  { data: PostCustomerLanguagesBody; params: PostCustomerLanguagesParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postCustomerLanguages>>,
+    { data: PostCustomerLanguagesBody; params: PostCustomerLanguagesParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postCustomerLanguages(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostCustomerLanguagesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerLanguages>>
+>;
+export type PostCustomerLanguagesMutationBody = PostCustomerLanguagesBody;
+export type PostCustomerLanguagesMutationError = unknown;
+
+export const usePostCustomerLanguages = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCustomerLanguages>>,
+    TError,
+    { data: PostCustomerLanguagesBody; params: PostCustomerLanguagesParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postCustomerLanguages>>,
+  TError,
+  { data: PostCustomerLanguagesBody; params: PostCustomerLanguagesParams },
+  TContext
+> => {
+  const mutationOptions = getPostCustomerLanguagesMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
