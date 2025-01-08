@@ -9,6 +9,7 @@ export default async function Home() {
   const data = await getCustomerConfig();
   if (!data) return null;
 
+  const { orderNow, menu, openHours } = data.siteTranslations || {};
   const heroSection = data?.sections?.hero;
 
   return (
@@ -35,12 +36,12 @@ export default async function Home() {
             </p>
             <div className="grid gap-2 grid-flow-col">
               <Button size="lg" asChild variant="secondary">
-                <Link href="/menu">Menu</Link>
+                <Link href="/menu">{menu ?? "Menu"}</Link>
               </Button>
               {heroSection?.orderUrl && (
                 <Button size="lg" asChild>
                   <Link target="_blank" href={heroSection?.orderUrl ?? "/"}>
-                    Order now
+                    {orderNow ?? "Order now"}
                   </Link>
                 </Button>
               )}
@@ -51,7 +52,7 @@ export default async function Home() {
           href="#open-hours"
           className="absolute bottom-4 grid place-items-center text-white"
         >
-          <span>Open hours</span>
+          <span>{openHours ?? "Open hours"}</span>
           <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
         </Link>
       </div>

@@ -22,6 +22,10 @@ export function LanguagePicker({ languages, defaultLanguage }: Props) {
     defaultLanguage ?? languages?.[0]
   );
 
+  if (languages.length <= 1) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

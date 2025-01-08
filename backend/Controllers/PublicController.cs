@@ -8,9 +8,10 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PublicController(RestaurantContext context, EmailService emailService) : ControllerBase
+public class PublicController(RestaurantContext context, EmailService emailService, TranslationContext translationContext) : ControllerBase
 {
     private RestaurantContext context = context;
+    private TranslationContext translationContext = translationContext;
     private EmailService emailService = emailService;
 
     private string? t(ICollection<Translation> translations, string key)
@@ -27,7 +28,12 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
                 x.CustomDomain == Key
             );
-        var resolvedLanguage = Language ?? cf?.Languages.Split(",").First();
+        string resolvedLanguage = Language ?? cf?.Languages.Split(",").First() ?? "";
+
+        if (string.IsNullOrEmpty(resolvedLanguage))
+        {
+            return BadRequest(new { message = "Language could not be resolved." });
+        }
 
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
@@ -63,7 +69,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Logo = customerConfig.Logo,
             Font = customerConfig.Font,
             Theme = customerConfig.Theme,
-            SiteMetaTitle = t(customerConfig.Translations, "site:short_description"),
+            SiteMetaTitle = t(customerConfig.Translations, "site:short_description") ?? customerConfig.SiteMetaTitle,
             SiteName = t(customerConfig.Translations, "site:name") ?? customerConfig.SiteName,
             HeroType = customerConfig.HeroType,
             Adress = customerConfig.Adress,
@@ -88,9 +94,11 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 About = new SiteSectionAboutResponse
                 {
                     Image = customerConfig?.SiteSectionAbout?.Image ?? "",
-                    Description = t(customerConfig.Translations, "about:description")
+                    Description = t(customerConfig.Translations, "about:description"),
+                    AboutTitle = translationContext.GetTranslation(resolvedLanguage, "about:title")
                 }
-            }
+            },
+            SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage)
         };
 
         return Ok(response);

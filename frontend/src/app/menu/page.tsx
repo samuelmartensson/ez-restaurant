@@ -10,7 +10,12 @@ const MenuPage = async () => {
   const data = await getCustomerConfig();
 
   if (!data?.menu) return null;
-  return <MenuRender data={data.menu} currency={data?.currency ?? ""} />;
+  return (
+    <>
+      <MenuRender data={data.menu} currency={data?.currency ?? ""} />;
+      <title>{`${data.siteTranslations?.menu} | ${data?.siteName}`}</title>
+    </>
+  );
 };
 
 export default MenuPage;

@@ -2,18 +2,20 @@ import { Separator } from "@/components/ui/separator";
 import { getCustomerConfig } from "@/mock_db";
 import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 
-const dayMap: { [key: number]: string } = {
-  1: "Monday",
-  2: "Tuesday",
-  3: "Wednesday",
-  4: "Thursday",
-  5: "Friday",
-  6: "Saturday",
-  7: "Sunday",
-};
+const dayMap = {
+  1: "monday",
+  2: "tuesday",
+  3: "wednesday",
+  4: "thursday",
+  5: "friday",
+  6: "saturday",
+  7: "sunday",
+} as const;
 
 export default async function Footer() {
   const data = await getCustomerConfig();
+  const { contactUs, openHours, allRightsReserved } =
+    data?.siteTranslations || {};
 
   return (
     <footer id="open-hours" className="text-gray-600 py-8 px-4 sm:px-6 lg:px-8">
@@ -25,7 +27,7 @@ export default async function Footer() {
             data?.instagramUrl) && (
             <div className="space-y-4">
               <h3 className="font-customer text-lg font-semibold text-gray-900">
-                CONTACT US
+                {contactUs ?? "CONTACT US"}
               </h3>
               {data?.email && (
                 <a
@@ -68,13 +70,16 @@ export default async function Footer() {
           )}
           <div className="space-y-4">
             <h3 className="font-customer text-lg font-semibold text-gray-900">
-              OPEN HOURS
+              {openHours ?? "OPEN HOURS"}
             </h3>
             <div className="flex items-start space-x-3">
               <div className="space-y-2">
                 {data?.openingHours?.map((o) => (
                   <div key={o.id} className="grid grid-cols-2 gap-x-4">
-                    <span>{(o.day && dayMap[o.day]) || o.label}</span>
+                    <span>
+                      {(o.day && data.siteTranslations?.[dayMap[o.day]]) ||
+                        o.label}
+                    </span>
                     {o.isClosed ? (
                       <span>Closed</span>
                     ) : (
@@ -91,7 +96,8 @@ export default async function Footer() {
 
         <Separator className="my-8" />
         <div className="text-center text-sm mb-4">
-          © {new Date().getFullYear()} {data?.siteName}. All rights reserved.
+          © {new Date().getFullYear()} {data?.siteName}.{" "}
+          {allRightsReserved ?? "All rights reserved"}.
         </div>
         {data?.logo && (
           // eslint-disable-next-line @next/next/no-img-element

@@ -10,6 +10,7 @@ let timer: NodeJS.Timeout | null = null;
 
 export function Navigation({ data }: { data: SiteConfig }) {
   const pathname = usePathname();
+  const { menu, aboutTitle } = data.siteTranslations || {};
   const [isExpanded, setExpanded] = useState(false);
   const [options, setOptions] = useState({
     hidden: false,
@@ -102,10 +103,12 @@ export function Navigation({ data }: { data: SiteConfig }) {
             )}
           </Link>
           <Link href="/menu">
-            <span className="text-lg cursor-pointer">MENU</span>
+            <span className="text-lg cursor-pointer">{menu ?? "MENU"}</span>
           </Link>
           <Link href="/about">
-            <span className="text-lg cursor-pointer">ABOUT</span>
+            <span className="text-lg cursor-pointer">
+              {aboutTitle ?? "ABOUT"}
+            </span>
           </Link>
           {data.languages && data.languages?.length > 0 && (
             <div className="ml-auto">

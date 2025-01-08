@@ -126,12 +126,30 @@ export const SubscriptionState = {
   NUMBER_1: 1,
 } as const;
 
+export interface SiteTranslationsResponse {
+  about?: string;
+  aboutTitle?: string;
+  allRightsReserved?: string;
+  contactUs?: string;
+  friday?: string;
+  menu?: string;
+  monday?: string;
+  openHours?: string;
+  orderNow?: string;
+  saturday?: string;
+  sunday?: string;
+  thursday?: string;
+  tuesday?: string;
+  wednesday?: string;
+}
+
 export interface SiteSectionHeroResponse {
   heroImage?: string;
   orderUrl?: string;
 }
 
 export interface SiteSectionAboutResponse {
+  aboutTitle?: string;
   description?: string;
   image?: string;
 }
@@ -199,6 +217,7 @@ export interface CustomerConfigResponse {
   sectionVisibility?: SectionVisibilityResponse;
   siteMetaTitle?: string;
   siteName?: string;
+  siteTranslations?: SiteTranslationsResponse;
   theme?: string;
 }
 

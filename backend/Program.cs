@@ -76,6 +76,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 string path = $"Data Source = {Environment.GetEnvironmentVariable("sqliterestaurantpath")};foreign keys=true" ?? "NO PATH. ERROR";
 
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseSqlite(path));
+
+builder.Services.AddSingleton<TranslationContext>();
+
 builder.Services.AddScoped<MenuService>();
 builder.Services.AddScoped<SiteConfigurationService>();
 builder.Services.AddScoped<S3Service>();

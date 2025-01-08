@@ -110,7 +110,7 @@ public class CustomerController(
             Phone = c.Phone,
             Email = c.Email,
             CustomDomain = c.CustomDomain,
-            Currency = c.Currency
+            Currency = c.Currency,
         }).ToList();
 
         return Ok(
