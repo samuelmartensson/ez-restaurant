@@ -25,6 +25,7 @@ export const getCustomerConfig = async () => {
     Key: customerId,
     Language: selectedLanguage,
   });
+
   if (!configResponse.domain)
     return {
       ok: false,
@@ -38,7 +39,10 @@ export const getCustomerConfig = async () => {
     });
   }
 
-  const menu = await getPublicGetCustomerMenu({ key: customerId });
+  const menu = await getPublicGetCustomerMenu({
+    Key: customerId,
+    Language: selectedLanguage,
+  });
   return {
     ...configResponse,
     selectedLanguage,

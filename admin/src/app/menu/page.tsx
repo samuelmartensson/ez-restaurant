@@ -197,15 +197,12 @@ const DraggableItem = ({
 };
 
 const DataLayer = () => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, params } = useDataContext();
 
   const { data = { categories: [], menuItems: [] }, isLoading } =
-    useGetPublicGetCustomerMenu(
-      {
-        key: selectedDomain,
-      },
-      { query: { enabled: !!selectedDomain } },
-    );
+    useGetPublicGetCustomerMenu(params, {
+      query: { enabled: !!selectedDomain },
+    });
 
   if (isLoading) return <></>;
 
@@ -215,7 +212,7 @@ const DataLayer = () => {
 const CATEGORY_DEFAULT = { description: "", name: "" };
 
 const AdminMenu = ({ data }: { data: MenuResponse }) => {
-  const { selectedDomain, selectedConfig } = useDataContext();
+  const { selectedDomain, selectedConfig, params } = useDataContext();
   const isMobile = useIsMobile();
   const [deletedItems, setDeletedItems] = useState<number[]>([]);
   const [selectedFieldIndex, setSelectedField] = useState<number>();
@@ -228,12 +225,9 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     name: string;
     description: string;
   }>(CATEGORY_DEFAULT);
-  const { refetch } = useGetPublicGetCustomerMenu(
-    {
-      key: selectedDomain,
-    },
-    { query: { enabled: false } },
-  );
+  const { refetch } = useGetPublicGetCustomerMenu(params, {
+    query: { enabled: false },
+  });
 
   const [categoryList, setCategoryList] = useState(data.categories);
   const categories = Object.fromEntries(
@@ -257,8 +251,14 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   useEffect(() => {
     if (!data) return;
     setCategoryList(data.categories);
+    const { name, description } = data.categories.find(
+      (c) => c.id === selectedCategory,
+    ) || { name: "", description: "" };
+
+    setAddCategory({ name, description });
+
     form.reset({ menu: data.menuItems?.map((d, i) => ({ ...d, index: i })) });
-  }, [data, form]);
+  }, [data, form, selectedCategory]);
 
   const { mutateAsync: updateMenu, isPending } = usePostMenuItems();
   const { mutateAsync: updateCategory } = usePostMenuCategory();
@@ -278,7 +278,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         name: addCategory.name,
         description: addCategory.description,
       },
-      params: { key: selectedDomain },
+      params,
     });
     if (selectedCategory === -1) {
       setAddCategory({
@@ -289,6 +289,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     toast.success("Categories updated.");
     refetchAndSync();
   };
+
   const handleDeleteCategory = async () => {
     await deleteCategory({
       params: { id: selectedCategory, key: selectedDomain },
@@ -304,7 +305,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     setDeletedItems([]);
 
     await updateMenu({
-      params: { key: selectedDomain },
+      params,
       data: {
         menuItemsJson: JSON.stringify(
           form.getValues("menu").map((d, index) => ({

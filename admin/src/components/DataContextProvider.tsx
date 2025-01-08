@@ -20,6 +20,10 @@ const DataContext = createContext<{
   cycleLanguage: () => void;
   customDomain: string;
   refetch: () => Promise<void>;
+  params: {
+    Key: string;
+    Language: string;
+  };
 }>({
   configs: [],
   selectedDomain: "",
@@ -30,6 +34,10 @@ const DataContext = createContext<{
   cycleLanguage: () => null,
   customDomain: "",
   refetch: () => Promise.resolve(),
+  params: {
+    Key: "",
+    Language: "",
+  },
 });
 
 export const useDataContext = () => useContext(DataContext);
@@ -115,6 +123,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
         selectedConfig,
         customDomain: selectedConfig?.customDomain ?? "",
         cycleLanguage,
+        params: { Key: selectedDomain, Language: selectedLanguage },
         refetch: async () => {
           await refetch();
         },

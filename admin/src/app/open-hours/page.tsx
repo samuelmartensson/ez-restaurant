@@ -47,7 +47,7 @@ const inputSchema = [
 ] as const;
 
 const OpenHours = () => {
-  const { selectedDomain } = useDataContext();
+  const { selectedDomain, params } = useDataContext();
   const formNormal = useForm<PostOpeningHourMutationBody>({
     defaultValues: [],
   });
@@ -61,16 +61,11 @@ const OpenHours = () => {
     control: formSpecial.control,
   });
 
-  const { data: openingHours, refetch } = useGetOpeningHour(
-    {
-      key: selectedDomain,
+  const { data: openingHours, refetch } = useGetOpeningHour(params, {
+    query: {
+      enabled: !!selectedDomain,
     },
-    {
-      query: {
-        enabled: !!selectedDomain,
-      },
-    },
-  );
+  });
   const normalOpeningHours = useMemo(
     () => openingHours?.filter((o) => o?.day !== 0),
     [openingHours],
@@ -93,7 +88,7 @@ const OpenHours = () => {
   async function onSubmit(data: PostOpeningHourMutationBody) {
     updateOpeningHour({
       data: [...data, ...formSpecial.getValues("special")],
-      params: { key: selectedDomain },
+      params,
     });
     toast.success("Opening hours saved.");
     refetch();

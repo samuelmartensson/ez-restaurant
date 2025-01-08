@@ -45,20 +45,23 @@ export type PostPublicContactParams = {
 };
 
 export type GetPublicGetCustomerMenuParams = {
-  key: string;
+  Key: string;
+  Language: string;
 };
 
 export type GetPublicGetCustomerConfigParams = {
   Key: string;
-  Language?: string;
+  Language: string;
 };
 
 export type PostOpeningHourParams = {
-  key: string;
+  Key: string;
+  Language: string;
 };
 
 export type GetOpeningHourParams = {
-  key: string;
+  Key: string;
+  Language: string;
 };
 
 export type PostMenuImportqoplamenuParams = {
@@ -75,7 +78,8 @@ export type DeleteMenuCategoryParams = {
 };
 
 export type PostMenuCategoryParams = {
-  key: string;
+  Key: string;
+  Language: string;
 };
 
 export type PostMenuItemsBody = {
@@ -84,7 +88,8 @@ export type PostMenuItemsBody = {
 };
 
 export type PostMenuItemsParams = {
-  key: string;
+  Key: string;
+  Language: string;
 };
 
 export type DeleteCustomerDomainParams = {
@@ -221,8 +226,7 @@ export interface CustomerConfigResponse {
   currency?: string;
   /** @nullable */
   customDomain?: string | null;
-  /** @nullable */
-  defaultLanguage?: string | null;
+  defaultLanguage?: string;
   domain?: string;
   /** @nullable */
   email?: string | null;

@@ -18,9 +18,9 @@ public class MenuController(
     [HttpPost("items")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery, Required] string key)
+    public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        await menuService.UploadCustomerMenu(menuItemsJson, files, key);
+        await menuService.UploadCustomerMenu(menuItemsJson, files, queryParameters);
         return Ok(new { message = "Success" });
     }
 
@@ -29,9 +29,9 @@ public class MenuController(
     [HttpPost("category")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AddCategory(AddCategoryRequest request, [FromQuery, Required] string key)
+    public async Task<IActionResult> AddCategory(AddCategoryRequest request, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        await menuService.UpdateOrCreateCategory(request, key);
+        await menuService.UpdateOrCreateCategory(request, queryParameters);
         return Ok(new { message = "Success" });
     }
 

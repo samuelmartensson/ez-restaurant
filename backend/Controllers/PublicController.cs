@@ -8,21 +8,52 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PublicController(RestaurantContext context, EmailService emailService, TranslationContext translationContext) : ControllerBase
+public class PublicController(RestaurantContext context, EmailService emailService, TranslationContext translationContext, TranslationService translationService) : ControllerBase
 {
     private RestaurantContext context = context;
     private TranslationContext translationContext = translationContext;
     private EmailService emailService = emailService;
+    private TranslationService translationService = translationService;
 
-    private string? t(ICollection<Translation> translations, string key)
+    private string t(ICollection<Translation> translations, string key)
     {
-        return translations.FirstOrDefault(t => t.Key == key)?.Value;
+        return translations.FirstOrDefault(t => t.Key == key)?.Value ?? "";
+    }
+
+    private async Task<List<OpeningHourResponse>> GetOpeningHours(CustomerConfig customerConfig, string Key, string Language)
+    {
+        var openingHourTasks = customerConfig.OpeningHours.Select(async o => new OpeningHour
+        {
+            CustomerConfigDomain = o.CustomerConfigDomain,
+            OpenTime = o.OpenTime,
+            CloseTime = o.CloseTime,
+            Day = o.Day,
+            Id = o.Id,
+            IsClosed = o.IsClosed,
+            Label = await translationService.GetByKey(
+                Language,
+                Key,
+                $"open_hour_{o.Id}"
+            ) ?? o.Label
+        }).ToList();
+
+        var openingHourList = await Task.WhenAll(openingHourTasks);
+        return openingHourList.ToList().Select(o =>
+            new OpeningHourResponse
+            {
+                OpenTime = o.OpenTime.ToString(@"hh\:mm"),
+                CloseTime = o.CloseTime.ToString(@"hh\:mm"),
+                Day = o.Day,
+                Id = o.Id,
+                IsClosed = o.IsClosed,
+                Label = o.Label
+            }).ToList();
     }
 
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery] string Language)
+    public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
         var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
                 x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
@@ -51,17 +82,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
 
-        var openingHours = customerConfig.OpeningHours.Select(o =>
-        new OpeningHourResponse
-        {
-            OpenTime = o.OpenTime.ToString(@"hh\:mm"),
-            CloseTime = o.CloseTime.ToString(@"hh\:mm"),
-            Day = o.Day,
-            Id = o.Id,
-            IsClosed = o.IsClosed,
-            Label = o.Label
-        }).ToList();
-
+        var openingHours = await GetOpeningHours(customerConfig, Key, resolvedLanguage);
         var response = new CustomerConfigResponse
         {
             Domain = customerConfig.Domain,
@@ -84,19 +105,19 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             DefaultLanguage = customerConfig.DefaultLanguage,
             SectionVisibility = new SectionVisibilityResponse
             {
-                ContactFormVisible = customerConfig?.SectionVisibility?.ContactFormVisible ?? false
+                ContactFormVisible = customerConfig.SectionVisibility?.ContactFormVisible ?? false
             },
             Sections = new SectionsResponse
             {
                 Hero = new SiteSectionHeroResponse
                 {
-                    HeroImage = customerConfig?.SiteSectionHero?.Image ?? "",
-                    OrderUrl = customerConfig?.SiteSectionHero?.OrderUrl ?? ""
+                    HeroImage = customerConfig.SiteSectionHero?.Image ?? "",
+                    OrderUrl = customerConfig.SiteSectionHero?.OrderUrl ?? ""
                 },
                 About = new SiteSectionAboutResponse
                 {
-                    Image = customerConfig?.SiteSectionAbout?.Image ?? "",
-                    Description = t(customerConfig.Translations, "about:description"),
+                    Image = customerConfig.SiteSectionAbout?.Image ?? "",
+                    Description = t(customerConfig.Translations, "about:description") ?? "",
                     AboutTitle = translationContext.GetTranslation(resolvedLanguage, "about:title")
                 }
             },
@@ -110,47 +131,58 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] string key)
+    public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] CommonQueryParameters queryParameters)
     {
+        var key = queryParameters.Key;
         var customerConfig = await context.CustomerConfigs
-            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() || x.CustomDomain == key);
+            .Include(cf => cf.MenuCategorys)
+                .ThenInclude(mc => mc.MenuItems)
+            .Select(cf => new
+            {
+                CustomerConfig = cf,
+                Translations = cf.Translations.Where(t =>
+                    t.LanguageCode == queryParameters.Language &&
+                    (t.Key.Contains("menu_item") || t.Key.Contains("menu_category"))
+                ),
+                cf.MenuCategorys
+            })
+            .FirstOrDefaultAsync(x =>
+                x.CustomerConfig.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() ||
+                x.CustomerConfig.CustomDomain == key);
+
+
         if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
 
-        var menuCategories = await context.MenuCategorys
-            .Include(mc => mc.MenuItems)
-            .Where(mc => mc.CustomerConfigDomain == customerConfig.Domain)
-            .ToListAsync();
-
-
-        if (string.IsNullOrEmpty(key) || menuCategories == null)
+        if (string.IsNullOrEmpty(key) || customerConfig.MenuCategorys == null)
         {
             return NotFound(new { message = "Menu not found for the provided key." });
         }
+        var translationMap = customerConfig.Translations.ToDictionary(t => t.Key);
+        var menuCategoriesResponse = customerConfig.MenuCategorys.OrderBy(x => x.Order).Select(mc =>
+            new MenuCategoryResponse
+            {
+                Id = mc.Id,
+                Order = mc.Order,
+                Name = translationMap.GetValueOrDefault($"menu_category_{mc.Id}_name")?.Value ?? mc.Name,
+                Description = translationMap.GetValueOrDefault($"menu_category_{mc.Id}_description")?.Value ?? mc.Description ?? ""
+            })
+            .ToList();
 
-        var menuCategoriesResponse = menuCategories.OrderBy(x => x.Order).Select(mc => new MenuCategoryResponse
-        {
-            Id = mc.Id,
-            Name = mc.Name,
-            Order = mc.Order,
-            Description = mc.Description ?? ""
-        })
-        .ToList();
-
-        var menuItemsResponse = menuCategories
+        var menuItemsResponse = customerConfig.MenuCategorys
             .SelectMany(m => m.MenuItems)
             .OrderBy(m => m.Order)
             .ToList()
             .Select(m => new MenuItemResponse
             {
                 Id = m.Id,
-                Name = m.Name,
+                Name = translationMap.GetValueOrDefault($"menu_item_{m.Id}_name")?.Value ?? m.Name,
+                Description = translationMap.GetValueOrDefault($"menu_item_{m.Id}_description")?.Value ?? m.Description,
+                Tags = translationMap.GetValueOrDefault($"menu_item_{m.Id}_tags")?.Value ?? m.Tags,
                 CategoryId = m.MenuCategoryId,
                 Price = m.Price,
-                Description = m.Description,
-                Tags = m.Tags,
                 Image = m.Image,
                 Order = m.Order
             })

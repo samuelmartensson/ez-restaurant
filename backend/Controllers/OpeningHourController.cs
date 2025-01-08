@@ -19,9 +19,9 @@ public class OpeningHourController(
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(typeof(List<OpeningHourResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOpeningHours([FromQuery, Required] string key)
+    public async Task<IActionResult> GetOpeningHours([FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        var openingHours = (await openingHourService.GetOpeningHours(key))
+        var openingHours = (await openingHourService.GetOpeningHours(queryParameters))
             .Select(o => new OpeningHourResponse
             {
                 OpenTime = o.OpenTime.ToString(@"hh\:mm"),
@@ -39,9 +39,9 @@ public class OpeningHourController(
     [HttpPost]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateOpeningHours(List<AddOpeningHourRequest> newOpeningHours, [FromQuery, Required] string key)
+    public async Task<IActionResult> UpdateOpeningHours(List<AddOpeningHourRequest> newOpeningHours, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        await openingHourService.UpdateOpeningHours(key, newOpeningHours);
+        await openingHourService.UpdateOpeningHours(queryParameters, newOpeningHours);
         return Ok(new { message = "Success" });
     }
 }
