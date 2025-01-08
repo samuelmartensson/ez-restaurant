@@ -6,8 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
 import { Image } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const MenuItem = ({
   description,
@@ -68,12 +67,10 @@ const MenuRender = ({
   data: MenuResponse;
   currency: string;
 }) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const ref = useRef<HTMLDivElement>(null);
-  const selectedCategory =
-    searchParams.get("selectedCategory") || data.categories?.[0]?.id || "all";
+  const [selectedCategory, setSelectedCategory] = useState(
+    data.categories?.[0]?.id || "all"
+  );
 
   return (
     <div className="relative grid gap-4 p-4 rounded rounded-tr-3xl rounded-bl-3xl shadow-lg bg-white overflow-hidden">
@@ -92,7 +89,7 @@ const MenuRender = ({
             className="overflow-auto scroll-smooth"
             value={String(selectedCategory)}
             onValueChange={(category) => {
-              router.replace(pathname + "?selectedCategory=" + category);
+              setSelectedCategory(category);
               if (!ref.current) return;
 
               const scrollDistance =
