@@ -86,7 +86,7 @@ const MenuRender = ({
         }}
       />
       <div className="relative z-10 grid gap-1">
-        {data.categories.length > 0 && (
+        {data?.categories?.length > 0 && (
           <Tabs
             ref={ref}
             className="overflow-auto scroll-smooth"
