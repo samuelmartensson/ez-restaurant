@@ -82,6 +82,16 @@ export type PostCustomerDomainParams = {
   domainName?: string;
 };
 
+export type PostCustomerLanguagesBody = {
+  DefaultLanguage?: string;
+  Languages?: string[];
+};
+
+export type PostCustomerLanguagesParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostCustomerSiteConfigurationAssetsBody = {
   Font?: Blob;
   Logo?: Blob;
@@ -99,7 +109,6 @@ export type PostCustomerSiteConfigurationBody = {
   Email?: string;
   Font?: string;
   InstagramUrl?: string;
-  Languages?: string[];
   Logo?: string;
   MapUrl?: string;
   Phone?: string;
@@ -127,7 +136,6 @@ export const SubscriptionState = {
 } as const;
 
 export interface SiteTranslationsResponse {
-  about?: string;
   aboutTitle?: string;
   allRightsReserved?: string;
   contactUs?: string;
@@ -195,9 +203,12 @@ export interface MenuResponse {
 export interface CustomerConfigResponse {
   /** @nullable */
   adress?: string | null;
+  availableLanguages?: string[];
   currency?: string;
   /** @nullable */
   customDomain?: string | null;
+  /** @nullable */
+  defaultLanguage?: string | null;
   domain?: string;
   /** @nullable */
   email?: string | null;
@@ -318,11 +329,6 @@ export const postCustomerSiteConfiguration = (
   params: PostCustomerSiteConfigurationParams,
 ) => {
   const formData = new FormData();
-  if (postCustomerSiteConfigurationBody.Languages !== undefined) {
-    postCustomerSiteConfigurationBody.Languages.forEach((value) =>
-      formData.append("Languages", value),
-    );
-  }
   if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
     formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
   }
@@ -392,6 +398,32 @@ export const postCustomerSiteConfigurationAssets = (
 
   return authorizedFetch<void>({
     url: `/Customer/site-configuration-assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
+export const postCustomerLanguages = (
+  postCustomerLanguagesBody: PostCustomerLanguagesBody,
+  params: PostCustomerLanguagesParams,
+) => {
+  const formData = new FormData();
+  if (postCustomerLanguagesBody.Languages !== undefined) {
+    postCustomerLanguagesBody.Languages.forEach((value) =>
+      formData.append("Languages", value),
+    );
+  }
+  if (postCustomerLanguagesBody.DefaultLanguage !== undefined) {
+    formData.append(
+      "DefaultLanguage",
+      postCustomerLanguagesBody.DefaultLanguage,
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/Customer/languages`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -604,6 +636,9 @@ export type PostCustomerSiteConfigurationResult = NonNullable<
 >;
 export type PostCustomerSiteConfigurationAssetsResult = NonNullable<
   Awaited<ReturnType<typeof postCustomerSiteConfigurationAssets>>
+>;
+export type PostCustomerLanguagesResult = NonNullable<
+  Awaited<ReturnType<typeof postCustomerLanguages>>
 >;
 export type PostCustomerDomainResult = NonNullable<
   Awaited<ReturnType<typeof postCustomerDomain>>

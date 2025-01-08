@@ -31,7 +31,7 @@ export const getCustomerConfig = async () => {
     } as SiteConfig;
 
   if (!configResponse.languages?.includes(selectedLanguage)) {
-    selectedLanguage = configResponse.languages?.[0] ?? "English";
+    selectedLanguage = configResponse.defaultLanguage ?? "English";
     configResponse = await getPublicGetCustomerConfig({
       Key: customerId,
       Language: selectedLanguage,
