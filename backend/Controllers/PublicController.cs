@@ -87,6 +87,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         var key = queryParameters.Key?.Trim().ToLower();
         string language = queryParameters.Language;
         var customerConfig = await context.CustomerConfigs
+            .Include(cf => cf.SiteSectionAbout)
             .Include(cf => cf.Translations.Where(t => t.LanguageCode == language))
             .FirstOrDefaultAsync(x => x.Domain.Replace(" ", "").ToLower() == key || x.CustomDomain == queryParameters.Key);
 
