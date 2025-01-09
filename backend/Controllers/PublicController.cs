@@ -184,6 +184,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             OpeningHours = openingHours,
             AvailableLanguages = translationContext.languages,
             DefaultLanguage = customerConfig.DefaultLanguage,
+            ThemeColorConfig = customerConfig.ThemeColorConfig,
             SectionVisibility = new SectionVisibilityResponse
             {
                 ContactFormVisible = customerConfig.SectionVisibility?.ContactFormVisible ?? false

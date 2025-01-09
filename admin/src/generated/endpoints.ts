@@ -54,6 +54,21 @@ export type GetPublicGetCustomerConfigParams = {
   Language: string;
 };
 
+export type GetPublicGetCustomerTranslationsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetPublicAboutParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetPublicGetCustomerConfigMetaParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostOpeningHourParams = {
   Key: string;
   Language: string;
@@ -134,6 +149,7 @@ export type PostCustomerSiteConfigurationBody = {
   SiteMetaTitle?: string;
   SiteName?: string;
   Theme?: string;
+  ThemeColorConfig?: string;
 };
 
 export type PostCustomerSiteConfigurationParams = {
@@ -190,6 +206,16 @@ export interface SectionVisibilityResponse {
   contactFormVisible?: boolean;
 }
 
+export interface OpeningHourResponse {
+  closeTime?: string;
+  day?: CustomDayOfWeek;
+  id?: number;
+  isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
+  openTime?: string;
+}
+
 export interface MenuItemResponse {
   categoryId: number;
   /** @minLength 1 */
@@ -217,6 +243,18 @@ export interface MenuCategoryResponse {
 export interface MenuResponse {
   categories: MenuCategoryResponse[];
   menuItems: MenuItemResponse[];
+}
+
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  isFirstSignIn?: boolean;
+  subscription?: SubscriptionState;
+}
+
+export interface CustomerConfigTranslations {
+  siteTranslations?: SiteTranslationsResponse;
 }
 
 export interface CustomerConfigResponse {
@@ -248,14 +286,15 @@ export interface CustomerConfigResponse {
   siteName?: string;
   siteTranslations?: SiteTranslationsResponse;
   theme?: string;
+  themeColorConfig?: string;
 }
 
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
+export interface CustomerConfigMetaResponse {
+  currency?: string;
+  defaultLanguage?: string;
   domain?: string;
-  isFirstSignIn?: boolean;
-  subscription?: SubscriptionState;
+  languages?: string[];
+  siteName?: string;
 }
 
 export type CustomDayOfWeek =
@@ -272,16 +311,6 @@ export const CustomDayOfWeek = {
   NUMBER_6: 6,
   NUMBER_7: 7,
 } as const;
-
-export interface OpeningHourResponse {
-  closeTime?: string;
-  day?: CustomDayOfWeek;
-  id?: number;
-  isClosed?: boolean;
-  /** @nullable */
-  label?: string | null;
-  openTime?: string;
-}
 
 export interface CreateConfigRequest {
   domain?: string;
@@ -621,6 +650,12 @@ export const postCustomerSiteConfiguration = (
   }
   if (postCustomerSiteConfigurationBody.MapUrl !== undefined) {
     formData.append("MapUrl", postCustomerSiteConfigurationBody.MapUrl);
+  }
+  if (postCustomerSiteConfigurationBody.ThemeColorConfig !== undefined) {
+    formData.append(
+      "ThemeColorConfig",
+      postCustomerSiteConfigurationBody.ThemeColorConfig,
+    );
   }
 
   return authorizedFetch<void>({
@@ -1573,6 +1608,428 @@ export const usePostOpeningHour = <
 
   return useMutation(mutationOptions);
 };
+
+export const getPublicGetCustomerConfigMeta = (
+  params: GetPublicGetCustomerConfigMetaParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<CustomerConfigMetaResponse>({
+    url: `/Public/get-customer-config-meta`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetPublicGetCustomerConfigMetaQueryKey = (
+  params: GetPublicGetCustomerConfigMetaParams,
+) => {
+  return [
+    `/Public/get-customer-config-meta`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetPublicGetCustomerConfigMetaQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerConfigMetaParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetPublicGetCustomerConfigMetaQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>
+  > = ({ signal }) => getPublicGetCustomerConfigMeta(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetPublicGetCustomerConfigMetaQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>
+>;
+export type GetPublicGetCustomerConfigMetaQueryError = unknown;
+
+export function useGetPublicGetCustomerConfigMeta<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerConfigMetaParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetPublicGetCustomerConfigMeta<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerConfigMetaParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetPublicGetCustomerConfigMeta<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerConfigMetaParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetPublicGetCustomerConfigMeta<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerConfigMetaParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetPublicGetCustomerConfigMetaQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getPublicAbout = (
+  params: GetPublicAboutParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<SiteSectionAboutResponse>({
+    url: `/Public/about`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetPublicAboutQueryKey = (params: GetPublicAboutParams) => {
+  return [`/Public/about`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetPublicAboutQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicAbout>>,
+  TError = unknown,
+>(
+  params: GetPublicAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getPublicAbout>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetPublicAboutQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicAbout>>> = ({
+    signal,
+  }) => getPublicAbout(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicAbout>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetPublicAboutQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicAbout>>
+>;
+export type GetPublicAboutQueryError = unknown;
+
+export function useGetPublicAbout<
+  TData = Awaited<ReturnType<typeof getPublicAbout>>,
+  TError = unknown,
+>(
+  params: GetPublicAboutParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getPublicAbout>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicAbout>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetPublicAbout<
+  TData = Awaited<ReturnType<typeof getPublicAbout>>,
+  TError = unknown,
+>(
+  params: GetPublicAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getPublicAbout>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicAbout>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetPublicAbout<
+  TData = Awaited<ReturnType<typeof getPublicAbout>>,
+  TError = unknown,
+>(
+  params: GetPublicAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getPublicAbout>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetPublicAbout<
+  TData = Awaited<ReturnType<typeof getPublicAbout>>,
+  TError = unknown,
+>(
+  params: GetPublicAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getPublicAbout>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetPublicAboutQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getPublicGetCustomerTranslations = (
+  params: GetPublicGetCustomerTranslationsParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<CustomerConfigTranslations>({
+    url: `/Public/get-customer-translations`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetPublicGetCustomerTranslationsQueryKey = (
+  params: GetPublicGetCustomerTranslationsParams,
+) => {
+  return [
+    `/Public/get-customer-translations`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetPublicGetCustomerTranslationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerTranslationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetPublicGetCustomerTranslationsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>
+  > = ({ signal }) => getPublicGetCustomerTranslations(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetPublicGetCustomerTranslationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>
+>;
+export type GetPublicGetCustomerTranslationsQueryError = unknown;
+
+export function useGetPublicGetCustomerTranslations<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerTranslationsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetPublicGetCustomerTranslations<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerTranslationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetPublicGetCustomerTranslations<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerTranslationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetPublicGetCustomerTranslations<
+  TData = Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+  TError = unknown,
+>(
+  params: GetPublicGetCustomerTranslationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetPublicGetCustomerTranslationsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 export const getPublicGetCustomerConfig = (
   params: GetPublicGetCustomerConfigParams,

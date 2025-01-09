@@ -53,6 +53,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Currency = siteConfiguration.Currency;
         customerConfig.MapUrl = siteConfiguration.MapUrl;
         customerConfig.Phone = siteConfiguration.Phone;
+        customerConfig.ThemeColorConfig = siteConfiguration.ThemeColorConfig;
         customerConfig.SectionVisibility.ContactFormVisible = siteConfiguration.ContactFormVisible;
 
         if (siteConfiguration.Logo == "REMOVE")

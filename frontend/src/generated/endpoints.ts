@@ -135,6 +135,7 @@ export type PostCustomerSiteConfigurationBody = {
   SiteMetaTitle?: string;
   SiteName?: string;
   Theme?: string;
+  ThemeColorConfig?: string;
 };
 
 export type PostCustomerSiteConfigurationParams = {
@@ -271,6 +272,7 @@ export interface CustomerConfigResponse {
   siteName?: string;
   siteTranslations?: SiteTranslationsResponse;
   theme?: string;
+  themeColorConfig?: string;
 }
 
 export interface CustomerConfigMetaResponse {
@@ -404,6 +406,12 @@ export const postCustomerSiteConfiguration = (
   }
   if (postCustomerSiteConfigurationBody.MapUrl !== undefined) {
     formData.append("MapUrl", postCustomerSiteConfigurationBody.MapUrl);
+  }
+  if (postCustomerSiteConfigurationBody.ThemeColorConfig !== undefined) {
+    formData.append(
+      "ThemeColorConfig",
+      postCustomerSiteConfigurationBody.ThemeColorConfig,
+    );
   }
 
   return authorizedFetch<void>({

@@ -22,20 +22,25 @@ export default async function Home() {
               src={heroSection.heroImage ?? ""}
               fill
               alt="hero"
-              className="object-cover opacity-55"
+              className="object-cover opacity-25"
             />
           </div>
         )}
         <div className="m-auto relative max-w-screen-xl grid place-items-center z-10">
           <div className="p-4 grid place-items-center gap-8">
-            <h1 className="text-primary-foreground font-customer text-3xl md:text-6xl uppercase max-w-3xl text-center">
+            <h1 className="text-white font-customer text-3xl md:text-6xl uppercase max-w-3xl text-center">
               {data.siteName}
             </h1>
-            <p className="text-lg md:text-xl max-w-4xl text-primary-foreground text-center text-balance">
+            <p className="text-white text-lg md:text-xl max-w-4xl text-primary-foreground text-center text-balance">
               {data.siteMetaTitle}
             </p>
             <div className="grid gap-2 grid-flow-col">
-              <Button size="lg" asChild variant="secondary">
+              <Button
+                size="lg"
+                asChild
+                variant="outline"
+                className="bg-transparent text-background"
+              >
                 <Link href="/menu">{menu ?? "Menu"}</Link>
               </Button>
               {heroSection?.orderUrl && (
@@ -50,7 +55,7 @@ export default async function Home() {
         </div>
         <Link
           href="#open-hours"
-          className="absolute bottom-4 grid place-items-center text-white"
+          className="absolute md:bottom-4 bottom-28 grid place-items-center text-white"
         >
           <span>{openHours ?? "Open hours"}</span>
           <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />

@@ -18,7 +18,7 @@ export default async function Footer() {
     data?.siteTranslations || {};
 
   return (
-    <footer id="open-hours" className="text-gray-600 py-8 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-accent text-accent-foreground pt-8 pb-28 md:pb-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-screen-lg mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {(data?.email ||
@@ -26,7 +26,7 @@ export default async function Footer() {
             data?.adress ||
             data?.instagramUrl) && (
             <div className="space-y-4">
-              <h3 className="font-customer text-lg font-semibold text-gray-900">
+              <h3 className="font-customer text-2xl font-semibold text-primary">
                 {contactUs ?? "CONTACT US"}
               </h3>
               {data?.email && (
@@ -34,7 +34,7 @@ export default async function Footer() {
                   href={`mailto:${data.email}`}
                   className="flex items-center space-x-3"
                 >
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5 text-primary" />
                   <span>{data?.email}</span>
                 </a>
               )}
@@ -43,7 +43,7 @@ export default async function Footer() {
                   href={`tel:${data.phone}`}
                   className="flex items-center space-x-3"
                 >
-                  <Phone className="h-5 w-5 text-gray-400" />
+                  <Phone className="h-5 w-5 text-primary" />
                   <span>{data?.phone}</span>
                 </a>
               )}
@@ -52,7 +52,7 @@ export default async function Footer() {
                   {...(data?.mapUrl && { href: data.mapUrl, target: "_blank" })}
                   className="flex items-center space-x-3"
                 >
-                  <MapPin className="h-5 w-5 text-gray-400" />
+                  <MapPin className="h-5 w-5 text-primary" />
                   <span>{data?.adress}</span>
                 </a>
               )}
@@ -62,14 +62,17 @@ export default async function Footer() {
                   href={data.instagramUrl}
                   className="flex items-center space-x-3"
                 >
-                  <Instagram className="h-5 w-5 text-gray-400" />
+                  <Instagram className="h-5 w-5 text-primary" />
                   <span>Instagram</span>
                 </a>
               )}
             </div>
           )}
           <div className="space-y-4">
-            <h3 className="font-customer text-lg font-semibold text-gray-900">
+            <h3
+              id="open-hours"
+              className="font-customer text-2xl font-semibold text-primary"
+            >
               {openHours ?? "OPEN HOURS"}
             </h3>
             <div className="flex items-start space-x-3">

@@ -73,7 +73,7 @@ const MenuRender = ({
   );
 
   return (
-    <div className="relative grid gap-4 p-4 rounded rounded-tr-3xl rounded-bl-3xl shadow-lg bg-white overflow-hidden">
+    <div className="relative grid gap-4 p-4 rounded shadow-lg bg-white overflow-hidden">
       <div
         className="inset-0 absolute"
         style={{
@@ -113,12 +113,12 @@ const MenuRender = ({
               }
             }}
           >
-            <TabsList className="justify-start">
+            <TabsList className="justify-start md:h-11">
               {data.categories.map((c) => (
                 <TabsTrigger
                   value={String(c.id)}
                   key={c.id}
-                  className="w-full font-customer text-lg"
+                  className="w-full font-customer md:text-lg"
                 >
                   {c.name}
                 </TabsTrigger>

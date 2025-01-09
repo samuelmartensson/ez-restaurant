@@ -40,8 +40,9 @@ import {
   usePostCustomerSiteConfiguration,
   usePostCustomerSiteConfigurationAssets,
 } from "@/generated/endpoints";
+import { getThemePrimaryFromConfig, getTheme } from "@/utils/theme";
 import { Save, Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -153,6 +154,11 @@ const Site = () => {
     isPending: isPendingAssets,
   } = usePostCustomerSiteConfigurationAssets();
 
+  const currentThemePrimary = useMemo(
+    () => getThemePrimaryFromConfig(customerConfig?.themeColorConfig ?? ""),
+    [customerConfig?.themeColorConfig],
+  );
+
   const isPending = isPendingAssets || isPendingData;
 
   useEffect(() => {
@@ -171,26 +177,39 @@ const Site = () => {
       Currency: customerConfig.currency ?? "",
       MapUrl: customerConfig.mapUrl ?? "",
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
+      ThemeColorConfig: currentThemePrimary,
     });
-  }, [customerConfig, form]);
+  }, [currentThemePrimary, customerConfig, form]);
 
   async function onSubmit(data: PostCustomerSiteConfigurationBody) {
     const params = { Key: selectedDomain, Language: selectedLanguage };
+    let themeConfig = customerConfig?.themeColorConfig;
+
+    if (currentThemePrimary !== data.ThemeColorConfig) {
+      try {
+        toast.info("Generating theme...");
+        themeConfig = await getTheme(data.ThemeColorConfig ?? "");
+        toast.success("Theme generated!");
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        toast.error("Theme could not be generated.");
+      }
+    }
+    await uploadSiteConfiguration({
+      data: {
+        ...data,
+        ThemeColorConfig: themeConfig,
+        Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
+        Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
+      },
+      params,
+    });
     await uploadSiteConfigurationAssets({
       data: {
         ...uploadedAssets,
       },
       params,
     });
-    await uploadSiteConfiguration({
-      data: {
-        ...data,
-        Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
-        Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
-      },
-      params,
-    });
-
     const updated = await refetch();
     if (!updated.data?.languages?.includes(selectedLanguage)) {
       setSelectedLanguage(updated.data?.languages?.[0] ?? "");
@@ -279,6 +298,22 @@ const Site = () => {
                     </SelectContent>
                   </Select>
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="ThemeColorConfig"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Theme Color</FormLabel>
+                <FormControl>
+                  <Input type="color" {...field} />
+                </FormControl>
+
                 <FormMessage />
               </FormItem>
             );

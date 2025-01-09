@@ -49,7 +49,7 @@ export default function ContactForm({
                 <h2 className="text-3xl font-customer font-bold mb-2 text-primary">
                   THANK YOU FOR REACHING OUT!
                 </h2>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-accent-foreground mb-6">
                   We will get back to you as soon as possible.
                 </p>
               </div>
@@ -58,7 +58,7 @@ export default function ContactForm({
                 <h2 className="text-3xl font-customer font-bold mb-2 text-primary">
                   PLANNING AN EVENT?
                 </h2>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-accent-foreground mb-6">
                   Need catering or a special request? Tell us below!
                 </p>
                 <form
