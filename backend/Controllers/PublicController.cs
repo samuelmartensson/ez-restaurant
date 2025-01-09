@@ -237,8 +237,6 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         if (customerConfig == null)
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
 
-        if (customerConfig.Config.MenuCategorys == null || !customerConfig.Config.MenuCategorys.Any())
-            return NotFound(new { message = "Menu not found for the provided key." });
 
         var translationMap = customerConfig.Translations.ToDictionary(t => t.Key);
 
