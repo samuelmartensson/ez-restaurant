@@ -84,7 +84,7 @@ export default async function Footer() {
                         o.label}
                     </span>
                     {o.isClosed ? (
-                      <span>Closed</span>
+                      <span>{data.siteTranslations?.closed ?? "Closed"}</span>
                     ) : (
                       <span>
                         {o.openTime} - {o.closeTime}

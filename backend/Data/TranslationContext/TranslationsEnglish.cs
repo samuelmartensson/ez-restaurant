@@ -14,6 +14,7 @@ public static class TranslationsEnglish
         { "friday", "Friday" },
         { "saturday", "Saturday" },
         { "sunday", "Sunday" },
-        { "all_rights_reserved", "All rights reserved" }
+        { "all_rights_reserved", "All rights reserved" },
+        { "closed", "Closed" }
     };
 }

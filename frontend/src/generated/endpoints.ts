@@ -159,6 +159,7 @@ export const SubscriptionState = {
 export interface SiteTranslationsResponse {
   aboutTitle?: string;
   allRightsReserved?: string;
+  closed?: string;
   contactUs?: string;
   friday?: string;
   menu?: string;
@@ -272,7 +273,8 @@ export interface CustomerConfigResponse {
   siteName?: string;
   siteTranslations?: SiteTranslationsResponse;
   theme?: string;
-  themeColorConfig?: string;
+  /** @nullable */
+  themeColorConfig?: string | null;
 }
 
 export interface CustomerConfigMetaResponse {
