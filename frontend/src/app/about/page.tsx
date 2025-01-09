@@ -1,19 +1,19 @@
 import SubPageLayout from "@/components/SubPageLayout";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { getCustomerConfig } from "@/mock_db";
+import { getAbout } from "@/mock_db";
+import Image from "next/image";
 import { Fragment } from "react";
 
 const About = async () => {
-  const data = await getCustomerConfig();
+  const data = await getAbout();
   if (!data) return null;
 
-  const aboutSection = data?.sections?.about;
+  const aboutSection = data.about;
   const descriptionLines = aboutSection?.description?.split("\n");
 
   return (
     <SubPageLayout>
-      <title>{`${aboutSection?.aboutTitle} | ${data?.siteName}`}</title>
+      <title>{`${aboutSection?.aboutTitle} | ${data?.meta.siteName}`}</title>
       <div className="container mx-auto px-4 md:pt-16">
         <Card>
           <div>

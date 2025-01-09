@@ -50,6 +50,92 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             }).ToList();
     }
 
+    [HttpGet("get-customer-config-meta")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(CustomerConfigMetaResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerConfigMeta([FromQuery, Required] string Key, [FromQuery, Required] string Language)
+    {
+        var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
+                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
+                x.CustomDomain == Key
+            );
+        if (cf == null)
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        }
+        string resolvedLanguage = Language ?? cf.Languages.Split(",").First() ?? "";
+
+        if (string.IsNullOrEmpty(resolvedLanguage))
+        {
+            return BadRequest(new { message = "Language could not be resolved." });
+        }
+        return Ok(new CustomerConfigMetaResponse
+        {
+            DefaultLanguage = cf.DefaultLanguage,
+            Domain = cf.Domain,
+            Languages = cf.Languages.Split(",").ToList(),
+            SiteName = t(cf.Translations, "site:name") ?? cf.SiteName,
+            Currency = cf.Currency,
+        });
+    }
+
+    [HttpGet("about")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(SiteSectionAboutResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> About([FromQuery, Required] CommonQueryParameters queryParameters)
+    {
+        var Key = queryParameters.Key;
+        var Language = queryParameters.Language;
+
+        var cf = await context.CustomerConfigs.Include(cf => cf.Translations).FirstOrDefaultAsync((x) =>
+                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
+                x.CustomDomain == Key
+            );
+
+        if (cf == null)
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        }
+        string resolvedLanguage = Language ?? cf.Languages.Split(",").First() ?? "";
+
+        if (string.IsNullOrEmpty(resolvedLanguage))
+        {
+            return BadRequest(new { message = "Language could not be resolved." });
+        }
+        return Ok(new SiteSectionAboutResponse
+        {
+            Image = cf.SiteSectionAbout?.Image ?? "",
+            Description = t(cf.Translations, "about:description") ?? "",
+            AboutTitle = translationContext.GetTranslation(resolvedLanguage, "about:title")
+        });
+    }
+
+    [HttpGet("get-customer-translations")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(CustomerConfigTranslations), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerTranslations([FromQuery, Required] string Key, [FromQuery, Required] string Language)
+    {
+        var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
+                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
+                x.CustomDomain == Key
+            );
+        if (cf == null)
+        {
+            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+        }
+        string resolvedLanguage = Language ?? cf.Languages.Split(",").First() ?? "";
+
+        if (string.IsNullOrEmpty(resolvedLanguage))
+        {
+            return BadRequest(new { message = "Language could not be resolved." });
+        }
+
+        return Ok(new CustomerConfigTranslations
+        {
+            SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage),
+        });
+    }
+
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]

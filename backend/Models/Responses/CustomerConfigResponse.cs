@@ -41,6 +41,20 @@ namespace Models.Responses
         public bool ContactFormVisible { get; set; } = false;
     }
 
+    public class CustomerConfigMetaResponse
+    {
+        public required string Domain { get; set; }
+        public required List<string> Languages { get; set; }
+        required public string DefaultLanguage { get; set; }
+        required public string SiteName { get; set; }
+        required public string Currency { get; set; }
+    }
+
+    public class CustomerConfigTranslations
+    {
+        public SiteTranslationsResponse? SiteTranslations { get; set; }
+    }
+
     public class CustomerConfigResponse
     {
         public int HeroType { get; set; }

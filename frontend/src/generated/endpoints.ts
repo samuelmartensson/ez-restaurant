@@ -26,6 +26,16 @@ export type PostSectionHeroParams = {
   key: string;
 };
 
+export type GetPublicAboutParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetPublicGetCustomerTranslationsParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostPublicContactParams = {
   key: string;
 };
@@ -36,6 +46,11 @@ export type GetPublicGetCustomerMenuParams = {
 };
 
 export type GetPublicGetCustomerConfigParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetPublicGetCustomerConfigMetaParams = {
   Key: string;
   Language: string;
 };
@@ -74,7 +89,8 @@ export type PostMenuItemsBody = {
 };
 
 export type PostMenuItemsParams = {
-  key: string;
+  Key: string;
+  Language: string;
 };
 
 export type DeleteCustomerDomainParams = {
@@ -175,6 +191,16 @@ export interface SectionVisibilityResponse {
   contactFormVisible?: boolean;
 }
 
+export interface OpeningHourResponse {
+  closeTime?: string;
+  day?: CustomDayOfWeek;
+  id?: number;
+  isClosed?: boolean;
+  /** @nullable */
+  label?: string | null;
+  openTime?: string;
+}
+
 export interface MenuItemResponse {
   categoryId: number;
   /** @minLength 1 */
@@ -202,6 +228,22 @@ export interface MenuCategoryResponse {
 export interface MenuResponse {
   categories: MenuCategoryResponse[];
   menuItems: MenuItemResponse[];
+}
+
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  isFirstSignIn?: boolean;
+  subscription?: SubscriptionState;
+}
+
+export interface CustomerConfigTranslations {
+  /** @nullable */
+  currency?: string | null;
+  /** @nullable */
+  siteName?: string | null;
+  siteTranslations?: SiteTranslationsResponse;
 }
 
 export interface CustomerConfigResponse {
@@ -235,12 +277,12 @@ export interface CustomerConfigResponse {
   theme?: string;
 }
 
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
+export interface CustomerConfigMetaResponse {
+  currency?: string;
+  defaultLanguage?: string;
   domain?: string;
-  isFirstSignIn?: boolean;
-  subscription?: SubscriptionState;
+  languages?: string[];
+  siteName?: string;
 }
 
 export type CustomDayOfWeek =
@@ -257,16 +299,6 @@ export const CustomDayOfWeek = {
   NUMBER_6: 6,
   NUMBER_7: 7,
 } as const;
-
-export interface OpeningHourResponse {
-  closeTime?: string;
-  day?: CustomDayOfWeek;
-  id?: number;
-  isClosed?: boolean;
-  /** @nullable */
-  label?: string | null;
-  openTime?: string;
-}
 
 export interface CreateConfigRequest {
   domain?: string;
@@ -536,6 +568,16 @@ export const postOpeningHour = (
   });
 };
 
+export const getPublicGetCustomerConfigMeta = (
+  params: GetPublicGetCustomerConfigMetaParams,
+) => {
+  return authorizedFetch<CustomerConfigMetaResponse>({
+    url: `/Public/get-customer-config-meta`,
+    method: "GET",
+    params,
+  });
+};
+
 export const getPublicGetCustomerConfig = (
   params: GetPublicGetCustomerConfigParams,
 ) => {
@@ -565,6 +607,24 @@ export const postPublicContact = (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: contactRequest,
+    params,
+  });
+};
+
+export const getPublicGetCustomerTranslations = (
+  params: GetPublicGetCustomerTranslationsParams,
+) => {
+  return authorizedFetch<CustomerConfigTranslations>({
+    url: `/Public/get-customer-translations`,
+    method: "GET",
+    params,
+  });
+};
+
+export const getPublicAbout = (params: GetPublicAboutParams) => {
+  return authorizedFetch<SiteSectionAboutResponse>({
+    url: `/Public/about`,
+    method: "GET",
     params,
   });
 };
@@ -670,6 +730,9 @@ export type GetOpeningHourResult = NonNullable<
 export type PostOpeningHourResult = NonNullable<
   Awaited<ReturnType<typeof postOpeningHour>>
 >;
+export type GetPublicGetCustomerConfigMetaResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>
+>;
 export type GetPublicGetCustomerConfigResult = NonNullable<
   Awaited<ReturnType<typeof getPublicGetCustomerConfig>>
 >;
@@ -678,6 +741,12 @@ export type GetPublicGetCustomerMenuResult = NonNullable<
 >;
 export type PostPublicContactResult = NonNullable<
   Awaited<ReturnType<typeof postPublicContact>>
+>;
+export type GetPublicGetCustomerTranslationsResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>
+>;
+export type GetPublicAboutResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicAbout>>
 >;
 export type PostSectionHeroResult = NonNullable<
   Awaited<ReturnType<typeof postSectionHero>>
