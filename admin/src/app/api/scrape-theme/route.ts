@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     executablePath:
       process.env.CHROME_EXECUTABLE_PATH ||
       (await chromium.executablePath(
-        "https://ez-rest.s3.eu-north-1.amazonaws.com/scraper/chromium-v126.0.0-pack.tar",
+        "https://ez-rest.s3.eu-north-1.amazonaws.com/scraper/chromium-v131.0.1-pack.tar",
       )),
     headless: chromium.headless,
   });
