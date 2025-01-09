@@ -26,16 +26,6 @@ export type PostSectionHeroParams = {
   key: string;
 };
 
-export type GetPublicAboutParams = {
-  Key: string;
-  Language: string;
-};
-
-export type GetPublicGetCustomerTranslationsParams = {
-  Key: string;
-  Language: string;
-};
-
 export type PostPublicContactParams = {
   key: string;
 };
@@ -46,6 +36,16 @@ export type GetPublicGetCustomerMenuParams = {
 };
 
 export type GetPublicGetCustomerConfigParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetPublicGetCustomerTranslationsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetPublicAboutParams = {
   Key: string;
   Language: string;
 };
@@ -239,10 +239,6 @@ export interface CustomerResponse {
 }
 
 export interface CustomerConfigTranslations {
-  /** @nullable */
-  currency?: string | null;
-  /** @nullable */
-  siteName?: string | null;
   siteTranslations?: SiteTranslationsResponse;
 }
 
@@ -578,6 +574,24 @@ export const getPublicGetCustomerConfigMeta = (
   });
 };
 
+export const getPublicAbout = (params: GetPublicAboutParams) => {
+  return authorizedFetch<SiteSectionAboutResponse>({
+    url: `/Public/about`,
+    method: "GET",
+    params,
+  });
+};
+
+export const getPublicGetCustomerTranslations = (
+  params: GetPublicGetCustomerTranslationsParams,
+) => {
+  return authorizedFetch<CustomerConfigTranslations>({
+    url: `/Public/get-customer-translations`,
+    method: "GET",
+    params,
+  });
+};
+
 export const getPublicGetCustomerConfig = (
   params: GetPublicGetCustomerConfigParams,
 ) => {
@@ -607,24 +621,6 @@ export const postPublicContact = (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: contactRequest,
-    params,
-  });
-};
-
-export const getPublicGetCustomerTranslations = (
-  params: GetPublicGetCustomerTranslationsParams,
-) => {
-  return authorizedFetch<CustomerConfigTranslations>({
-    url: `/Public/get-customer-translations`,
-    method: "GET",
-    params,
-  });
-};
-
-export const getPublicAbout = (params: GetPublicAboutParams) => {
-  return authorizedFetch<SiteSectionAboutResponse>({
-    url: `/Public/about`,
-    method: "GET",
     params,
   });
 };
@@ -733,6 +729,12 @@ export type PostOpeningHourResult = NonNullable<
 export type GetPublicGetCustomerConfigMetaResult = NonNullable<
   Awaited<ReturnType<typeof getPublicGetCustomerConfigMeta>>
 >;
+export type GetPublicAboutResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicAbout>>
+>;
+export type GetPublicGetCustomerTranslationsResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>
+>;
 export type GetPublicGetCustomerConfigResult = NonNullable<
   Awaited<ReturnType<typeof getPublicGetCustomerConfig>>
 >;
@@ -741,12 +743,6 @@ export type GetPublicGetCustomerMenuResult = NonNullable<
 >;
 export type PostPublicContactResult = NonNullable<
   Awaited<ReturnType<typeof postPublicContact>>
->;
-export type GetPublicGetCustomerTranslationsResult = NonNullable<
-  Awaited<ReturnType<typeof getPublicGetCustomerTranslations>>
->;
-export type GetPublicAboutResult = NonNullable<
-  Awaited<ReturnType<typeof getPublicAbout>>
 >;
 export type PostSectionHeroResult = NonNullable<
   Awaited<ReturnType<typeof postSectionHero>>

@@ -80,13 +80,13 @@ export const getCustomerConfig = async () => {
   } as SiteConfig;
 };
 
-export const getCustomerMenu = async () => {
+export const getCustomerMenu: () => Promise<SiteMenu> = async () => {
   const [meta, params] = await resolveParams();
 
-  if (!params) {
-    return {
+  if (!params || !meta) {
+    return Promise.resolve({
       ok: false,
-    } as SiteMenu;
+    } as SiteMenu);
   }
 
   const menu = await getPublicGetCustomerMenu(params);
@@ -95,9 +95,9 @@ export const getCustomerMenu = async () => {
   return {
     menu,
     meta,
-    translations,
+    translations: translations.siteTranslations ?? {},
     ok: !!menu,
-  } as SiteMenu;
+  };
 };
 
 interface About {
