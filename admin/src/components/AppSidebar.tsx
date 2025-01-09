@@ -31,7 +31,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const items = [
   {
-    title: "Site",
+    title: "General",
     url: "/",
     icon: Home,
   },

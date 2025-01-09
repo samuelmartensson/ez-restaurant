@@ -1,5 +1,6 @@
 "use client";
 
+import CycleLanguageLabel from "@/components/CycleLanguageLabel";
 import { useDataContext } from "@/components/DataContextProvider";
 import FilePreview from "@/components/FilePreview";
 import hasDomain from "@/components/hasDomain";
@@ -29,6 +30,7 @@ const inputSchema = [
     id: "Description",
     label: "Description",
     type: "textarea",
+    translate: true,
   },
 ] as const;
 
@@ -104,7 +106,13 @@ const About = () => {
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>{input.label}</FormLabel>
+                  <FormLabel>
+                    {input.translate ? (
+                      <CycleLanguageLabel label={input.label} />
+                    ) : (
+                      input.label
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>

@@ -23,7 +23,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Copy, Plus, Save, Trash, X } from "lucide-react";
+import {
+  AlignLeft,
+  Copy,
+  DollarSign,
+  Folder,
+  Image,
+  Plus,
+  Save,
+  Text,
+  Trash,
+  Type,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useDataContext } from "@/components/DataContextProvider";
@@ -87,12 +99,14 @@ const inputSchema = [
       label: "Name",
       type: "text",
       description: "",
+      icon: Type,
     },
     {
       id: "price",
       label: "Price",
       type: "number",
       description: "",
+      icon: DollarSign,
     },
   ],
   [
@@ -101,6 +115,7 @@ const inputSchema = [
       label: "Category",
       type: "select",
       description: "",
+      icon: Folder,
     },
   ],
   [
@@ -109,6 +124,7 @@ const inputSchema = [
       label: "Description",
       type: "textarea",
       description: "",
+      icon: AlignLeft,
     },
   ],
   [
@@ -117,6 +133,7 @@ const inputSchema = [
       label: "Image",
       type: "file",
       description: "",
+      icon: Image,
     },
   ],
   [
@@ -125,6 +142,7 @@ const inputSchema = [
       label: "Tags",
       type: "text",
       description: "To create multiple tags, separate words with commas (,)",
+      icon: Text,
     },
   ],
 ] as const;
@@ -201,7 +219,10 @@ const DataLayer = () => {
 
   const { data = { categories: [], menuItems: [] }, isLoading } =
     useGetPublicGetCustomerMenu(params, {
-      query: { enabled: !!selectedDomain },
+      query: {
+        enabled: !!selectedDomain,
+        placeholderData: (previousData) => previousData,
+      },
     });
 
   if (isLoading) return <></>;
@@ -401,17 +422,17 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   }
 
   return (
-    <div>
+    <div className="max-h-[72svh] md:max-h-[75svh]">
       <div
-        className="grid gap-4 duration-100"
+        className="grid max-h-full gap-4 overflow-auto duration-100"
         style={{
           gridTemplateColumns:
             isMobile || !selectedField ? "1fr 0fr" : "3fr 2fr",
         }}
       >
-        <div className="grid grid-rows-[auto_60vh]">
+        <div className="relative grid grid-rows-[auto_1fr]">
           {Categories}
-          <div className="flex flex-col gap-2 overflow-auto p-2">
+          <div className="flex flex-col gap-2 p-2">
             <DndContext sensors={sensors} onDragEnd={onDragEnd}>
               <SortableContext
                 items={fields}
@@ -537,7 +558,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                 selectedFieldIndex !== -1 &&
                 selectedFieldIndex !== undefined && (
                   <div
-                    className="grid gap-4 p-4 animate-in fade-in"
+                    className="sticky top-0 grid gap-4 p-4 animate-in fade-in"
                     key={selectedFieldIndex}
                   >
                     {inputSchema.map((inputRow) => (
@@ -651,7 +672,10 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
 
                               return (
                                 <FormItem className="grid flex-1">
-                                  <FormLabel>{input.label}</FormLabel>
+                                  <FormLabel className="flex items-center gap-0.5">
+                                    <input.icon className="size-4" />{" "}
+                                    {input.label}
+                                  </FormLabel>
                                   <FormControl>{render}</FormControl>
                                   {input?.description && (
                                     <FormDescription>

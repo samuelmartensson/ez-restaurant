@@ -35,7 +35,14 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
 
     public async Task<List<OpeningHour>> GetOpeningHours(CommonQueryParameters queryParameters)
     {
-        var openingHours = await context.OpeningHours.Where(o => o.CustomerConfigDomain == queryParameters.Key).ToListAsync();
+        var openingHours = await context.OpeningHours.Where(o => o.CustomerConfigDomain == queryParameters.Key).OrderBy(o => o.Day).ToListAsync();
+        if (!openingHours.Any())
+        {
+            var openingHoursInit = InitializeWeeklyOpeningHours(queryParameters.Key);
+            await context.AddRangeAsync(openingHoursInit);
+            await context.SaveChangesAsync();
+            return openingHoursInit;
+        }
 
         var openingHourTasks = openingHours.Select(async o => new OpeningHour
         {

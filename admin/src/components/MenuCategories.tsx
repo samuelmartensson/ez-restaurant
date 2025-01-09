@@ -175,7 +175,7 @@ const MenuCategories = ({
 
   return (
     <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
-      <div className="mb-4 overflow-auto">
+      <div className="sticky top-0 z-10 mb-4 overflow-auto bg-white">
         <SortableContext items={items} strategy={horizontalListSortingStrategy}>
           <div
             style={{ maxWidth: "100%" }}

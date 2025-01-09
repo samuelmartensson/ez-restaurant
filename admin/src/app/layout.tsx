@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import "./globals.css";
 import AppLoader from "@/components/AppLoader";
 import { Button } from "@/components/ui/button";
+import { Languages } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,12 +42,14 @@ const Content = ({ children }: { children: React.ReactNode }) => {
           <Button
             type="button"
             variant="ghost"
-            size="sm"
             onClick={() => cycleLanguage()}
-            className="grid gap-0 text-left text-sm leading-none"
+            className="flex"
           >
-            <span>{selectedDomain}</span>
-            <span className="text-muted-foreground">{selectedLanguage}</span>
+            <Languages />
+            <div className="grid gap-0 text-left text-sm leading-none">
+              <span>{selectedDomain}</span>
+              <span className="text-muted-foreground">{selectedLanguage}</span>
+            </div>
           </Button>
         </div>
         {children}

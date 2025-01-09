@@ -1,5 +1,6 @@
 "use client";
 
+import CycleLanguageLabel from "@/components/CycleLanguageLabel";
 import { useDataContext } from "@/components/DataContextProvider";
 import FilePreview from "@/components/FilePreview";
 import FormLayout from "@/components/FormLayout";
@@ -48,34 +49,42 @@ const inputSchema = [
   {
     id: "SiteName",
     label: "Name",
+    translate: true,
   },
   {
     id: "SiteMetaTitle",
     label: "Short description / Slogan",
+    translate: true,
   },
   {
     id: "Currency",
     label: "Currency",
+    translate: false,
   },
   {
     id: "Adress",
     label: "Adress",
+    translate: false,
   },
   {
     id: "Phone",
     label: "Phone",
+    translate: false,
   },
   {
     id: "Email",
     label: "Email",
+    translate: false,
   },
   {
     id: "InstagramUrl",
     label: "Instagram URL",
+    translate: false,
   },
   {
     id: "MapUrl",
     label: "Map URL",
+    translate: false,
   },
 ] as const;
 
@@ -227,7 +236,13 @@ const Site = () => {
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>{input.label}</FormLabel>
+                  <FormLabel>
+                    {input.translate ? (
+                      <CycleLanguageLabel label={input.label} />
+                    ) : (
+                      input.label
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -414,7 +429,7 @@ const Site = () => {
           ))}
         </div>
         <Button
-          className="fixed inset-x-3 bottom-4 md:left-[--sidebar-width]"
+          className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
           disabled={isPending}
           type="submit"
         >
