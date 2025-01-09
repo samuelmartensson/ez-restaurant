@@ -19,7 +19,7 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
   return (
     <nav
       style={{ top: expanded ? 0 : "unset" }}
-      className="fixed bottom-0 left-0 right-0 z-50 text-accent-foreground duration-300 bg-accent"
+      className="shadow-md shadow-black fixed bottom-0 left-0 right-0 z-50 text-accent-foreground duration-300 bg-accent"
     >
       <div className="flex font-customer container gap-10 m-auto h-full">
         {!expanded ? (

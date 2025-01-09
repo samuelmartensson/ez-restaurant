@@ -123,6 +123,7 @@ const Site = () => {
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
   );
+  const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const form = useForm<PostCustomerSiteConfigurationBody>({
     defaultValues: {
       SiteName: "",
@@ -159,7 +160,7 @@ const Site = () => {
     [customerConfig?.themeColorConfig],
   );
 
-  const isPending = isPendingAssets || isPendingData;
+  const isPending = isPendingAssets || isPendingData || isGeneratingTheme;
 
   useEffect(() => {
     if (!customerConfig) return;
@@ -187,14 +188,19 @@ const Site = () => {
 
     if (currentThemePrimary !== data.ThemeColorConfig) {
       try {
-        toast.info("Generating theme...");
+        setIsGeneratingTheme(true);
+        const loadId = "theme";
+        toast.loading("Generating theme...", { id: loadId });
         themeConfig = await getTheme(data.ThemeColorConfig ?? "");
-        toast.success("Theme generated!");
+        toast.dismiss(loadId);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         toast.error("Theme could not be generated.");
+      } finally {
+        setIsGeneratingTheme(false);
       }
     }
+
     await uploadSiteConfiguration({
       data: {
         ...data,

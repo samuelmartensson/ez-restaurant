@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
-import { Image } from "lucide-react";
+import { HandPlatter, Image } from "lucide-react";
 import { useRef, useState } from "react";
 
 const MenuItem = ({
@@ -26,15 +26,15 @@ const MenuItem = ({
         />
       ) : (
         <div className="grid place-items-center min-w-32 max-w-32 h-32 bg-gray-200 object-cover rounded-xl">
-          <Image className="text-gray-400" />
+          <HandPlatter className="text-gray-400" />
         </div>
       )}
-      <div className="grid gap-2 w-full">
+      <div className="grid gap-2 w-full justify-items-start">
         <div className="grid gap-4">
           <div className="grid gap-1">
             <span className="text-lg font-customer">{name}</span>
             {description && (
-              <span className="text-muted-foreground text-sm">
+              <span className="text-accent-foreground text-sm">
                 {description}
               </span>
             )}
@@ -52,9 +52,9 @@ const MenuItem = ({
             </div>
           )}
         </div>
-        <span className="font-customer text-primary font-bold self-end whitespace-nowrap">
+        <Badge className="inline-block font-customer text-lg self-end whitespace-nowrap">
           {price} {currency}
-        </span>
+        </Badge>
       </div>
     </div>
   );

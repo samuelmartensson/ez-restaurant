@@ -2,7 +2,7 @@ import chromium from "@sparticuz/chromium-min";
 import { NextRequest } from "next/server";
 import puppeteer from "puppeteer-core";
 
-export const maxDuration = 20;
+export const maxDuration = 30;
 export async function GET(request: NextRequest) {
   const isLocal = !!process.env.CHROME_EXECUTABLE_PATH;
   const color = request.nextUrl.searchParams.get("color") ?? "";

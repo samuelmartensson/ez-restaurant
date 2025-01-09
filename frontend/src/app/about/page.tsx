@@ -1,5 +1,10 @@
 import SubPageLayout from "@/components/SubPageLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 import { getAbout } from "@/mock_db";
 import Image from "next/image";
 import { Fragment } from "react";
@@ -29,17 +34,17 @@ const About = async () => {
               </div>
             )}
             <CardContent className="p-8">
-              <h1 className="font-customer text-4xl font-bold mb-6 text-primary">
+              <CardTitle className="font-customer text-4xl">
                 {aboutSection?.aboutTitle}
-              </h1>
-              <p className="text-lg mb-4 text-muted-foreground text-pretty">
+              </CardTitle>
+              <CardDescription className="md:text-lg mb-4 text-muted-foreground text-pretty">
                 {descriptionLines?.map((line, index) => (
                   <Fragment key={index}>
                     {line}
                     <br />
                   </Fragment>
                 ))}
-              </p>
+              </CardDescription>
             </CardContent>
           </div>
         </Card>

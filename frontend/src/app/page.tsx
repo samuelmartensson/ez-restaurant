@@ -1,7 +1,7 @@
 import ContactForm from "@/components/ContactForm";
 import { Button } from "@/components/ui/button";
 import { getCustomerConfig } from "@/mock_db";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, HandPlatter, Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -41,11 +41,15 @@ export default async function Home() {
                 variant="outline"
                 className="bg-transparent text-background"
               >
-                <Link href="/menu">{menu ?? "Menu"}</Link>
+                <Link href="/menu">
+                  <Menu className="!size-6" />
+                  {menu ?? "Menu"}
+                </Link>
               </Button>
               {heroSection?.orderUrl && (
                 <Button size="lg" asChild>
                   <Link target="_blank" href={heroSection?.orderUrl ?? "/"}>
+                    <HandPlatter className="!size-6" />
                     {orderNow ?? "Order now"}
                   </Link>
                 </Button>

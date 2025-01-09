@@ -31,7 +31,7 @@ export function LanguagePicker({ languages, defaultLanguage }: Props) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="font-customer justify-start gap-2">
           <Languages className="h-4 w-4" />
-          <span className="hidden md:block">{selectedLanguage}</span>
+          {selectedLanguage}
           <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
