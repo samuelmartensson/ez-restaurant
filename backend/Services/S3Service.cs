@@ -27,6 +27,7 @@ public class S3Service
             }
 
             var fileTransferUtility = new TransferUtility(_s3Client);
+            var cachedKey = $"{keyName}?t={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
 
             // Create a memory stream to hold the file data
             using (var memoryStream = new MemoryStream())
@@ -37,7 +38,7 @@ public class S3Service
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 await fileTransferUtility.UploadAsync(memoryStream, _bucketName, keyName);
                 Console.WriteLine($"File uploaded to S3 with key: {keyName}");
-                return _bucketURL + keyName;
+                return _bucketURL + cachedKey;
             }
         }
         catch (AmazonS3Exception e)
