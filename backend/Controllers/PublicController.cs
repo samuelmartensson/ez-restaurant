@@ -84,31 +84,25 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(SiteSectionAboutResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> About([FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        var Key = queryParameters.Key;
-        var Language = queryParameters.Language;
+        var key = queryParameters.Key?.Trim().ToLower();
+        string language = queryParameters.Language;
+        var customerConfig = await context.CustomerConfigs
+            .Include(cf => cf.Translations.Where(t => t.LanguageCode == language))
+            .FirstOrDefaultAsync(x => x.Domain.Replace(" ", "").ToLower() == key || x.CustomDomain == queryParameters.Key);
 
-        var cf = await context.CustomerConfigs.Include(cf => cf.Translations).FirstOrDefaultAsync((x) =>
-                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
-                x.CustomDomain == Key
-            );
-
-        if (cf == null)
+        if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
-        string resolvedLanguage = Language ?? cf.Languages.Split(",").First() ?? "";
 
-        if (string.IsNullOrEmpty(resolvedLanguage))
-        {
-            return BadRequest(new { message = "Language could not be resolved." });
-        }
         return Ok(new SiteSectionAboutResponse
         {
-            Image = cf.SiteSectionAbout?.Image ?? "",
-            Description = t(cf.Translations, "about:description") ?? "",
-            AboutTitle = translationContext.GetTranslation(resolvedLanguage, "about:title")
+            Image = customerConfig.SiteSectionAbout?.Image ?? string.Empty,
+            Description = t(customerConfig.Translations, "about:description") ?? string.Empty,
+            AboutTitle = translationContext.GetTranslation(language, "about:title")
         });
     }
+
 
     [HttpGet("get-customer-translations")]
     [Produces("application/json")]
