@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuItemResponse, MenuResponse } from "@/generated/endpoints";
-import { HandPlatter, Image } from "lucide-react";
+import { HandPlatter } from "lucide-react";
 import { useRef, useState } from "react";
 
 const MenuItem = ({
