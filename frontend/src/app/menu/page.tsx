@@ -5,7 +5,6 @@ import MenuRender from "./MenuRender";
 const MenuPage = async () => {
   const data = await getCustomerMenu();
 
-  if (!data?.menu) return null;
   return (
     <SubPageLayout title={data.translations?.menu}>
       <MenuRender data={data.menu} currency={data?.meta.currency ?? ""} />

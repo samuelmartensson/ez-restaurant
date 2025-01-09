@@ -90,7 +90,7 @@ export const getCustomerMenu = async () => {
   }
 
   const menu = await getPublicGetCustomerMenu(params);
-  const translations = getPublicGetCustomerTranslations(params);
+  const translations = await getPublicGetCustomerTranslations(params);
 
   return {
     menu,

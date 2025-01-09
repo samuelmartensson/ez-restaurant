@@ -55,7 +55,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(CustomerConfigMetaResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerConfigMeta([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
-        var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
+        var cf = await context.CustomerConfigs.Include(cf => cf.Translations).FirstOrDefaultAsync((x) =>
                 x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
                 x.CustomDomain == Key
             );
@@ -219,36 +219,36 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        var key = queryParameters.Key;
+        if (string.IsNullOrEmpty(queryParameters.Key))
+            return NotFound(new { message = "Key is required." });
+
+        string normalizedKey = queryParameters.Key.Trim().ToLower();
+
         var customerConfig = await context.CustomerConfigs
+            .Where(cf => cf.Domain.Trim().ToLower() == normalizedKey || cf.CustomDomain == normalizedKey)
             .Include(cf => cf.MenuCategorys)
-                .ThenInclude(mc => mc.MenuItems)
+            .ThenInclude(mc => mc.MenuItems)
             .Select(cf => new
             {
-                CustomerConfig = cf,
+                Config = cf,
                 Translations = cf.Translations.Where(t =>
                     t.LanguageCode == queryParameters.Language &&
-                    (t.Key.Contains("menu_item") || t.Key.Contains("menu_category"))
-                ),
-                cf.MenuCategorys
+                    (t.Key.StartsWith("menu_item") || t.Key.StartsWith("menu_category"))
+                )
             })
-            .FirstOrDefaultAsync(x =>
-                x.CustomerConfig.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower() ||
-                x.CustomerConfig.CustomDomain == key);
-
+            .FirstOrDefaultAsync();
 
         if (customerConfig == null)
-        {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
-        }
 
-        if (string.IsNullOrEmpty(key) || customerConfig.MenuCategorys == null)
-        {
+        if (customerConfig.Config.MenuCategorys == null || !customerConfig.Config.MenuCategorys.Any())
             return NotFound(new { message = "Menu not found for the provided key." });
-        }
+
         var translationMap = customerConfig.Translations.ToDictionary(t => t.Key);
-        var menuCategoriesResponse = customerConfig.MenuCategorys.OrderBy(x => x.Order).Select(mc =>
-            new MenuCategoryResponse
+
+        var menuCategoriesResponse = customerConfig.Config.MenuCategorys
+            .OrderBy(mc => mc.Order)
+            .Select(mc => new MenuCategoryResponse
             {
                 Id = mc.Id,
                 Order = mc.Order,
@@ -257,20 +257,19 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             })
             .ToList();
 
-        var menuItemsResponse = customerConfig.MenuCategorys
-            .SelectMany(m => m.MenuItems)
-            .OrderBy(m => m.Order)
-            .ToList()
-            .Select(m => new MenuItemResponse
+        var menuItemsResponse = customerConfig.Config.MenuCategorys
+            .SelectMany(mc => mc.MenuItems)
+            .OrderBy(mi => mi.Order)
+            .Select(mi => new MenuItemResponse
             {
-                Id = m.Id,
-                Name = translationMap.GetValueOrDefault($"menu_item_{m.Id}_name")?.Value ?? m.Name,
-                Description = translationMap.GetValueOrDefault($"menu_item_{m.Id}_description")?.Value ?? m.Description,
-                Tags = translationMap.GetValueOrDefault($"menu_item_{m.Id}_tags")?.Value ?? m.Tags,
-                CategoryId = m.MenuCategoryId,
-                Price = m.Price,
-                Image = m.Image,
-                Order = m.Order
+                Id = mi.Id,
+                Name = translationMap.GetValueOrDefault($"menu_item_{mi.Id}_name")?.Value ?? mi.Name,
+                Description = translationMap.GetValueOrDefault($"menu_item_{mi.Id}_description")?.Value ?? mi.Description,
+                Tags = translationMap.GetValueOrDefault($"menu_item_{mi.Id}_tags")?.Value ?? mi.Tags,
+                CategoryId = mi.MenuCategoryId,
+                Price = mi.Price,
+                Image = mi.Image,
+                Order = mi.Order
             })
             .ToList();
 
@@ -280,6 +279,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             MenuItems = menuItemsResponse
         });
     }
+
 
     [HttpPost("contact")]
     [Produces("application/json")]
