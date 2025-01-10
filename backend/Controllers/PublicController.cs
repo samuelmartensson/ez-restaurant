@@ -20,9 +20,9 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         return translations.FirstOrDefault(t => t.Key == key)?.Value ?? "";
     }
 
-    private async Task<List<OpeningHourResponse>> GetOpeningHours(CustomerConfig customerConfig, string Key, string Language)
+    private List<OpeningHourResponse> GetOpeningHours(CustomerConfig customerConfig)
     {
-        var openingHourTasks = customerConfig.OpeningHours.Select(async o => new OpeningHourResponse
+        return customerConfig.OpeningHours.Select(o => new OpeningHourResponse
         {
             OpenTime = o.OpenTime.ToString(@"hh\:mm"),
             CloseTime = o.CloseTime.ToString(@"hh\:mm"),
@@ -32,10 +32,6 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Label = customerConfig.Translations
                         .FirstOrDefault(t => t.Key == $"open_hour_{o.Id}")?.Value ?? o.Label
         }).ToList();
-
-        var openingHourList = await Task.WhenAll(openingHourTasks);
-
-        return openingHourList.ToList();
     }
 
     [HttpGet("get-customer-config-meta")]
@@ -151,7 +147,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             return NotFound(new { message = "CustomerConfig not found for the provided Key." });
         }
 
-        var openingHours = await GetOpeningHours(customerConfig, Key, resolvedLanguage);
+        var openingHours = GetOpeningHours(customerConfig);
         var response = new CustomerConfigResponse
         {
             Domain = customerConfig.Domain,
