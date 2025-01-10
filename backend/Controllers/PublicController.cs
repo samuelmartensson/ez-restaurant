@@ -33,7 +33,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 Language,
                 Key,
                 $"open_hour_{o.Id}"
-            ) ?? o.Label
+            ) ?? $"{Language}, {Key} {o.Id}"
         }).ToList();
 
         var openingHourList = await Task.WhenAll(openingHourTasks);
