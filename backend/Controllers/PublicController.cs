@@ -34,10 +34,15 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 Language,
                 Key,
                 $"open_hour_{o.Id}"
-            ) ?? o.Label
+            ) ?? "not found"
         }).ToList();
 
         var openingHourList = await Task.WhenAll(openingHourTasks);
+        foreach (var o in openingHourList)
+        {
+            Console.WriteLine(o.Label);
+
+        }
         return openingHourList.ToList().Select(o =>
             new OpeningHourResponse
             {
