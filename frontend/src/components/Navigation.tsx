@@ -203,7 +203,7 @@ export function Navigation({ data }: { data: SiteConfig }) {
       className="fixed bottom-0 md:bottom-[unset] md:top-4 left-0 right-0 z-50 duration-300"
     >
       <div className="font-customer container gap-10 m-auto max-w-screen-xl text-accent-foreground bg-accent/95 backdrop-blur supports-[backdrop-filter]:bg-accent/60 rounded-lg">
-        <div className="md:text-base flex items-center gap-x-0 md:gap-x-2 py-0 px-4 md:px-8">
+        <div className="md:text-base flex items-center gap-x-0 md:gap-x-2 py-0 px-4 md:px-0.5">
           <Link href="/" className="p-2">
             {data?.logo ? (
               <img
@@ -235,7 +235,7 @@ export function Navigation({ data }: { data: SiteConfig }) {
           </Button>
 
           {data.languages && data.languages?.length > 0 && (
-            <div className="ml-auto">
+            <div className="ml-auto pr-2">
               <LanguagePicker
                 defaultLanguage={data.selectedLanguage}
                 languages={data.languages}
