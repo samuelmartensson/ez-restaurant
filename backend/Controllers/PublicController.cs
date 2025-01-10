@@ -29,11 +29,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Day = o.Day,
             Id = o.Id,
             IsClosed = o.IsClosed,
-            Label = await translationService.GetByKey(
-                Language,
-                Key,
-                $"open_hour_{o.Id}"
-            ) ?? $"{Language}, {Key} {o.Id}"
+            Label = customerConfig.Translations
+                        .FirstOrDefault(t => t.Key == $"open_hour_{o.Id}")?.Value ?? o.Label
         }).ToList();
 
         var openingHourList = await Task.WhenAll(openingHourTasks);
@@ -151,7 +148,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
 
         if (customerConfig == null)
         {
-            return NotFound(new { message = "CustomerConfig not found for the provided key." });
+            return NotFound(new { message = "CustomerConfig not found for the provided Key." });
         }
 
         var openingHours = await GetOpeningHours(customerConfig, Key, resolvedLanguage);
