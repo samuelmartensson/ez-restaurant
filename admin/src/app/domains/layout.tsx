@@ -5,5 +5,5 @@ export default function DomainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <FormLayout title="Domain">{children}</FormLayout>;
+  return <FormLayout title="Domain & DNS">{children}</FormLayout>;
 }

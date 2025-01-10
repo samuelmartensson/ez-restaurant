@@ -1,7 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect } from "react";
 
-function FilePreview({ file, className }: { file: File; className?: string }) {
+function FilePreview({ file }: { file: File; className?: string }) {
   const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
@@ -15,12 +16,13 @@ function FilePreview({ file, className }: { file: File; className?: string }) {
 
   if (!previewUrl) return null;
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      className={cn("h-32 w-32 rounded bg-gray-100 object-contain", className)}
-      src={previewUrl}
-      alt=""
-    />
+    <div className="h-32 w-full rounded border p-2">
+      <img
+        className={cn("rounded object-contain", "m-auto h-full")}
+        src={previewUrl}
+        alt=""
+      />
+    </div>
   );
 }
 

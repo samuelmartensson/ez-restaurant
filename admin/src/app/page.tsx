@@ -2,7 +2,7 @@
 
 import CycleLanguageLabel from "@/components/CycleLanguageLabel";
 import { useDataContext } from "@/components/DataContextProvider";
-import FilePreview from "@/components/FilePreview";
+import FormImagePreview from "@/components/FormImagePreview";
 import FormLayout from "@/components/FormLayout";
 import hasDomain from "@/components/hasDomain";
 import LanguageManager from "@/components/LanguageManager";
@@ -18,12 +18,13 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { FileInput, Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ import {
 } from "@/generated/endpoints";
 import { getThemePrimaryFromConfig, getTheme } from "@/utils/theme";
 import { Save, Settings } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -51,32 +53,41 @@ const inputSchema = [
     id: "SiteName",
     label: "Name",
     translate: true,
+    description: "",
   },
   {
     id: "SiteMetaTitle",
     label: "Short description / Slogan",
     translate: true,
+    description: "",
   },
   {
     id: "Currency",
     label: "Currency",
     translate: false,
+    description: "The currency displayed in your menu.",
   },
   {
     id: "Adress",
     label: "Adress",
     translate: false,
+    description: "",
   },
   {
     id: "Phone",
     label: "Phone",
     translate: false,
+    description: "",
   },
   {
     id: "Email",
     label: "Email",
     translate: false,
+    description: "",
   },
+] as const;
+
+const socialsInputSchema = [
   {
     id: "InstagramUrl",
     label: "Instagram URL",
@@ -115,9 +126,13 @@ const ACTIONS = {
   REMOVE: "REMOVE",
 };
 
-const Wrapper = () => <FormLayout title="Site">{hasDomain(Site)()}</FormLayout>;
+const Wrapper = () => hasDomain(Site)();
 
 const Site = () => {
+  const searchParams = useSearchParams();
+  const isSocials = searchParams.get("socials") === "true";
+  const isMedia = searchParams.get("media") === "true";
+
   const { selectedDomain, selectedLanguage, setSelectedLanguage } =
     useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
@@ -225,259 +240,310 @@ const Site = () => {
     toast.success("Site information saved.");
   }
 
-  return (
-    <Form {...form}>
-      <form
-        className="relative grid max-w-lg gap-4 overflow-auto pb-20"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        <div className="mb-2 flex flex-wrap items-center gap-2 overflow-auto">
-          <div>Languages</div>
-          <div className="flex w-full gap-2">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                  <Settings />
-                  <span>Manage languages</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Languages</DialogTitle>
-                  <DialogDescription>
-                    Enable the languages you want to display on your website.
-                  </DialogDescription>
-                </DialogHeader>
-                <LanguageManager />
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-        {inputSchema.map((input) => (
-          <FormField
-            key={input.id}
-            control={form.control}
-            name={input.id}
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>
-                    {input.translate ? (
-                      <CycleLanguageLabel label={input.label} />
-                    ) : (
-                      input.label
-                    )}
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-        ))}
-        <FormField
-          control={form.control}
-          name="Theme"
-          render={({ field }) => {
-            return (
-              <FormItem>
-                <FormLabel>Theme</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={field.value} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Theme</SelectLabel>
-                        {THEMES.filter(Boolean).map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
-        <FormField
-          control={form.control}
-          name="ThemeColorConfig"
-          render={({ field }) => {
-            return (
-              <FormItem>
-                <FormLabel>Theme Color</FormLabel>
-                <FormControl>
-                  <Input type="color" {...field} />
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
-        <div className="mb-4 flex flex-wrap gap-2">
-          {assetsInputSchema.map((input) => (
+  if (isMedia) {
+    return (
+      <FormLayout title="Media">
+        <Form {...form}>
+          <form
+            className="relative grid max-w-lg gap-4 overflow-auto pb-20"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
-              key={input.id}
               control={form.control}
-              name={input.id}
+              name="Theme"
               render={({ field }) => {
                 return (
-                  <FormItem className="flex-1">
-                    <FormLabel>{input.label}</FormLabel>
+                  <FormItem>
+                    <FormLabel>Theme</FormLabel>
                     <FormControl>
-                      {field.value && field.value !== ACTIONS.REMOVE ? (
-                        <div className="grid gap-2">
-                          {input.type === "image" && (
-                            <>
-                              {uploadedAssets?.[field.name] ? (
-                                <FilePreview
-                                  file={uploadedAssets[field.name]}
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={field.value} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Theme</SelectLabel>
+                            {THEMES.filter(Boolean).map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <FormField
+              control={form.control}
+              name="ThemeColorConfig"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Theme Color</FormLabel>
+                    <FormControl>
+                      <Input type="color" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <div className="mb-4 flex flex-wrap gap-2">
+              {assetsInputSchema.map((input) => (
+                <FormField
+                  key={input.id}
+                  control={form.control}
+                  name={input.id}
+                  render={({ field }) => {
+                    return (
+                      <FormItem className="flex-1">
+                        <FormLabel>{input.label}</FormLabel>
+                        <FormControl>
+                          {field.value && field.value !== ACTIONS.REMOVE ? (
+                            <div className="grid gap-2">
+                              {input.type === "image" && (
+                                <FormImagePreview
+                                  file={uploadedAssets?.[field.name]}
+                                  image={field.value}
+                                  isStagedDelete={
+                                    form.watch(field.name) === ACTIONS.REMOVE
+                                  }
                                 />
-                              ) : (
+                              )}
+                              {input.type === "file" && (
                                 <>
-                                  {field.value &&
-                                  form.watch(field.name) !== ACTIONS.REMOVE ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                      className="mx-auto h-32 w-32 rounded bg-gray-100 object-contain"
-                                      src={field.value as string}
-                                      alt=""
-                                    />
-                                  ) : (
-                                    <div className="grid h-32 w-32 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
-                                      No image
-                                    </div>
+                                  {!(field.value as unknown as File)?.name && (
+                                    <style>
+                                      {`
+                                        @font-face {
+                                          font-family: "Customer";
+                                          src: url("${field.value}");
+                                        }
+                                      `}
+                                    </style>
                                   )}
+                                  <div
+                                    className="grid h-32 place-items-center rounded border p-2"
+                                    style={{
+                                      fontFamily: (
+                                        field.value as unknown as File
+                                      )?.name
+                                        ? "inherit"
+                                        : "Customer",
+                                    }}
+                                  >
+                                    {(field.value as unknown as File)?.name ?? (
+                                      <div className="grid place-items-center gap-1">
+                                        <span>My font</span>
+                                        <span>MY FONT</span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </>
                               )}
-                            </>
-                          )}
-                          {input.type === "file" && (
-                            <>
-                              {!(field.value as unknown as File)?.name && (
-                                <style>{`
-                                  @font-face {
-                                    font-family: "Customer";
-                                    src: url("${field.value}");
+                              <Button
+                                className="block"
+                                variant="destructive"
+                                type="button"
+                                onClick={() => {
+                                  if (field.value) {
+                                    form.setValue(field.name, ACTIONS.REMOVE);
                                   }
-                            `}</style>
-                              )}
-                              <div
-                                className="grid h-32 place-items-center rounded bg-gray-100 px-2 py-1"
-                                style={{
-                                  fontFamily: (field.value as unknown as File)
-                                    ?.name
-                                    ? "inherit"
-                                    : "Customer",
+                                  setUploadedAssets((state) => {
+                                    const newState = { ...state };
+                                    delete newState[field.name];
+
+                                    return newState;
+                                  });
                                 }}
                               >
-                                {(field.value as unknown as File)?.name ?? (
-                                  <div className="grid place-items-center gap-1">
-                                    <span>My font</span>
-                                    <span>MY FONT</span>
-                                  </div>
-                                )}
-                              </div>
-                            </>
-                          )}
-                          <Button
-                            className="block"
-                            variant="destructive"
-                            type="button"
-                            onClick={() => {
-                              if (field.value) {
-                                form.setValue(field.name, ACTIONS.REMOVE);
+                                Remove file
+                              </Button>
+                            </div>
+                          ) : (
+                            <FileInput
+                              accept={
+                                input.type === "image"
+                                  ? "image/*"
+                                  : ".woff, .woff2, .otf, .ttf"
                               }
-                              setUploadedAssets((state) => {
-                                const newState = { ...state };
-                                delete newState[field.name];
+                              onFileSelect={(file) => {
+                                if (file) {
+                                  setUploadedAssets((state) => ({
+                                    ...state,
+                                    [field.name]: file,
+                                  }));
+                                  form.setValue(
+                                    field.name,
+                                    file as unknown as string,
+                                  );
+                                }
+                              }}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              ))}
+            </div>
+            <Button
+              className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
+              disabled={isPending}
+              type="submit"
+            >
+              <Save /> Save
+            </Button>
+          </form>
+        </Form>
+      </FormLayout>
+    );
+  }
 
-                                return newState;
-                              });
-                            }}
-                          >
-                            Remove file
-                          </Button>
-                        </div>
-                      ) : (
-                        <Input
-                          type="file"
-                          accept={
-                            input.type === "image"
-                              ? "image/*"
-                              : ".woff, .woff2, .otf, .ttf"
-                          }
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            if (file) {
-                              setUploadedAssets((state) => ({
-                                ...state,
-                                [field.name]: file,
-                              }));
-                              form.setValue(
-                                field.name,
-                                file as unknown as string,
-                              );
-                            }
-                          }}
-                        />
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-          ))}
-        </div>
-        <div className="mb-4">
-          <h2 className="mb-6 text-xl">Section visibility</h2>
-          {toggleInputSchema.map((input) => (
+  if (isSocials) {
+    return (
+      <FormLayout title="Social channels">
+        <Form {...form}>
+          <form
+            className="relative grid max-w-lg gap-4 overflow-auto pb-20"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            {socialsInputSchema.map((input) => (
+              <FormField
+                key={input.id}
+                control={form.control}
+                name={input.id}
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>{input.label}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            ))}
+            <Button
+              className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
+              disabled={isPending}
+              type="submit"
+            >
+              <Save /> Save
+            </Button>
+          </form>
+        </Form>
+      </FormLayout>
+    );
+  }
+
+  return (
+    <FormLayout title="General">
+      <Form {...form}>
+        <form
+          className="relative grid max-w-lg gap-4 overflow-auto pb-20"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <div className="mb-2 flex flex-wrap items-center gap-2 overflow-auto">
+            <div>Languages</div>
+            <div className="flex w-full gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Settings />
+                    <span>Manage languages</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Languages</DialogTitle>
+                    <DialogDescription>
+                      Enable the languages you want to display on your website.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <LanguageManager />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+          {inputSchema.map((input) => (
             <FormField
               key={input.id}
               control={form.control}
               name={input.id}
               render={({ field }) => {
                 return (
-                  <FormItem className="flex items-center">
-                    <FormLabel className="pb-0">{input.label}</FormLabel>
+                  <FormItem>
+                    <FormLabel>
+                      {input.translate ? (
+                        <CycleLanguageLabel label={input.label} />
+                      ) : (
+                        input.label
+                      )}
+                    </FormLabel>
                     <FormControl>
-                      <Switch
-                        defaultChecked={false}
-                        className="ml-2"
-                        checked={!!field.value}
-                        onCheckedChange={(checked) => {
-                          form.setValue(field.name, checked);
-                        }}
-                      />
+                      <Input {...field} />
                     </FormControl>
+                    {input.description && (
+                      <FormDescription>{input.description}</FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 );
               }}
             />
           ))}
-        </div>
-        <Button
-          className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-          disabled={isPending}
-          type="submit"
-        >
-          <Save /> Save
-        </Button>
-      </form>
-    </Form>
+
+          <div className="mb-4">
+            <h2 className="mb-6 text-xl">Section visibility</h2>
+            {toggleInputSchema.map((input) => (
+              <FormField
+                key={input.id}
+                control={form.control}
+                name={input.id}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="flex items-center">
+                      <FormLabel className="pb-0">{input.label}</FormLabel>
+                      <FormControl>
+                        <Switch
+                          defaultChecked={false}
+                          className="ml-2"
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => {
+                            form.setValue(field.name, checked);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            ))}
+          </div>
+          <Button
+            className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
+            disabled={isPending}
+            type="submit"
+          >
+            <Save /> Save
+          </Button>
+        </form>
+      </Form>
+    </FormLayout>
   );
 };
 

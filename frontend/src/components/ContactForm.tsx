@@ -9,6 +9,7 @@ import {
   postPublicContact,
 } from "@/generated/endpoints";
 import { useState } from "react";
+import { Badge } from "./ui/badge";
 
 export default function ContactForm({
   data,
@@ -55,9 +56,9 @@ export default function ContactForm({
               </div>
             ) : (
               <div className="w-full md:w-1/2">
-                <h2 className="text-3xl font-customer font-bold mb-2 text-primary">
-                  PLANNING AN EVENT?
-                </h2>
+                <Badge className="mb-2">
+                  <h2 className="text-3xl font-customer">PLANNING AN EVENT?</h2>
+                </Badge>
                 <p className="text-accent-foreground mb-6">
                   Need catering or a special request? Tell us below!
                 </p>

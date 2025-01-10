@@ -7,6 +7,7 @@ import { LanguagePicker } from "./LanguagePicker";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HandPlatter, Info, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
 
 let timer: NodeJS.Timeout | null = null;
 
@@ -52,12 +53,12 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
         ) : (
           <div
             style={{ opacity: 1 }}
-            className="duration-300 flex flex-1 flex-col gap-4 py-4 px-4 mt-auto"
+            className="duration-300 flex flex-1 flex-col gap-2 py-4 px-4 mt-auto"
           >
             <Link
               onClick={() => setExpanded(false)}
               href="/"
-              className="m-auto mb-12"
+              className="m-auto"
             >
               {data?.logo ? (
                 <div className="grid place-items-center gap-2">
@@ -72,7 +73,7 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
                 <span className="font-bold text-xl">{data.siteName}</span>
               )}
             </Link>
-
+            <Separator className="bg-primary/25" />
             <Button
               className="justify-start"
               onClick={() => setExpanded(false)}
@@ -117,7 +118,6 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
 
 export function Navigation({ data }: { data: SiteConfig }) {
   const { menu, aboutTitle, orderNow } = data.siteTranslations || {};
-  const [isExpanded, setExpanded] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   const [options, setOptions] = useState({
     hidden: false,
@@ -169,7 +169,6 @@ export function Navigation({ data }: { data: SiteConfig }) {
   }, [handleScroll]);
 
   useEffect(() => {
-    if (isExpanded) return;
     let shouldHide = false;
 
     if (y > 60 && y - lastY > 0) {
@@ -187,7 +186,7 @@ export function Navigation({ data }: { data: SiteConfig }) {
         lastHiddenY: shouldHide ? y : s.lastHiddenY,
       };
     });
-  }, [y, lastY, setExpanded, isExpanded]);
+  }, [y, lastY]);
 
   if (!isLoad) return null;
 
@@ -198,7 +197,6 @@ export function Navigation({ data }: { data: SiteConfig }) {
   return (
     <nav
       style={{
-        height: isExpanded ? "100%" : "unset",
         transform:
           !isMobile && options.hidden ? "translateY(-120%)" : "translateY(0%)",
       }}

@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronDown, Languages } from "lucide-react";
-import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { setCookie } from "@/utils";
+import { useEffect, useState } from "react";
 
 interface Props {
   defaultLanguage?: string;
@@ -18,16 +18,26 @@ interface Props {
 }
 
 export function LanguagePicker({ languages, defaultLanguage }: Props) {
-  const [selectedLanguage, setSelectedLanguage] = React.useState(
+  const [open, setOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(
     defaultLanguage ?? languages?.[0]
   );
+
+  useEffect(() => {
+    const fn = () => {
+      setOpen(false);
+    };
+
+    document.addEventListener("scroll", fn);
+    return () => document.removeEventListener("scroll", fn);
+  }, []);
 
   if (languages.length <= 1) {
     return null;
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="font-customer justify-start gap-2">
           <Languages className="h-4 w-4" />

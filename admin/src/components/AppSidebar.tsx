@@ -15,26 +15,43 @@ import {
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import {
   Clock,
+  Coffee,
   CreditCard,
   Globe,
-  Home,
+  Image,
   Info,
+  Instagram,
   LogOut,
+  ScreenShare,
+  Settings2,
   SquareMenu,
   Wallpaper,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ConfigSwitcher } from "./ConfigSwitcher";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { ConfigSwitcher } from "./ConfigSwitcher";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
-const items = [
+const settings = [
   {
-    title: "General",
+    title: "General settings",
     url: "/",
-    icon: Home,
+    icon: Settings2,
   },
+  {
+    title: "Media & Theme",
+    url: "/?media=true",
+    icon: Image,
+  },
+  {
+    title: "Social channels",
+    url: "/?socials=true",
+    icon: Instagram,
+  },
+];
+
+const sections = [
   {
     title: "Hero",
     url: "/hero",
@@ -57,10 +74,17 @@ const items = [
   },
 ];
 
+const groups = [
+  { title: "Settings", items: settings },
+  { title: "Sections", items: sections },
+];
+
 export function AppSidebar() {
   const { configs, selectedConfig, selectedDomain, customDomain } =
     useDataContext();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const { setOpenMobile } = useSidebar();
   const { user } = useUser();
 
@@ -70,6 +94,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <div className="flex w-full items-center justify-center gap-2 border-b bg-accent p-6 text-base font-thin text-accent-foreground">
+        <Coffee className="size-5" /> EZRest - Admin
+      </div>
       <SidebarHeader className="gap-1">
         <ConfigSwitcher domains={configs.map((c) => c.domain ?? "")} />
         <LanguageSwitcher languages={selectedConfig?.languages ?? []} />
@@ -78,18 +105,6 @@ export function AppSidebar() {
             <SidebarGroupLabel>Website</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={() => setOpenMobile(false)}
-                    asChild
-                    isActive={"/domains" === pathname}
-                  >
-                    <Link href="/domains">
-                      <Globe />
-                      <span>Domain</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => {
@@ -106,8 +121,20 @@ export function AppSidebar() {
                     }}
                     disabled={!selectedDomain}
                   >
-                    <Globe />
-                    <span>My site</span>
+                    <ScreenShare />
+                    <span>Preview my site</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setOpenMobile(false)}
+                    asChild
+                    isActive={"/domains" === pathname}
+                  >
+                    <Link href="/domains">
+                      <Globe />
+                      <span>Domain & DNS</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -116,31 +143,39 @@ export function AppSidebar() {
         </SidebarContent>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    onClick={() => setOpenMobile(false)}
-                    asChild
-                    isActive={item.url === pathname}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      onClick={() => setOpenMobile(false)}
+                      asChild
+                      isActive={
+                        item.url ===
+                        `${pathname}${!!searchParams.toString() ? `?${searchParams.toString()}` : ""}`
+                      }
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <SidebarContent>
           <SidebarGroup>
+            <SidebarGroupLabel className="h-auto font-bold">
+              My account
+            </SidebarGroupLabel>
             <SidebarGroupLabel>{user?.fullName}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>

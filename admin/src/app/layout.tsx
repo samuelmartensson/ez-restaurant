@@ -37,7 +37,7 @@ const Content = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <AppSidebar />
       <main className="w-full">
-        <div className="sticky top-0 z-10 flex items-center gap-1 border-b bg-white py-4 pl-2 md:pl-4">
+        <div className="sticky top-0 z-10 flex items-center gap-1 border-b bg-white py-3 pl-2 md:pl-4">
           <SidebarTrigger />
           <Button
             type="button"

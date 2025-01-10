@@ -1,18 +1,19 @@
 "use client";
 
 import { useDataContext } from "@/components/DataContextProvider";
-import FilePreview from "@/components/FilePreview";
+import FormImagePreview from "@/components/FormImagePreview";
 import hasDomain from "@/components/hasDomain";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { FileInput, Input } from "@/components/ui/input";
 import {
   PostSectionHeroMutationBody,
   useGetPublicGetCustomerConfig,
@@ -28,6 +29,8 @@ const inputSchema = [
     id: "OrderUrl",
     label: "Order now URL",
     type: "text",
+    description:
+      "Populating this field will activate the order button on your website.",
   },
 ] as const;
 
@@ -108,6 +111,9 @@ const Hero = () => {
                     <Input {...field} />
                   </FormControl>
                   <FormMessage />
+                  {input.description && (
+                    <FormDescription>{input.description}</FormDescription>
+                  )}
                 </FormItem>
               );
             }}
@@ -125,31 +131,16 @@ const Hero = () => {
                   <FormControl>
                     {(field.value && !deletedAssets?.[field.name]) ||
                     uploadedAssets?.[field.name] ? (
-                      <div className="grid justify-start gap-2">
+                      <div className="grid gap-2">
                         {input.type === "image" && (
-                          <>
-                            {uploadedAssets?.[field.name] ? (
-                              <FilePreview file={uploadedAssets[field.name]} />
-                            ) : (
-                              <>
-                                {field.value ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    className="h-32 w-32 rounded bg-gray-100 object-contain"
-                                    src={field.value as unknown as string}
-                                    alt=""
-                                  />
-                                ) : (
-                                  <div className="grid h-32 w-32 place-items-center rounded bg-gray-100 p-2 text-xs text-primary">
-                                    No image
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </>
+                          <FormImagePreview
+                            image={field.value as unknown as string}
+                            isStagedDelete={!field.value}
+                            file={uploadedAssets[field.name]}
+                          />
                         )}
                         <Button
-                          className="block"
+                          className="justify-self-stretch"
                           variant="destructive"
                           type="button"
                           onClick={() => {
@@ -171,11 +162,9 @@ const Hero = () => {
                         </Button>
                       </div>
                     ) : (
-                      <Input
-                        type="file"
+                      <FileInput
                         accept={input.type === "image" ? "image/*" : ""}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
+                        onFileSelect={(file) => {
                           if (file) {
                             setUploadedAssets((state) => ({
                               ...state,
