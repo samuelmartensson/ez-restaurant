@@ -142,7 +142,7 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="shadow-inner">
         {groups.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
@@ -170,7 +170,7 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t shadow-2xl md:shadow-none md:shadow-black">
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel className="h-auto font-bold">
