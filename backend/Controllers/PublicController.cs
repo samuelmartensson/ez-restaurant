@@ -22,11 +22,10 @@ public class PublicController(RestaurantContext context, EmailService emailServi
 
     private async Task<List<OpeningHourResponse>> GetOpeningHours(CustomerConfig customerConfig, string Key, string Language)
     {
-        var openingHourTasks = customerConfig.OpeningHours.Select(async o => new OpeningHour
+        var openingHourTasks = customerConfig.OpeningHours.Select(async o => new OpeningHourResponse
         {
-            CustomerConfigDomain = o.CustomerConfigDomain,
-            OpenTime = o.OpenTime,
-            CloseTime = o.CloseTime,
+            OpenTime = o.OpenTime.ToString(@"hh\:mm"),
+            CloseTime = o.CloseTime.ToString(@"hh\:mm"),
             Day = o.Day,
             Id = o.Id,
             IsClosed = o.IsClosed,
@@ -34,25 +33,12 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 Language,
                 Key,
                 $"open_hour_{o.Id}"
-            ) ?? "not found"
+            ) ?? o.Label
         }).ToList();
 
         var openingHourList = await Task.WhenAll(openingHourTasks);
-        foreach (var o in openingHourList)
-        {
-            Console.WriteLine(o.Label);
 
-        }
-        return openingHourList.ToList().Select(o =>
-            new OpeningHourResponse
-            {
-                OpenTime = o.OpenTime.ToString(@"hh\:mm"),
-                CloseTime = o.CloseTime.ToString(@"hh\:mm"),
-                Day = o.Day,
-                Id = o.Id,
-                IsClosed = o.IsClosed,
-                Label = o.Label
-            }).ToList();
+        return openingHourList.ToList();
     }
 
     [HttpGet("get-customer-config-meta")]
