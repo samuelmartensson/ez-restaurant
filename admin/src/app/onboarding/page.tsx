@@ -24,39 +24,42 @@ const Onboarding = () => {
   const [step, setStep] = useState<Steps>(selectedDomain ? "menu" : "start");
 
   return (
-    <div className="fixed inset-0 z-10 bg-white">
-      {step === "start" && (
-        <div className="m-auto grid max-w-md pt-20">
-          <h1 className="mb-2 text-xl">Welcome to EZ Rest</h1>
-          <p className="mb-8 text-muted-foreground">
-            To get up and running ASAP we will take you through the necessary
-            first steps.
-          </p>
-          <Button onClick={() => setStep("domain")}>Okay, lets go!</Button>
-        </div>
-      )}
-      <div className="m-auto grid max-w-md place-items-center pt-20">
-        {step === "domain" && (
-          <OnboardingDomain onNextClick={() => setStep("site")} />
-        )}
-        {step === "site" && (
-          <OnboardingSite onNextClick={() => setStep("menu")} />
-        )}
-        {step === "menu" && (
-          <OnboardingMenu onNextClick={() => setStep("end")} />
-        )}
-        {step === "end" && (
-          <div className="m-auto grid max-w-md pt-20">
-            <h1 className="mb-2 text-xl">All done!</h1>
+    <div className="fixed inset-0 z-10 grid place-items-center bg-white">
+      <div className="grid w-full max-w-md">
+        <h1 className="mb-4 text-3xl">EZRest - Onboarding</h1>
+        {step === "start" && (
+          <div className="m-auto grid">
+            <h2 className="mb-2 text-xl">Welcome to EZ Rest</h2>
             <p className="mb-8 text-muted-foreground">
-              The minimum requirements of your website are setup! Continue
-              customizing and adding information in your dashboard.
+              To get up and running ASAP we will take you through the necessary
+              first steps.
             </p>
-            <Button onClick={() => router.replace("/")}>
-              Go to my dashboard
-            </Button>
+            <Button onClick={() => setStep("domain")}>Okay, lets go!</Button>
           </div>
         )}
+        <div className="m-auto grid w-full place-items-center">
+          {step === "domain" && (
+            <OnboardingDomain onNextClick={() => setStep("site")} />
+          )}
+          {step === "site" && (
+            <OnboardingSite onNextClick={() => setStep("menu")} />
+          )}
+          {step === "menu" && (
+            <OnboardingMenu onNextClick={() => setStep("end")} />
+          )}
+          {step === "end" && (
+            <div className="m-auto grid max-w-md">
+              <h2 className="mb-2 text-xl">All done!</h2>
+              <p className="mb-8 text-muted-foreground">
+                The minimum requirements of your website are setup! Continue
+                customizing and adding information in your dashboard.
+              </p>
+              <Button onClick={() => router.replace("/")}>
+                Go to my dashboard
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

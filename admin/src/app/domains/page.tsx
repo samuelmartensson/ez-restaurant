@@ -143,57 +143,58 @@ const Domain = () => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>DNS setup for custom domain</DialogTitle>
-                  <DialogDescription className="text-left">
-                    <ol className="grid list-disc gap-2 pl-5 pt-5">
-                      <li>
-                        <strong>Log in to your DNS providers dashboard</strong>:
-                        This could be your domain registrar (like GoDaddy,
-                        One.com, Loopia) or a hosting provider with DNS
-                        management tools.
-                      </li>
-                      <li>
-                        <strong>Navigate to DNS Management</strong>:{" "}
-                        {`Look for options
+                  <DialogTitle>DNS setup</DialogTitle>
+                  <DialogDescription>
+                    Configuration instructions for using a custom domain.
+                  </DialogDescription>
+                  <ol className="grid list-disc gap-2 pl-5 pt-5">
+                    <li>
+                      <strong>Log in to your DNS providers dashboard</strong>:
+                      This could be your domain registrar (like GoDaddy,
+                      One.com, Loopia) or a hosting provider with DNS management
+                      tools.
+                    </li>
+                    <li>
+                      <strong>Navigate to DNS Management</strong>:{" "}
+                      {`Look for options
                   like "DNS Settings," "DNS Management," or "Advanced DNS" to
                   access your domain's DNS records.`}
-                      </li>
-                      <li>
-                        <strong>Add a New CNAME Record</strong>: Select the
-                        option to
-                        {`"Add Record" or "Create New Record."`} Choose{" "}
-                        <code>CNAME</code> as the record type.
-                      </li>
-                      <li>
-                        <strong>Enter the domain and Target</strong>:
-                        <ul>
-                          <li>
-                            {`In the "Name" field, enter the subdomain you want to point
+                    </li>
+                    <li>
+                      <strong>Add a New CNAME Record</strong>: Select the option
+                      to
+                      {`"Add Record" or "Create New Record."`} Choose{" "}
+                      <code>CNAME</code> as the record type.
+                    </li>
+                    <li>
+                      <strong>Enter the domain and Target</strong>:
+                      <ul>
+                        <li>
+                          {`In the "Name" field, enter the subdomain you want to point
                       (e.g., "www" or "blog"). Leave blank if you want to use
                       your apex domain.`}
-                          </li>
-                          <li>
-                            {`In the "Value" or "Points to" field, enter the full domain
+                        </li>
+                        <li>
+                          {`In the "Value" or "Points to" field, enter the full domain
                       name, it should resolve to: "${selectedDomain}.ezrest.se".`}
-                          </li>
-                        </ul>
-                      </li>
-                      <li>
-                        <strong>Save the Record</strong>:{" "}
-                        {`Click the "Save" or "Add
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <strong>Save the Record</strong>:{" "}
+                      {`Click the "Save" or "Add
                   Record" button to save the changes.`}
-                      </li>
-                      <li>
-                        <strong>Wait for Propagation</strong>: It may take a few
-                        minutes to several hours for DNS changes to propagate
-                        across the internet.
-                      </li>
-                      <li>
-                        <strong>Done!</strong>: Your EZ Rest website should now
-                        be available via your own domain.
-                      </li>
-                    </ol>
-                  </DialogDescription>
+                    </li>
+                    <li>
+                      <strong>Wait for Propagation</strong>: It may take a few
+                      minutes to several hours for DNS changes to propagate
+                      across the internet.
+                    </li>
+                    <li>
+                      <strong>Done!</strong>: Your EZ Rest website should now be
+                      available via your own domain.
+                    </li>
+                  </ol>
                 </DialogHeader>
                 <DialogFooter>
                   <DialogClose asChild>

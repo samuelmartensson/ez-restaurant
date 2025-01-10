@@ -28,7 +28,7 @@ const OnboardingDomain = ({ onNextClick }: Props) => {
 
   return (
     <div>
-      <h1 className="mb-2 text-xl">Domain setup</h1>
+      <h2 className="mb-2 text-xl">Domain setup</h2>
       <p className="mb-8 text-muted-foreground">
         You can manage multiple businesses from the same EZ Rest account. Each
         one will need its own unique domain name to identify it.

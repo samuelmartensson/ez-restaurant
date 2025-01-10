@@ -65,6 +65,7 @@ const OnboardingMenu = ({ onNextClick }: { onNextClick: () => void }) => {
             ...data,
             price: Number(data.price),
             categoryId: Number(menuData.categories[0].id),
+            order: 0,
           },
         ]),
       },
@@ -76,7 +77,7 @@ const OnboardingMenu = ({ onNextClick }: { onNextClick: () => void }) => {
   if (step === "category") {
     return (
       <div className="w-full">
-        <h1 className="mb-2 text-xl">Menu category setup</h1>
+        <h2 className="mb-2 text-xl">Menu category setup</h2>
         <p className="mb-8 text-pretty text-muted-foreground">
           Create your first menu category.
         </p>

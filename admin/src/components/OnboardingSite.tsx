@@ -54,6 +54,7 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
         Theme: "modern",
         Logo: "",
         Font: "",
+        Currency: "SEK",
       },
       params,
     });
@@ -63,7 +64,7 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
   return (
     <Form {...form}>
       <div>
-        <h1 className="mb-2 text-xl">Site setup</h1>
+        <h2 className="mb-2 text-xl">Site setup</h2>
         <p className="mb-8 text-pretty text-muted-foreground">
           Next, give your site a name, formatted like you would market it.
         </p>
