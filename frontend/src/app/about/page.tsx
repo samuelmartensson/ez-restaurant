@@ -1,11 +1,5 @@
 import SubPageLayout from "@/components/SubPageLayout";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { getAbout } from "@/mock_db";
 import Image from "next/image";
 import { Fragment } from "react";
@@ -18,11 +12,11 @@ const About = async () => {
   const descriptionLines = aboutSection?.description?.split("\n");
 
   return (
-    <SubPageLayout>
+    <SubPageLayout title={aboutSection.aboutTitle ?? ""}>
       <title>{`${aboutSection?.aboutTitle} | ${data?.meta.siteName}`}</title>
-      <div className="container mx-auto md:pt-16">
+      <div className="container mx-auto">
         <Card className="border-none">
-          {aboutSection?.image && (
+          {!!aboutSection?.image && (
             <div className="p-2">
               <Image
                 src={aboutSection?.image ?? ""}
@@ -34,11 +28,6 @@ const About = async () => {
             </div>
           )}
           <CardContent className="p-8 grid gap-4 justify-items-start">
-            <Badge>
-              <CardTitle className="font-customer text-4xl">
-                {aboutSection?.aboutTitle}
-              </CardTitle>
-            </Badge>
             <CardDescription className="md:text-lg mb-4 text-muted-foreground text-pretty">
               {descriptionLines?.map((line, index) => (
                 <Fragment key={index}>
