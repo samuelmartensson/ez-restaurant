@@ -14,6 +14,25 @@ jobs:
       - run: dotnet publish -c Release -o publish
         working-directory: backend
 
+      # Step 3: Set environment variable for database connection
+      - name: Set environment variable for database connection
+        run: |
+          echo "CONNECTION_STRING=${{ secrets.CONNECTION_STRING }}" >> $GITHUB_ENV
+
+      # Step 4: Install PostgreSQL client (psql) for connection testing
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      # Step 5: Test connection to Supabase using psql
+      - name: Test database connection
+        run: |
+          echo "Testing connection to Supabase..."
+          psql "$CONNECTION_STRING" -c '\q'  # '\q' quits after connecting, meaning no error = success
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+
       - name: Add SSH Server to Known Hosts
         run: |
           mkdir -p ~/.ssh
