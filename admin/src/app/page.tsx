@@ -5,16 +5,7 @@ import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import FormLayout from "@/components/FormLayout";
 import hasDomain from "@/components/hasDomain";
-import LanguageManager from "@/components/LanguageManager";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -41,8 +32,8 @@ import {
   usePostCustomerSiteConfiguration,
   usePostCustomerSiteConfigurationAssets,
 } from "@/generated/endpoints";
-import { getThemePrimaryFromConfig, getTheme } from "@/utils/theme";
-import { Save, Settings } from "lucide-react";
+import { getTheme, getThemePrimaryFromConfig } from "@/utils/theme";
+import { Save } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -74,6 +65,12 @@ const inputSchema = [
     description: "",
   },
   {
+    id: "MapUrl",
+    label: "Map URL",
+    description: "",
+    translate: false,
+  },
+  {
     id: "Phone",
     label: "Phone",
     translate: false,
@@ -91,11 +88,6 @@ const socialsInputSchema = [
   {
     id: "InstagramUrl",
     label: "Instagram URL",
-    translate: false,
-  },
-  {
-    id: "MapUrl",
-    label: "Map URL",
     translate: false,
   },
 ] as const;
@@ -219,7 +211,7 @@ const Site = () => {
     await uploadSiteConfiguration({
       data: {
         ...data,
-        ThemeColorConfig: themeConfig,
+        ThemeColorConfig: themeConfig ?? "",
         Logo: data.Logo === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
         Font: data.Font === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
       },
@@ -456,28 +448,6 @@ const Site = () => {
           className="relative grid max-w-lg gap-4 overflow-auto pb-20"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className="mb-2 flex flex-wrap items-center gap-2 overflow-auto">
-            <div>Languages</div>
-            <div className="flex w-full gap-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Settings />
-                    <span>Manage languages</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Languages</DialogTitle>
-                    <DialogDescription>
-                      Enable the languages you want to display on your website.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <LanguageManager />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
           {inputSchema.map((input) => (
             <FormField
               key={input.id}

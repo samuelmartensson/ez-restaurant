@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect } from "react";
 
-function FilePreview({ file }: { file: File; className?: string }) {
+function FilePreview({ file, className }: { file: File; className?: string }) {
   const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
@@ -16,7 +16,7 @@ function FilePreview({ file }: { file: File; className?: string }) {
 
   if (!previewUrl) return null;
   return (
-    <div className="h-32 w-full rounded border p-2">
+    <div className={cn("h-32 w-full rounded border p-2", className)}>
       <img
         className={cn("rounded object-contain", "m-auto h-full")}
         src={previewUrl}

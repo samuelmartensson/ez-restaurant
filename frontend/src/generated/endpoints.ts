@@ -5,6 +5,21 @@
  * OpenAPI spec version: 1.0
  */
 import { authorizedFetch } from "../authorized-fetch";
+export type DeleteSectionGalleryParams = {
+  id?: number;
+  Key: string;
+  Language: string;
+};
+
+export type PostSectionGalleryBody = {
+  Image?: Blob;
+};
+
+export type PostSectionGalleryParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostSectionAboutBody = {
   Description?: string;
   Image?: Blob;
@@ -162,6 +177,7 @@ export interface SiteTranslationsResponse {
   closed?: string;
   contactUs?: string;
   friday?: string;
+  gallery?: string;
   menu?: string;
   monday?: string;
   openHours?: string;
@@ -178,6 +194,11 @@ export interface SiteSectionHeroResponse {
   orderUrl?: string;
 }
 
+export interface SiteSectionGalleryResponse {
+  id?: number;
+  image?: string;
+}
+
 export interface SiteSectionAboutResponse {
   aboutTitle?: string;
   description?: string;
@@ -186,6 +207,7 @@ export interface SiteSectionAboutResponse {
 
 export interface SectionsResponse {
   about?: SiteSectionAboutResponse;
+  gallery?: SiteSectionGalleryResponse[];
   hero?: SiteSectionHeroResponse;
 }
 
@@ -687,6 +709,32 @@ export const postSectionAbout = (
   });
 };
 
+export const postSectionGallery = (
+  postSectionGalleryBody: PostSectionGalleryBody,
+  params: PostSectionGalleryParams,
+) => {
+  const formData = new FormData();
+  if (postSectionGalleryBody.Image !== undefined) {
+    formData.append("Image", postSectionGalleryBody.Image);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/gallery`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
+export const deleteSectionGallery = (params: DeleteSectionGalleryParams) => {
+  return authorizedFetch<void>({
+    url: `/Section/gallery`,
+    method: "DELETE",
+    params,
+  });
+};
+
 export const postWebhook = () => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
 };
@@ -759,6 +807,12 @@ export type PostSectionHeroResult = NonNullable<
 >;
 export type PostSectionAboutResult = NonNullable<
   Awaited<ReturnType<typeof postSectionAbout>>
+>;
+export type PostSectionGalleryResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionGallery>>
+>;
+export type DeleteSectionGalleryResult = NonNullable<
+  Awaited<ReturnType<typeof deleteSectionGallery>>
 >;
 export type PostWebhookResult = NonNullable<
   Awaited<ReturnType<typeof postWebhook>>

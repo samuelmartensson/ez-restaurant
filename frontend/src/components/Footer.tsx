@@ -19,7 +19,7 @@ export default async function Footer() {
     data?.siteTranslations || {};
 
   return (
-    <footer className="bg-accent text-accent-foreground pt-8 pb-28 md:pb-8 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-white text-accent-foreground pt-8 pb-28 md:pb-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-screen-lg mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {(data?.email ||

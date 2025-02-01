@@ -6,6 +6,7 @@ namespace Models.Responses
         public required string ContactUs { get; set; }
         public required string OpenHours { get; set; }
         public required string Menu { get; set; }
+        public required string Gallery { get; set; }
         public required string OrderNow { get; set; }
         public required string Monday { get; set; }
         public required string Tuesday { get; set; }
@@ -31,10 +32,17 @@ namespace Models.Responses
         public required string AboutTitle { get; set; }
     }
 
+    public class SiteSectionGalleryResponse
+    {
+        public required int Id { get; set; }
+        public required string Image { get; set; }
+    }
+
     public class SectionsResponse
     {
         public required SiteSectionHeroResponse Hero { get; set; }
         public required SiteSectionAboutResponse About { get; set; }
+        public required List<SiteSectionGalleryResponse> Gallery { get; set; } = new List<SiteSectionGalleryResponse>();
     }
 
     public class SectionVisibilityResponse

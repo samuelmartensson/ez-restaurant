@@ -6,6 +6,7 @@ public static class TranslationsSwedish
         { "contact_us", "Kontakta oss" },
         { "open_hours", "Öppettider" },
         { "menu", "Meny" },
+        { "gallery", "Galleri" },
         { "order_now", "Beställ nu" },
         { "monday", "Måndag" },
         { "tuesday", "Tisdag" },

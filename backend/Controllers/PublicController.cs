@@ -134,6 +134,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         var customerConfig = await context.CustomerConfigs
             .Include(cf => cf.SiteSectionHero)
             .Include(cf => cf.SiteSectionAbout)
+            .Include(cf => cf.SiteSectionGallery)
             .Include(cf => cf.SectionVisibility)
             .Include(cf => cf.OpeningHours)
             .Include(cf => cf.Translations.Where(t => t.LanguageCode == resolvedLanguage))
@@ -185,7 +186,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                     Image = customerConfig.SiteSectionAbout?.Image ?? "",
                     Description = t(customerConfig.Translations, "about:description") ?? "",
                     AboutTitle = translationContext.GetTranslation(resolvedLanguage, "about:title")
-                }
+                },
+                Gallery = customerConfig.SiteSectionGallery.Select(g => new SiteSectionGalleryResponse { Id = g.Id, Image = g.Image }).ToList(),
             },
             SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage)
         };

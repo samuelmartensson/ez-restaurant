@@ -1,4 +1,5 @@
 import ContactForm from "@/components/ContactForm";
+import Gallery from "@/components/Gallery";
 import { Button } from "@/components/ui/button";
 import { getCustomerConfig } from "@/mock_db";
 import { ChevronDown, HandPlatter, Menu } from "lucide-react";
@@ -65,8 +66,18 @@ export default async function Home() {
           <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
         </Link>
       </div>
+
       {data.sectionVisibility?.contactFormVisible && (
         <ContactForm data={data} />
+      )}
+      {(data.sections?.gallery || [])?.length > 0 && (
+        <div className="py-16 px-2">
+          <Gallery
+            urls={(data.sections?.gallery || [])
+              ?.map((g) => g.image ?? "")
+              .slice(0, 6)}
+          />
+        </div>
       )}
     </main>
   );

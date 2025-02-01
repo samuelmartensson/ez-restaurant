@@ -24,7 +24,7 @@ const SubPageLayout = async ({
           className="object-cover opacity-10"
         />
       </div>
-      <div className="relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-md m-auto z-10">
+      <div className="relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-xl m-auto z-10">
         {title && (
           <Badge className="mb-4">
             <h1 className="text-5xl font-bold font-customer">{title}</h1>

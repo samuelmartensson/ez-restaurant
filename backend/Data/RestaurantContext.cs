@@ -12,6 +12,7 @@ public class RestaurantContext : DbContext
     public required DbSet<MenuItem> MenuItems { get; set; }
     public required DbSet<User> Users { get; set; }
     public required DbSet<SiteSectionAbout> SiteSectionAbouts { get; set; }
+    public required DbSet<SiteSectionGallery> SiteSectionGallerys { get; set; }
     public required DbSet<SiteSectionHero> SiteSectionHeros { get; set; }
     public required DbSet<OpeningHour> OpeningHours { get; set; }
     public required DbSet<Translation> Translations { get; set; }
@@ -29,6 +30,7 @@ public class RestaurantContext : DbContext
         modelBuilder.Entity<SectionVisibility>().HasKey(c => c.Id);
         modelBuilder.Entity<SiteSectionHero>().HasKey(c => c.Id);
         modelBuilder.Entity<SiteSectionAbout>().HasKey(c => c.Id);
+        modelBuilder.Entity<SiteSectionGallery>().HasKey(c => c.Id);
 
         modelBuilder.Entity<Customer>()
             .HasMany(c => c.CustomerConfigs)
@@ -51,6 +53,11 @@ public class RestaurantContext : DbContext
             .HasForeignKey(c => c.CustomerConfigDomain);
 
         modelBuilder.Entity<CustomerConfig>()
+            .HasMany(c => c.SiteSectionGallery)
+            .WithOne(c => c.CustomerConfig)
+            .HasForeignKey(c => c.CustomerConfigDomain);
+
+        modelBuilder.Entity<CustomerConfig>()
             .HasMany(cf => cf.OpeningHours)
             .WithOne(c => c.CustomerConfig)
             .HasForeignKey(c => c.CustomerConfigDomain);
@@ -69,6 +76,8 @@ public class RestaurantContext : DbContext
             .HasOne(c => c.SiteSectionAbout)
             .WithOne(c => c.CustomerConfig)
             .HasForeignKey<SiteSectionAbout>(c => c.CustomerConfigDomain);
+
+
 
         modelBuilder.Entity<MenuCategory>()
             .HasMany(cf => cf.MenuItems)

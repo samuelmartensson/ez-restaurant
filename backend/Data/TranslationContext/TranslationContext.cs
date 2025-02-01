@@ -20,6 +20,7 @@ public class TranslationContext
             ContactUs = GetTranslation(language, "contact_us"),
             OpenHours = GetTranslation(language, "open_hours"),
             Menu = GetTranslation(language, "menu"),
+            Gallery = GetTranslation(language, "gallery"),
             AboutTitle = GetTranslation(language, "about:title"),
             OrderNow = GetTranslation(language, "order_now"),
             Monday = GetTranslation(language, "monday"),

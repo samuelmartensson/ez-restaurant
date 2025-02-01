@@ -120,7 +120,7 @@ public class CustomerController(
             new CustomerResponse
             {
                 IsFirstSignIn = false,
-                Subscription = customer?.Subscription ?? SubscriptionState.Free,
+                Subscription = subscription != null ? customer?.Subscription ?? SubscriptionState.Free : SubscriptionState.Free,
                 CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>(),
                 CancelInfo = cancelInfo,
             }
@@ -231,7 +231,8 @@ public class CustomerController(
         if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
-        };
+        }
+        ;
 
         var response = await vercelService.CreateDomain(domainName);
         if (response.IsSuccessStatusCode)
@@ -264,12 +265,14 @@ public class CustomerController(
         if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
-        };
+        }
+        ;
 
         if (string.IsNullOrEmpty(customerConfig.CustomDomain) || customerConfig.CustomDomain == null)
         {
             return NotFound(new { message = "Custom domain not found." });
-        };
+        }
+        ;
 
         var response = await vercelService.DeleteDomain(customerConfig.CustomDomain);
         if (response.IsSuccessStatusCode)

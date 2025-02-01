@@ -37,7 +37,7 @@ const inputSchema = [
 const assetsInputSchema = [
   {
     id: "Image",
-    label: "Hero image",
+    label: "Background image",
     type: "image",
   },
 ] as const;

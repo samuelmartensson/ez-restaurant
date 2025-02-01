@@ -19,6 +19,21 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type DeleteSectionGalleryParams = {
+  id?: number;
+  Key: string;
+  Language: string;
+};
+
+export type PostSectionGalleryBody = {
+  Image?: Blob;
+};
+
+export type PostSectionGalleryParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostSectionAboutBody = {
   Description?: string;
   Image?: Blob;
@@ -173,6 +188,7 @@ export const SubscriptionState = {
 export interface SiteTranslationsResponse {
   aboutTitle?: string;
   allRightsReserved?: string;
+  closed?: string;
   contactUs?: string;
   friday?: string;
   menu?: string;
@@ -191,6 +207,11 @@ export interface SiteSectionHeroResponse {
   orderUrl?: string;
 }
 
+export interface SiteSectionGalleryResponse {
+  id?: number;
+  image?: string;
+}
+
 export interface SiteSectionAboutResponse {
   aboutTitle?: string;
   description?: string;
@@ -199,6 +220,7 @@ export interface SiteSectionAboutResponse {
 
 export interface SectionsResponse {
   about?: SiteSectionAboutResponse;
+  gallery?: SiteSectionGalleryResponse[];
   hero?: SiteSectionHeroResponse;
 }
 
@@ -286,7 +308,8 @@ export interface CustomerConfigResponse {
   siteName?: string;
   siteTranslations?: SiteTranslationsResponse;
   theme?: string;
-  themeColorConfig?: string;
+  /** @nullable */
+  themeColorConfig?: string | null;
 }
 
 export interface CustomerConfigMetaResponse {
@@ -2560,6 +2583,148 @@ export const usePostSectionAbout = <
   TContext
 > => {
   const mutationOptions = getPostSectionAboutMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postSectionGallery = (
+  postSectionGalleryBody: PostSectionGalleryBody,
+  params: PostSectionGalleryParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postSectionGalleryBody.Image !== undefined) {
+    formData.append("Image", postSectionGalleryBody.Image);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/gallery`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostSectionGalleryMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionGallery>>,
+    TError,
+    { data: PostSectionGalleryBody; params: PostSectionGalleryParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postSectionGallery>>,
+  TError,
+  { data: PostSectionGalleryBody; params: PostSectionGalleryParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postSectionGallery>>,
+    { data: PostSectionGalleryBody; params: PostSectionGalleryParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postSectionGallery(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostSectionGalleryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionGallery>>
+>;
+export type PostSectionGalleryMutationBody = PostSectionGalleryBody;
+export type PostSectionGalleryMutationError = unknown;
+
+export const usePostSectionGallery = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionGallery>>,
+    TError,
+    { data: PostSectionGalleryBody; params: PostSectionGalleryParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postSectionGallery>>,
+  TError,
+  { data: PostSectionGalleryBody; params: PostSectionGalleryParams },
+  TContext
+> => {
+  const mutationOptions = getPostSectionGalleryMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const deleteSectionGallery = (params: DeleteSectionGalleryParams) => {
+  return authorizedFetch<void>({
+    url: `/Section/gallery`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteSectionGalleryMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSectionGallery>>,
+    TError,
+    { params: DeleteSectionGalleryParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteSectionGallery>>,
+  TError,
+  { params: DeleteSectionGalleryParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteSectionGallery>>,
+    { params: DeleteSectionGalleryParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return deleteSectionGallery(params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteSectionGalleryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteSectionGallery>>
+>;
+
+export type DeleteSectionGalleryMutationError = unknown;
+
+export const useDeleteSectionGallery = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSectionGallery>>,
+    TError,
+    { params: DeleteSectionGalleryParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteSectionGallery>>,
+  TError,
+  { params: DeleteSectionGalleryParams },
+  TContext
+> => {
+  const mutationOptions = getDeleteSectionGalleryMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

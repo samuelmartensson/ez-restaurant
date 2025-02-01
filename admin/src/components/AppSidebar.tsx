@@ -18,14 +18,16 @@ import {
   Coffee,
   CreditCard,
   Globe,
+  Home,
   Image,
+  Images,
   Info,
   Instagram,
+  Languages,
   LogOut,
   ScreenShare,
   Settings2,
   SquareMenu,
-  Wallpaper,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -38,6 +40,11 @@ const settings = [
     title: "General settings",
     url: "/",
     icon: Settings2,
+  },
+  {
+    title: "Languages",
+    url: "/languages",
+    icon: Languages,
   },
   {
     title: "Media & Theme",
@@ -53,24 +60,29 @@ const settings = [
 
 const sections = [
   {
-    title: "Hero",
-    url: "/hero",
-    icon: Wallpaper,
+    title: "Menu page",
+    url: "/menu",
+    icon: SquareMenu,
   },
   {
-    title: "About",
+    title: "Home page",
+    url: "/hero",
+    icon: Home,
+  },
+  {
+    title: "About page",
     url: "/about",
     icon: Info,
+  },
+  {
+    title: "Gallery",
+    url: "/gallery",
+    icon: Images,
   },
   {
     title: "Open hours",
     url: "/open-hours",
     icon: Clock,
-  },
-  {
-    title: "Menu",
-    url: "/menu",
-    icon: SquareMenu,
   },
 ];
 

@@ -5,29 +5,30 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { LanguagePicker } from "./LanguagePicker";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { HandPlatter, Info, Menu, X } from "lucide-react";
+import { HandPlatter, Images, Info, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 let timer: NodeJS.Timeout | null = null;
 
 const MobileNavigation = ({ data }: { data: SiteConfig }) => {
   const [expanded, setExpanded] = useState(false);
-  const { menu, aboutTitle, orderNow } = data.siteTranslations || {};
+  const { menu, gallery, aboutTitle, orderNow } = data.siteTranslations || {};
 
   const hasLanguagePicker = data.languages && data.languages?.length > 0;
 
   return (
     <nav
       style={{ top: expanded ? 0 : "unset" }}
-      className="shadow-md shadow-black fixed bottom-0 left-0 right-0 z-50 text-accent-foreground duration-300 bg-accent"
+      className="shadow-md shadow-black fixed bottom-0 left-0 right-0 z-50 text-accent-foreground duration-300 bg-white"
     >
       <div className="flex font-customer container gap-10 m-auto h-full">
         {!expanded ? (
           <div className="flex-1 flex items-center gap-x-0 p-2">
             {data.sections?.hero?.orderUrl && (
               <Button
-                size="sm"
                 onClick={() => window.open(data.sections?.hero?.orderUrl)}
               >
                 <HandPlatter /> {orderNow ?? "ORDER NOW"}
@@ -94,6 +95,18 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
                 <Info className="md:!size-5" /> {aboutTitle ?? "ABOUT"}
               </Link>
             </Button>
+            {(data.sections?.gallery || [])?.length > 0 && (
+              <Button
+                className="justify-start"
+                onClick={() => setExpanded(false)}
+                asChild
+                variant="ghost"
+              >
+                <Link href="/gallery">
+                  <Images className="md:!size-5" /> {gallery ?? "GALLERY"}
+                </Link>
+              </Button>
+            )}
             {data.sections?.hero?.orderUrl && (
               <Button
                 className="justify-start"
@@ -104,8 +117,8 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
             )}
             <Button
               onClick={() => setExpanded(false)}
-              variant="secondary"
-              className="mt-auto"
+              variant="ghost"
+              className="mt-8"
             >
               <X className="!size-6" /> Close
             </Button>
@@ -117,7 +130,8 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
 };
 
 export function Navigation({ data }: { data: SiteConfig }) {
-  const { menu, aboutTitle, orderNow } = data.siteTranslations || {};
+  const pathname = usePathname();
+  const { menu, aboutTitle, orderNow, gallery } = data.siteTranslations || {};
   const [isLoad, setIsLoad] = useState(false);
   const [options, setOptions] = useState({
     hidden: false,
@@ -197,51 +211,102 @@ export function Navigation({ data }: { data: SiteConfig }) {
   return (
     <nav
       style={{
-        transform:
-          !isMobile && options.hidden ? "translateY(-120%)" : "translateY(0%)",
+        transform: options.hidden ? "translateY(-120%)" : "translateY(0%)",
       }}
-      className="fixed bottom-0 px-2 md:bottom-[unset] md:top-4 left-0 right-0 z-50 duration-300"
+      className="fixed bottom-0 md:bottom-[unset] md:top-0 left-0 right-0 z-50 duration-300 text-accent-foreground bg-white"
     >
-      <div className="font-customer container gap-10 m-auto max-w-screen-xl text-accent-foreground bg-accent/95 backdrop-blur supports-[backdrop-filter]:bg-accent/60 rounded-lg">
-        <div className="md:text-base flex items-center gap-x-0 md:gap-x-2 py-0 px-4 md:px-0.5">
-          <Link href="/" className="p-2">
+      <div className="font-customer container gap-10 m-auto max-w-screen-xl px-2">
+        <div className="md:text-base flex relative items-center px-0.5">
+          <Link href="/">
             {data?.logo ? (
               <img
                 src={data.logo}
                 alt=""
-                className="mr-4 h-8 max-w-[120px] md:h-16 rounded-lg object-contain"
+                className="mr-4 max-w-[120px] h-16 rounded-lg object-contain"
               />
             ) : (
               <span className="mr-4 font-bold text-xl">{data.siteName}</span>
             )}
           </Link>
-          {data.sections?.hero?.orderUrl && (
+          <div className="">
             <Button
-              size={isMobile ? "sm" : "default"}
-              onClick={() => window.open(data.sections?.hero?.orderUrl)}
+              size="default"
+              className={cn(
+                "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
+                pathname === "/menu" && "border-primary"
+              )}
+              asChild
+              variant="ghost"
             >
-              <HandPlatter className="md:!size-5" /> {orderNow ?? "ORDER NOW"}
+              <Link href="/menu">
+                <Menu
+                  className={cn(
+                    "md:!size-5 text-accent-foreground",
+                    pathname === "/menu" && "text-primary"
+                  )}
+                />{" "}
+                {menu ?? "MENU"}
+              </Link>
             </Button>
-          )}
-          <Button size={isMobile ? "sm" : "default"} asChild variant="ghost">
-            <Link href="/menu">
-              <Menu className="md:!size-5" /> {menu ?? "MENU"}
-            </Link>
-          </Button>
-          <Button size={isMobile ? "sm" : "default"} asChild variant="ghost">
-            <Link href="/about">
-              <Info className="md:!size-5" /> {aboutTitle ?? "ABOUT"}
-            </Link>
-          </Button>
-
-          {data.languages && data.languages?.length > 0 && (
-            <div className="ml-auto pr-2">
-              <LanguagePicker
-                defaultLanguage={data.selectedLanguage}
-                languages={data.languages}
-              />
-            </div>
-          )}
+            <Button
+              size="default"
+              className={cn(
+                "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
+                pathname === "/about" && "border-primary"
+              )}
+              asChild
+              variant="ghost"
+            >
+              <Link href="/about">
+                <Info
+                  className={cn(
+                    "md:!size-5 text-accent-foreground",
+                    pathname === "/about" && "text-primary"
+                  )}
+                />{" "}
+                {aboutTitle ?? "ABOUT"}
+              </Link>
+            </Button>
+            {(data.sections?.gallery || [])?.length > 0 && (
+              <Button
+                size="default"
+                className={cn(
+                  "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
+                  pathname === "/gallery" && "border-primary"
+                )}
+                asChild
+                variant="ghost"
+              >
+                <Link href="/gallery">
+                  <Images
+                    className={cn(
+                      "md:!size-5 text-accent-foreground",
+                      pathname === "/gallery" && "text-primary"
+                    )}
+                  />{" "}
+                  {gallery ?? "GALLERY"}
+                </Link>
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2 absolute right-2">
+            {data.sections?.hero?.orderUrl && (
+              <Button
+                size={isMobile ? "sm" : "default"}
+                onClick={() => window.open(data.sections?.hero?.orderUrl)}
+              >
+                <HandPlatter className="md:!size-5" /> {orderNow ?? "ORDER NOW"}
+              </Button>
+            )}
+            {data.languages && data.languages?.length > 0 && (
+              <div className="ml-auto pr-2">
+                <LanguagePicker
+                  defaultLanguage={data.selectedLanguage}
+                  languages={data.languages}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

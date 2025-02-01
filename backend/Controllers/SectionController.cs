@@ -34,5 +34,27 @@ public class SectionController(
         await sectionConfigurationService.UpdateAbout(assets, removedAssets, fields, queryParameters);
         return Ok(new { message = "Success" });
     }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPost("gallery")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadGalleryImage([FromForm] UploadGalleryAssetsRequest asset, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.AddGalleryImage(asset, queryParameters);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpDelete("gallery")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteGalleryImage([FromQuery] int id, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.RemoveGalleryImage(id, queryParameters);
+        return Ok(new { message = "Success" });
+    }
 }
 

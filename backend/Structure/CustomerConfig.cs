@@ -22,6 +22,7 @@ public class CustomerConfig
     public Customer? Customer { get; set; }
     public SiteSectionAbout? SiteSectionAbout { get; set; }
     public SiteSectionHero? SiteSectionHero { get; set; }
+    public ICollection<SiteSectionGallery> SiteSectionGallery { get; set; } = new List<SiteSectionGallery>();
     public ICollection<MenuCategory> MenuCategorys { get; set; } = new List<MenuCategory>();
     public ICollection<OpeningHour> OpeningHours { get; set; } = new List<OpeningHour>();
     public ICollection<Translation> Translations { get; set; } = new List<Translation>();

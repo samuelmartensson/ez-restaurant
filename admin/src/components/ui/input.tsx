@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 import { useState, useRef } from "react";
@@ -9,10 +9,12 @@ import { File, Upload } from "lucide-react";
 interface FileInputProps {
   onFileSelect: (file: File | null) => void;
   accept?: string;
+  triggerOnMount?: boolean;
 }
 
-function FileInput({ accept, onFileSelect }: FileInputProps) {
+function FileInput({ accept, onFileSelect, triggerOnMount }: FileInputProps) {
   const [fileName, setFileName] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,6 +26,25 @@ function FileInput({ accept, onFileSelect }: FileInputProps) {
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
+
+  useEffect(() => {
+    if (triggerOnMount) {
+      handleButtonClick();
+    }
+  }, [triggerOnMount]);
+
+  useEffect(() => {
+    const fileInput = fileInputRef.current;
+    if (!fileInput) return;
+    const onCancel = () => {
+      onFileSelect(null);
+    };
+
+    fileInput.addEventListener("cancel", onCancel);
+    return () => {
+      fileInput.removeEventListener("cancel", onCancel);
+    };
+  }, [onFileSelect]);
 
   return (
     <div className="grid w-full items-center space-y-2">
@@ -41,6 +62,7 @@ function FileInput({ accept, onFileSelect }: FileInputProps) {
         accept={accept}
         type="file"
         ref={fileInputRef}
+        onBlur={() => console.log("blu")}
         onChange={handleFileChange}
         className="hidden"
       />
