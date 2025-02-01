@@ -87,6 +87,7 @@ const Gallery = () => {
                         <Button
                           className="block"
                           variant="destructive"
+                          size="sm"
                           type="button"
                           onClick={async () => {
                             if (field.value && imageId !== -1) {

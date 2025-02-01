@@ -45,6 +45,7 @@ jobs:
             Environment=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             Environment=VERCEL_TOKEN=${{ secrets.VERCEL_TOKEN }}
             Environment=SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+            Environment=CONNECTION_STRING=${{ secrets.CONNECTION_STRING }}
             \" > /etc/systemd/system/restaurantbackend.service.d/aws-env.conf
             systemctl daemon-reload
             '

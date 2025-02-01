@@ -35,7 +35,11 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
 
     public async Task<List<OpeningHour>> GetOpeningHours(CommonQueryParameters queryParameters)
     {
-        var openingHours = await context.OpeningHours.Where(o => o.CustomerConfigDomain == queryParameters.Key).OrderBy(o => o.Day).ToListAsync();
+        var openingHours = await context.OpeningHours
+            .Where(o => o.CustomerConfigDomain == queryParameters.Key)
+            .OrderBy(o => o.Day)
+            .ToListAsync();
+
         if (!openingHours.Any())
         {
             var openingHoursInit = InitializeWeeklyOpeningHours(queryParameters.Key);
@@ -44,25 +48,31 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
             return openingHoursInit;
         }
 
-        var openingHourTasks = openingHours.Select(async o => new OpeningHour
+        var openingHourList = new List<OpeningHour>();
+        foreach (var o in openingHours)
         {
-            CustomerConfigDomain = o.CustomerConfigDomain,
-            OpenTime = o.OpenTime,
-            CloseTime = o.CloseTime,
-            Day = o.Day,
-            Id = o.Id,
-            IsClosed = o.IsClosed,
-            Label = await translationService.GetByKey(
+            var translatedLabel = await translationService.GetByKey(
                 queryParameters.Language,
                 queryParameters.Key,
                 ConstructTranslationKey(o.Id)
-            ) ?? o.Label
-        }).ToList();
+            );
 
-        var openingHourList = await Task.WhenAll(openingHourTasks);
+            openingHourList.Add(new OpeningHour
+            {
+                CustomerConfigDomain = o.CustomerConfigDomain,
+                OpenTime = o.OpenTime,
+                CloseTime = o.CloseTime,
+                Day = o.Day,
+                Id = o.Id,
+                IsClosed = o.IsClosed,
+                Label = translatedLabel ?? o.Label
+            });
+        }
 
-        return openingHourList.ToList();
+        return openingHourList;
+
     }
+
 
     public TimeSpan ParseTimeString(string timeString)
     {
@@ -120,7 +130,8 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
                 await context.AddAsync(openHour);
                 await context.SaveChangesAsync();
                 translationId = openHour.Id;
-            };
+            }
+            ;
 
             if (isSpecial)
             {
