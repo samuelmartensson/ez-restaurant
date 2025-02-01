@@ -45,7 +45,7 @@ const Gallery = () => {
     Language: selectedLanguage,
   });
 
-  const { mutateAsync: uploadImage } = usePostSectionGallery();
+  const { mutateAsync: uploadImages } = usePostSectionGallery();
   const { mutateAsync: deleteImage } = useDeleteSectionGallery();
 
   useEffect(() => {
@@ -117,11 +117,12 @@ const Gallery = () => {
                       <FileInput
                         triggerOnMount
                         accept="image/*"
-                        onFileSelect={async (file) => {
-                          if (file) {
-                            await uploadImage({
+                        multiple
+                        onFileSelect={async (files) => {
+                          if (files) {
+                            await uploadImages({
                               data: {
-                                Image: file,
+                                Images: files,
                               },
                               params: {
                                 Key: selectedDomain,
@@ -129,7 +130,7 @@ const Gallery = () => {
                               },
                             });
                             refetch();
-                            toast.success("Image uploaded.");
+                            toast.success("Images uploaded.");
                           } else {
                             remove(index);
                           }
@@ -148,7 +149,7 @@ const Gallery = () => {
           type="button"
           onClick={() => append({ image: "" as unknown as string, id: -1 })}
         >
-          <Upload /> Upload Image
+          <Upload /> Upload Image(s)
         </Button>
       </form>
     </Form>

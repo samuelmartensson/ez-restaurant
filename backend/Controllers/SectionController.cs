@@ -40,9 +40,9 @@ public class SectionController(
     [HttpPost("gallery")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadGalleryImage([FromForm] UploadGalleryAssetsRequest asset, [FromQuery] CommonQueryParameters queryParameters)
+    public async Task<IActionResult> UploadGalleryImage([FromForm] UploadGalleryAssetsRequest assets, [FromQuery] CommonQueryParameters queryParameters)
     {
-        await sectionConfigurationService.AddGalleryImage(asset, queryParameters);
+        await sectionConfigurationService.AddGalleryImage(assets, queryParameters);
         return Ok(new { message = "Success" });
     }
 

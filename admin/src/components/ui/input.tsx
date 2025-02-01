@@ -6,21 +6,38 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { File, Upload } from "lucide-react";
 
-interface FileInputProps {
+interface SingleFileInputProps {
   onFileSelect: (file: File | null) => void;
   accept?: string;
+  multiple?: false;
   triggerOnMount?: boolean;
 }
 
-function FileInput({ accept, onFileSelect, triggerOnMount }: FileInputProps) {
+interface MultiFileInputProps {
+  onFileSelect: (file: File[] | null) => void;
+  accept?: string;
+  multiple: true;
+  triggerOnMount?: boolean;
+}
+
+function FileInput({
+  accept,
+  onFileSelect,
+  multiple,
+  triggerOnMount,
+}: SingleFileInputProps | MultiFileInputProps) {
   const [fileName, setFileName] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    setFileName(file ? file.name : null);
-    onFileSelect(file);
+    const files = event.target.files || null;
+    setFileName(files?.length === 1 ? files[0].name : null);
+    if (multiple) {
+      onFileSelect(Array.from(files ?? []));
+    } else {
+      onFileSelect(files?.[0] ?? null);
+    }
   };
 
   const handleButtonClick = () => {
@@ -59,6 +76,7 @@ function FileInput({ accept, onFileSelect, triggerOnMount }: FileInputProps) {
         <Upload /> Choose File
       </Button>
       <input
+        multiple={multiple}
         accept={accept}
         type="file"
         ref={fileInputRef}

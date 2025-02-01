@@ -26,7 +26,7 @@ export type DeleteSectionGalleryParams = {
 };
 
 export type PostSectionGalleryBody = {
-  Image?: Blob;
+  Images?: Blob[];
 };
 
 export type PostSectionGalleryParams = {
@@ -191,6 +191,7 @@ export interface SiteTranslationsResponse {
   closed?: string;
   contactUs?: string;
   friday?: string;
+  gallery?: string;
   menu?: string;
   monday?: string;
   openHours?: string;
@@ -2593,8 +2594,10 @@ export const postSectionGallery = (
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (postSectionGalleryBody.Image !== undefined) {
-    formData.append("Image", postSectionGalleryBody.Image);
+  if (postSectionGalleryBody.Images !== undefined) {
+    postSectionGalleryBody.Images.forEach((value) =>
+      formData.append("Images", value),
+    );
   }
 
   return authorizedFetch<void>({

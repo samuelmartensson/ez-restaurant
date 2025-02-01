@@ -110,7 +110,7 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
         await context.SaveChangesAsync();
     }
 
-    public async Task AddGalleryImage(UploadGalleryAssetsRequest asset, CommonQueryParameters queryParameters)
+    public async Task AddGalleryImage(UploadGalleryAssetsRequest assets, CommonQueryParameters queryParameters)
     {
         var customerConfig = await context.CustomerConfigs
             .FirstOrDefaultAsync((x) => x.Domain == queryParameters.Key);
@@ -120,14 +120,18 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
             throw new Exception("CustomerConfig not found for the provided key.");
         }
 
-        if (asset.Image != null)
+        foreach (var asset in assets.Images)
         {
-            var newGallery = new SiteSectionGallery { CustomerConfigDomain = customerConfig.Domain, Image = "" };
-            await context.SiteSectionGallerys.AddAsync(newGallery);
-            await context.SaveChangesAsync();
-            string url = await s3Service.UploadFileAsync(asset.Image, $"{queryParameters.Key}/gallery/{newGallery.Id}");
-            newGallery.Image = url;
+            if (asset != null)
+            {
+                var newGallery = new SiteSectionGallery { CustomerConfigDomain = customerConfig.Domain, Image = "" };
+                context.SiteSectionGallerys.Add(newGallery);
+                await context.SaveChangesAsync();
+                string url = await s3Service.UploadFileAsync(asset, $"{queryParameters.Key}/gallery/{newGallery.Id}");
+                newGallery.Image = url;
+            }
         }
+
 
         await context.SaveChangesAsync();
     }
