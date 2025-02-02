@@ -1,79 +1,71 @@
-on: push
-name: 🚀 Deploy website on push
+name: .NET Publish and Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main # Trigger on push to the main branch
+
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 🚚 Get latest code
+      # Step 1: Checkout the repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - uses: actions/setup-dotnet@v3
+      # Step 2: Set up .NET 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
-      - run: dotnet publish -c Release -o publish
+
+      # Step 3: Restore dependencies and publish the project
+      - name: Publish .NET project
+        run: |
+          dotnet restore
+          dotnet publish -c Release -o ./publish
         working-directory: backend
 
-      # Step 3: Set environment variable for database connection
-      - name: Set environment variable for database connection
-        run: |
-          echo "CONNECTION_STRING=${{ secrets.CONNECTION_STRING }}" >> $GITHUB_ENV
-
-      # Step 4: Install PostgreSQL client (psql) for connection testing
-      - name: Install psql client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      # Step 5: Test connection to Supabase using psql
-      - name: Test database connection
-        run: |
-          echo "Testing connection to Supabase..."
-          psql "$CONNECTION_STRING" -c '\q'  # '\q' quits after connecting, meaning no error = success
+      # Step 4: Copy published files to AWS EC2 instance
+      - name: Copy files to EC2 via SSH
         env:
-          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-
-      - name: Add SSH Server to Known Hosts
+          SSH_KEY: ${{ secrets.SU_PW }} # SSH key stored in GitHub Secrets
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan 172.232.147.147 >> ~/.ssh/known_hosts
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no -r ./backend/publish ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com:app
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Install rsync and Verify Installation
-        run: |
-          sudo apt-get -y install rsync openssh-client
-
-      - name: Deploy Dotnet App
-        run: /usr/bin/rsync -rlDvz --delete ./backend/publish/ wilhelm@172.232.147.147:/var/www/restaurantbackend/
-
-      - name: Set AWS Environment Variables
+      # Step 5: Update environment variables in the systemd service file
+      - name: Update environment variables
         env:
-          SUDO_PASSWORD: ${{ secrets.SU_PW }}
+          SSH_KEY: ${{ secrets.SU_PW }} # SSH key stored in GitHub Secrets
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
         run: |
-          ssh -o StrictHostKeyChecking=no wilhelm@172.232.147.147 "
-            echo $SUDO_PASSWORD | sudo -S bash -c '
-            mkdir -p /etc/systemd/system/restaurantbackend.service.d/
-            echo \"[Service]
-            Environment=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            Environment=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            Environment=CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
-            Environment=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-            Environment=VERCEL_TOKEN=${{ secrets.VERCEL_TOKEN }}
-            Environment=SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
-            Environment=CONNECTION_STRING=${{ secrets.CONNECTION_STRING }}
-            \" > /etc/systemd/system/restaurantbackend.service.d/aws-env.conf
-            systemctl daemon-reload
-            '
-          "
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo bash -c 'echo -e \"\n\
+          Environment=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID\n\
+          Environment=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY\n\
+          Environment=CLERK_SECRET_KEY=$CLERK_SECRET_KEY\n\
+          Environment=STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY\n\
+          Environment=VERCEL_TOKEN=$VERCEL_TOKEN\n\
+          Environment=SMTP_PASSWORD=$SMTP_PASSWORD\n\
+          Environment=CONNECTION_STRING=$CONNECTION_STRING\n\
+          \" >> /etc/systemd/system/backend.service'"
 
-      - name: Restart service on CentOS server
+      # Step 6: Restart the .NET app on the EC2 instance
+      - name: Restart .NET app
         env:
-          SUDO_PASSWORD: ${{ secrets.SU_PW }}
+          SSH_KEY: ${{ secrets.SU_PW }} # SSH key stored in GitHub Secrets
         run: |
-          ssh -o StrictHostKeyChecking=no wilhelm@172.232.147.147 "
-            echo $SUDO_PASSWORD | sudo -S systemctl restart restaurantbackend.service
-           "
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo systemctl restart backend.service"
