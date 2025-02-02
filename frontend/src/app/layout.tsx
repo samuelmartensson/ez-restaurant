@@ -75,7 +75,7 @@ export default async function RootLayout({
       <body className="antialiased relative">
         <Navigation data={data} />
         {children}
-        <Footer />
+        <Footer data={data} />
       </body>
     </html>
   );

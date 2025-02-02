@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
@@ -120,10 +121,12 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
         var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
-                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
-                x.CustomDomain == Key
-            );
+                        x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
+                        x.CustomDomain == Key
+                    );
         string resolvedLanguage = Language ?? cf?.Languages.Split(",").First() ?? "";
 
         if (string.IsNullOrEmpty(resolvedLanguage))
@@ -163,6 +166,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             Email = customerConfig.Email,
             Phone = customerConfig.Phone,
             InstagramUrl = customerConfig.InstagramUrl,
+            TiktokUrl = customerConfig.TiktokUrl,
+            FacebookUrl = customerConfig.FacebookUrl,
             Currency = customerConfig.Currency,
             MapUrl = customerConfig.MapUrl,
             CustomDomain = customerConfig.CustomDomain,
@@ -191,6 +196,11 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             },
             SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage)
         };
+        stopwatch.Stop();
+
+        // Get the elapsed time
+        var elapsedTime = stopwatch.Elapsed;
+        Console.WriteLine(elapsedTime.TotalMilliseconds);
 
         return Ok(response);
 

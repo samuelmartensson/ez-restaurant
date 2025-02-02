@@ -68,6 +68,9 @@ namespace backend.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
+                    b.Property<string>("FacebookUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Font")
                         .HasColumnType("text");
 
@@ -104,6 +107,9 @@ namespace backend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("ThemeColorConfig")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TiktokUrl")
                         .HasColumnType("text");
 
                     b.HasKey("Domain");

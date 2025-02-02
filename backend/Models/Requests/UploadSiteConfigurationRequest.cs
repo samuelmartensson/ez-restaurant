@@ -26,6 +26,8 @@ namespace Models.Requests
         public string? Phone { get; set; }
         public string? Email { get; set; }
         public string? InstagramUrl { get; set; }
+        public string? TiktokUrl { get; set; }
+        public string? FacebookUrl { get; set; }
         public string? MapUrl { get; set; } = "";
         public string? ThemeColorConfig { get; set; } = "";
 

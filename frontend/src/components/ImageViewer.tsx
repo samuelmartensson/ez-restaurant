@@ -20,16 +20,19 @@ const ImageViewer = ({
             pointerEvents: isOpen ? "auto" : "none",
           }}
           onClick={() => setIsOpen(false)}
-          className="duration-200 fixed inset-0 grid place-items-center bg-black/80 z-[99]"
+          className="duration-200 fixed inset-0 grid place-items-center bg-white/90 z-[99]"
         >
           <img
+            style={{
+              transform: isOpen ? "translateY(0px)" : "translateY(-8px)",
+            }}
             loading="lazy"
-            className="w-11/12 max-w-screen-sm max-h-[80svh] object-contain"
+            className="duration-300 w-11/12 max-w-screen-sm max-h-[80svh] object-contain"
             src={url}
             alt=""
           />
         </div>,
-        document.querySelector("body")!
+        document.body
       )}
       <div className="cursor-pointer" onClick={() => setIsOpen(true)}>
         {children}

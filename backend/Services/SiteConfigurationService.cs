@@ -50,6 +50,8 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         customerConfig.Adress = siteConfiguration.Adress;
         customerConfig.Email = siteConfiguration.Email;
         customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
+        customerConfig.TiktokUrl = siteConfiguration.TiktokUrl;
+        customerConfig.FacebookUrl = siteConfiguration.FacebookUrl;
         customerConfig.Currency = siteConfiguration.Currency;
         customerConfig.MapUrl = siteConfiguration.MapUrl;
         customerConfig.Phone = siteConfiguration.Phone;

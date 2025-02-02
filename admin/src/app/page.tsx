@@ -90,6 +90,16 @@ const socialsInputSchema = [
     label: "Instagram URL",
     translate: false,
   },
+  {
+    id: "TiktokUrl",
+    label: "Tiktok URL",
+    translate: false,
+  },
+  {
+    id: "FacebookUrl",
+    label: "Facebook URL",
+    translate: false,
+  },
 ] as const;
 
 const toggleInputSchema = [
@@ -141,6 +151,8 @@ const Site = () => {
       Phone: "",
       Email: "",
       InstagramUrl: "",
+      TiktokUrl: "",
+      FacebookUrl: "",
       MapUrl: "",
       Currency: "",
     },
@@ -182,6 +194,8 @@ const Site = () => {
       Phone: customerConfig.phone ?? "",
       Email: customerConfig.email ?? "",
       InstagramUrl: customerConfig.instagramUrl ?? "",
+      TiktokUrl: customerConfig.tiktokUrl ?? "",
+      FacebookUrl: customerConfig.facebookUrl ?? "",
       Currency: customerConfig.currency ?? "",
       MapUrl: customerConfig.mapUrl ?? "",
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,

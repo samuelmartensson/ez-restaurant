@@ -156,6 +156,7 @@ export type PostCustomerSiteConfigurationBody = {
   ContactFormVisible?: boolean;
   Currency?: string;
   Email?: string;
+  FacebookUrl?: string;
   Font?: string;
   InstagramUrl?: string;
   Logo?: string;
@@ -165,6 +166,7 @@ export type PostCustomerSiteConfigurationBody = {
   SiteName?: string;
   Theme?: string;
   ThemeColorConfig?: string;
+  TiktokUrl?: string;
 };
 
 export type PostCustomerSiteConfigurationParams = {
@@ -292,6 +294,8 @@ export interface CustomerConfigResponse {
   /** @nullable */
   email?: string | null;
   /** @nullable */
+  facebookUrl?: string | null;
+  /** @nullable */
   font?: string | null;
   heroType?: number;
   /** @nullable */
@@ -311,6 +315,8 @@ export interface CustomerConfigResponse {
   theme?: string;
   /** @nullable */
   themeColorConfig?: string | null;
+  /** @nullable */
+  tiktokUrl?: string | null;
 }
 
 export interface CustomerConfigMetaResponse {
@@ -670,6 +676,15 @@ export const postCustomerSiteConfiguration = (
     formData.append(
       "InstagramUrl",
       postCustomerSiteConfigurationBody.InstagramUrl,
+    );
+  }
+  if (postCustomerSiteConfigurationBody.TiktokUrl !== undefined) {
+    formData.append("TiktokUrl", postCustomerSiteConfigurationBody.TiktokUrl);
+  }
+  if (postCustomerSiteConfigurationBody.FacebookUrl !== undefined) {
+    formData.append(
+      "FacebookUrl",
+      postCustomerSiteConfigurationBody.FacebookUrl,
     );
   }
   if (postCustomerSiteConfigurationBody.MapUrl !== undefined) {
