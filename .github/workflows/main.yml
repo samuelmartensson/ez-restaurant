@@ -52,15 +52,15 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo bash -c '\
-            sed -i \"/^Environment=/d\" /etc/systemd/system/backend.service
-            sed -i \"/^\[Service\]/a \\
-            Environment=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID\\n\\
-            Environment=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY\\n\\
-            Environment=CLERK_SECRET_KEY=$CLERK_SECRET_KEY\\n\\
-            Environment=STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY\\n\\
-            Environment=VERCEL_TOKEN=$VERCEL_TOKEN\\n\\
-            Environment=SMTP_PASSWORD=$SMTP_PASSWORD\\n\\
-            Environment=CONNECTION_STRING=$CONNECTION_STRING\" /etc/systemd/system/backend.service'"
+          sed -i \"/^Environment=/d\" /etc/systemd/system/backend.service
+          sed -i \"/^\[Service\]/a \\
+          Environment=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID\\n\\
+          Environment=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY\\n\\
+          Environment=CLERK_SECRET_KEY=$CLERK_SECRET_KEY\\n\\
+          Environment=STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY\\n\\
+          Environment=VERCEL_TOKEN=$VERCEL_TOKEN\\n\\
+          Environment=SMTP_PASSWORD=$SMTP_PASSWORD\\n\\
+          Environment=CONNECTION_STRING=\\\"$CONNECTION_STRING\\\"\" /etc/systemd/system/backend.service'"
 
       # Step 6: Restart the .NET app on the EC2 instance
       - name: Restart .NET app
