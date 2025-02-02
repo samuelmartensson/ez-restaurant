@@ -270,5 +270,13 @@ public class PublicController(RestaurantContext context, EmailService emailServi
 
         return Ok(new { message = "Success" });
     }
+
+    [HttpGet("ping")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult Ping()
+    {
+        return Ok(new { message = "Success" });
+    }
 }
 
