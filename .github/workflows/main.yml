@@ -48,10 +48,10 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-        run: |
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo bash -c '\
+      run: |
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo bash -c '\
           sed -i \"/^Environment=/d\" /etc/systemd/system/backend.service
           sed -i \"/^\[Service\]/a \\
           Environment=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID\\n\\
