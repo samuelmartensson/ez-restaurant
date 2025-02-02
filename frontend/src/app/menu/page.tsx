@@ -6,7 +6,7 @@ const MenuPage = async () => {
   const data = await getCustomerMenu();
 
   return (
-    <SubPageLayout title={data.translations?.menu}>
+    <SubPageLayout className="max-w-screen-md" title={data.translations?.menu}>
       <MenuRender data={data.menu} currency={data?.meta.currency ?? ""} />
       <title>{`${data.translations?.menu} | ${data?.meta?.siteName}`}</title>
     </SubPageLayout>

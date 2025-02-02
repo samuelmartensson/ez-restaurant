@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
@@ -121,8 +120,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
+
         var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
                         x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
                         x.CustomDomain == Key
@@ -140,7 +138,6 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             .Include(cf => cf.SiteSectionGallery)
             .Include(cf => cf.SectionVisibility)
             .Include(cf => cf.OpeningHours)
-            .Include(cf => cf.Translations.Where(t => t.LanguageCode == resolvedLanguage))
             .FirstOrDefaultAsync((x) =>
                 x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
                 x.CustomDomain == Key
@@ -150,6 +147,12 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         {
             return NotFound(new { message = "CustomerConfig not found for the provided Key." });
         }
+
+
+        var translations = await context.Translations
+            .Where(t => t.CustomerConfigDomain == customerConfig.Domain && t.LanguageCode == resolvedLanguage)
+            .ToListAsync();
+        customerConfig.Translations = translations;
 
         var openingHours = GetOpeningHours(customerConfig);
         var response = new CustomerConfigResponse
@@ -196,14 +199,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             },
             SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage)
         };
-        stopwatch.Stop();
-
-        // Get the elapsed time
-        var elapsedTime = stopwatch.Elapsed;
-        Console.WriteLine(elapsedTime.TotalMilliseconds);
 
         return Ok(response);
-
     }
 
     [HttpGet("get-customer-menu")]
@@ -220,23 +217,18 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             .Where(cf => cf.Domain.Trim().ToLower() == normalizedKey || cf.CustomDomain == normalizedKey)
             .Include(cf => cf.MenuCategorys)
             .ThenInclude(mc => mc.MenuItems)
-            .Select(cf => new
-            {
-                Config = cf,
-                Translations = cf.Translations.Where(t =>
-                    t.LanguageCode == queryParameters.Language &&
-                    (t.Key.StartsWith("menu_item") || t.Key.StartsWith("menu_category"))
-                )
-            })
             .FirstOrDefaultAsync();
 
         if (customerConfig == null)
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
 
+        var translations = await context.Translations
+            .Where(t => t.LanguageCode == queryParameters.Language && (t.Key.StartsWith("menu_item") || t.Key.StartsWith("menu_category")))
+            .ToListAsync();
 
-        var translationMap = customerConfig.Translations.ToDictionary(t => t.Key);
+        var translationMap = translations.ToDictionary(t => t.Key);
 
-        var menuCategoriesResponse = customerConfig.Config.MenuCategorys
+        var menuCategoriesResponse = customerConfig.MenuCategorys
             .OrderBy(mc => mc.Order)
             .Select(mc => new MenuCategoryResponse
             {
@@ -247,7 +239,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             })
             .ToList();
 
-        var menuItemsResponse = customerConfig.Config.MenuCategorys
+        var menuItemsResponse = customerConfig.MenuCategorys
             .SelectMany(mc => mc.MenuItems)
             .OrderBy(mi => mi.Order)
             .Select(mi => new MenuItemResponse

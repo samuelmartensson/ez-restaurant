@@ -2,12 +2,15 @@ import { getCustomerConfig } from "@/mock_db";
 import Image from "next/image";
 import { ReactNode } from "react";
 import { Badge } from "./ui/badge";
+import { cn } from "@/lib/utils";
 
 const SubPageLayout = async ({
   title,
+  className,
   children,
 }: {
   title?: string;
+  className?: string;
   children: ReactNode;
 }) => {
   const data = await getCustomerConfig();
@@ -24,7 +27,12 @@ const SubPageLayout = async ({
           className="object-cover opacity-10"
         />
       </div>
-      <div className="relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-xl m-auto z-10">
+      <div
+        className={cn(
+          "relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-xl m-auto z-10",
+          className
+        )}
+      >
         {title && (
           <Badge className="mb-4">
             <h1 className="text-5xl font-bold font-customer">{title}</h1>

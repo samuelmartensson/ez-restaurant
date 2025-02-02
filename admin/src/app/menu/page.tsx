@@ -301,6 +301,10 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       },
       params,
     });
+    await updateCategoryOrder({
+      data: categoryList.map((item, index) => ({ ...item, order: index + 1 })),
+      params: { key: selectedDomain },
+    });
     if (selectedCategory === -1) {
       setAddCategory({
         name: "",
@@ -342,10 +346,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         ),
       },
     });
-    await updateCategoryOrder({
-      data: categoryList.map((item, index) => ({ ...item, order: index + 1 })),
-      params: { key: selectedDomain },
-    });
+    await handleUpdateCategory();
     refetchAndSync();
     toast.success("Updated menu.");
     setUploadedImages({});

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import ImageViewer from "@/components/ImageViewer";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,11 +19,13 @@ const MenuItem = ({
   return (
     <div className="border-b-2 border-dashed pt-6 pb-2 flex gap-4">
       {image ? (
-        <img
-          src={image}
-          alt=""
-          className="min-w-32 max-w-32 h-32 bg-gray-200 object-cover rounded-xl"
-        />
+        <ImageViewer url={image}>
+          <img
+            src={image}
+            alt=""
+            className="min-w-32 max-w-32 h-32 bg-gray-200 object-cover rounded-xl"
+          />
+        </ImageViewer>
       ) : (
         <div className="grid place-items-center min-w-32 max-w-32 h-32 bg-gray-200 object-cover rounded-xl">
           <HandPlatter className="text-gray-400" />
