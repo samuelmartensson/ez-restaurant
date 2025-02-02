@@ -1,6 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { SiteConfig } from "@/mock_db";
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { Badge } from "./ui/badge";
 
 const dayMap = {
