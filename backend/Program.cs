@@ -127,7 +127,7 @@ else
     app.UseCors("Prod");
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
