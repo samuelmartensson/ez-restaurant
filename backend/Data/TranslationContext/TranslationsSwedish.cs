@@ -5,6 +5,7 @@ public static class TranslationsSwedish
         { "about:title", "Om oss" },
         { "contact_us", "Kontakta oss" },
         { "open_hours", "Öppettider" },
+        { "open_hours_cta", "Öppettider & Kontakt" },
         { "menu", "Meny" },
         { "gallery", "Galleri" },
         { "order_now", "Beställ nu" },

@@ -10,7 +10,7 @@ export default async function Home() {
   const data = await getCustomerConfig();
   if (!data) return null;
 
-  const { orderNow, menu, openHours } = data.siteTranslations || {};
+  const { orderNow, menu, openHoursCta } = data.siteTranslations || {};
   const heroSection = data?.sections?.hero;
 
   return (
@@ -62,7 +62,7 @@ export default async function Home() {
           href="#open-hours"
           className="absolute md:bottom-4 bottom-28 grid place-items-center text-white"
         >
-          <span>{openHours ?? "Open hours"}</span>
+          <span>{openHoursCta ?? "Open hours"}</span>
           <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
         </Link>
       </div>

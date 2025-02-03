@@ -29,7 +29,7 @@ const SubPageLayout = async ({
       </div>
       <div
         className={cn(
-          "relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-xl m-auto z-10",
+          "relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-md m-auto z-10",
           className
         )}
       >

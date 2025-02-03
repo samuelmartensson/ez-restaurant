@@ -183,6 +183,7 @@ export interface SiteTranslationsResponse {
   menu?: string;
   monday?: string;
   openHours?: string;
+  openHoursCta?: string;
   orderNow?: string;
   saturday?: string;
   sunday?: string;

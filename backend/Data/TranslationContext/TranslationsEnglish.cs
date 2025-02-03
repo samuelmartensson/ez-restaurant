@@ -5,6 +5,7 @@ public static class TranslationsEnglish
         { "about:title", "About us" },
         { "contact_us", "Contact us" },
         { "open_hours", "Open hours" },
+        { "open_hours_cta", "Open hours & Contact" },
         { "menu", "Menu" },
         { "gallery", "Gallery" },
         { "order_now", "Order now" },

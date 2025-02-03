@@ -5,6 +5,7 @@ namespace Models.Responses
         public required string AboutTitle { get; set; }
         public required string ContactUs { get; set; }
         public required string OpenHours { get; set; }
+        public required string OpenHoursCta { get; set; }
         public required string Menu { get; set; }
         public required string Gallery { get; set; }
         public required string OrderNow { get; set; }

@@ -101,9 +101,10 @@ const DraggableBadge = ({
           onClick();
         }
       }}
-      className="flex gap-1 whitespace-nowrap rounded-full text-sm"
+      className="flex gap-1 whitespace-nowrap rounded-full text-xs md:text-base"
     >
       <Button
+        className="h-8"
         type="button"
         variant="ghost"
         size="icon"
@@ -117,6 +118,7 @@ const DraggableBadge = ({
       </Button>
       {props.children}
       <Button
+        className="h-8"
         type="button"
         size="icon"
         variant="ghost"

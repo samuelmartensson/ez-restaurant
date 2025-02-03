@@ -494,7 +494,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                             </div>
                           </div>
                         </Button>
-                        <div className="grid content-start gap-2">
+                        <div className="mb-2 grid grid-cols-2 content-start gap-2 md:mb-0 md:grid-cols-1">
                           <Button
                             size="sm"
                             variant="outline"
