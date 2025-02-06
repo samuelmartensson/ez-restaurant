@@ -158,4 +158,116 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
         context.SiteSectionGallerys.Remove(galleryEntry);
         await context.SaveChangesAsync();
     }
+
+    public async Task<List<NewsArticleResponse>> ListNewsArticles(CommonQueryParameters queryParameters)
+    {
+        var articles = await context.NewsArticles
+            .Where((x) => x.CustomerConfigDomain == queryParameters.Key).OrderBy(a => a.UpdatedAt).Reverse().ToListAsync();
+
+        return articles?.Select(a => new NewsArticleResponse
+        {
+            Id = a.Id,
+            Title = a.Title,
+            Content = a.Content,
+            Date = a.Date,
+            UpdatedAt = a.UpdatedAt,
+            Published = a.Published
+        }).ToList() ?? new List<NewsArticleResponse>();
+    }
+
+    public async Task<NewsArticleResponse> GetNewsArticle(int id, CommonQueryParameters queryParameters)
+    {
+        var article = await context.NewsArticles
+            .FirstOrDefaultAsync((x) => x.CustomerConfigDomain == queryParameters.Key && x.Id == id);
+
+        if (article == null)
+        {
+            throw new Exception("Article not found.");
+        }
+
+        var title = await translationService.GetByKey(queryParameters.Language, queryParameters.Key, $"news_title_{article.Id}");
+        var content = await translationService.GetByKey(queryParameters.Language, queryParameters.Key, $"news_content_{article.Id}");
+
+        return new NewsArticleResponse
+        {
+            Id = article.Id,
+            Title = title ?? article.Title,
+            Content = content ?? article.Content,
+            Date = article.Date,
+            UpdatedAt = article.UpdatedAt,
+            Published = article.Published,
+            Image = article.Image
+        };
+    }
+
+    public async Task UpdateNewsArticle(int id, AddNewsArticleRequest request, CommonQueryParameters queryParameters)
+    {
+        var existingArticle = await context.NewsArticles
+            .FirstOrDefaultAsync((x) => x.CustomerConfigDomain == queryParameters.Key && x.Id == id);
+        if (existingArticle == null)
+        {
+            throw new Exception("Article not found.");
+        }
+
+        existingArticle.UpdatedAt = DateTime.UtcNow;
+        existingArticle.Published = request.Published;
+
+        if (request.Image != null)
+        {
+            var url = await s3Service.UploadFileAsync(request.Image, $"{queryParameters.Key}/news/{existingArticle.Id}");
+            existingArticle.Image = url;
+        }
+        else
+        {
+            await s3Service.DeleteFileAsync($"{queryParameters.Key}/news/{existingArticle.Id}");
+            existingArticle.Image = "";
+        }
+
+        await translationService.CreateOrUpdateByKeys(
+            queryParameters.Language,
+            queryParameters.Key,
+            new Dictionary<string, string>
+            {
+                { $"news_title_{existingArticle.Id}", request.Title },
+                { $"news_content_{existingArticle.Id}", request.Content }
+            }
+        );
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task AddNewsArticle(AddNewsArticleRequest request, CommonQueryParameters queryParameters)
+    {
+        var customerConfig = await context.CustomerConfigs
+            .FirstOrDefaultAsync((x) => x.Domain == queryParameters.Key);
+
+        if (customerConfig == null)
+        {
+            throw new Exception("CustomerConfig not found for the provided key.");
+        }
+
+        var newArticle = new NewsArticle
+        {
+            CustomerConfigDomain = customerConfig.Domain,
+            Title = request.Title,
+            Content = request.Content,
+            Date = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Published = request.Published
+        };
+        context.Add(newArticle);
+        await context.SaveChangesAsync();
+
+        await translationService.CreateOrUpdateByKeys(
+            queryParameters.Language,
+            queryParameters.Key,
+            new Dictionary<string, string>
+            {
+                { $"news_title_{newArticle.Id}", request.Title },
+                { $"news_content_{newArticle.Id}", request.Content }
+            }
+        );
+
+        await context.SaveChangesAsync();
+    }
 }

@@ -8,16 +8,15 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PublicController(RestaurantContext context, EmailService emailService, TranslationContext translationContext, TranslationService translationService) : ControllerBase
+public class PublicController(RestaurantContext context, EmailService emailService, TranslationContext translationContext) : ControllerBase
 {
     private RestaurantContext context = context;
     private TranslationContext translationContext = translationContext;
     private EmailService emailService = emailService;
-    private TranslationService translationService = translationService;
 
-    private string t(ICollection<Translation> translations, string key)
+    private string? t(ICollection<Translation> translations, string key)
     {
-        return translations.FirstOrDefault(t => t.Key == key)?.Value ?? "";
+        return translations.FirstOrDefault(t => t.Key == key)?.Value;
     }
 
     private List<OpeningHourResponse> GetOpeningHours(CustomerConfig customerConfig)
@@ -88,7 +87,6 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         });
     }
 
-
     [HttpGet("get-customer-translations")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigTranslations), StatusCodes.Status200OK)]
@@ -138,6 +136,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             .Include(cf => cf.SiteSectionGallery)
             .Include(cf => cf.SectionVisibility)
             .Include(cf => cf.OpeningHours)
+            .Include(cf => cf.NewsArticles)
             .FirstOrDefaultAsync((x) =>
                 x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
                 x.CustomDomain == Key
@@ -195,7 +194,20 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                     Description = t(customerConfig.Translations, "about:description") ?? "",
                     AboutTitle = translationContext.GetTranslation(resolvedLanguage, "about:title")
                 },
-                Gallery = customerConfig.SiteSectionGallery.Select(g => new SiteSectionGalleryResponse { Id = g.Id, Image = g.Image }).ToList(),
+                Gallery = customerConfig.SiteSectionGallery.Select(g => new SiteSectionGalleryResponse
+                {
+                    Id = g.Id,
+                    Image = g.Image
+                }).ToList(),
+                NewsArticles = customerConfig.NewsArticles.Where(a => a.Published).Select(a => new NewsArticleResponse
+                {
+                    Id = a.Id,
+                    Title = t(customerConfig.Translations, $"news_title_{a.Id}") ?? a.Title,
+                    Content = t(customerConfig.Translations, $"news_content_{a.Id}") ?? a.Content,
+                    Image = a.Image,
+                    Date = a.Date,
+                    UpdatedAt = a.UpdatedAt
+                }).ToList(),
             },
             SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage)
         };

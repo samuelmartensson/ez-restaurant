@@ -25,6 +25,7 @@ import {
   Instagram,
   Languages,
   LogOut,
+  Newspaper,
   ScreenShare,
   Settings2,
   SquareMenu,
@@ -78,6 +79,11 @@ const sections = [
     title: "Gallery",
     url: "/gallery",
     icon: Images,
+  },
+  {
+    title: "News",
+    url: "/news",
+    icon: Newspaper,
   },
   {
     title: "Open hours",

@@ -22,7 +22,7 @@ const Gallery = ({ urls }: Props) => {
           </ImageViewer>
         ))}
       </div>
-      <Separator className="my-8 max-w-screen-lg mx-auto" decorative />
+      <Separator className="my-16 max-w-screen-lg mx-auto" decorative />
     </div>
   );
 };

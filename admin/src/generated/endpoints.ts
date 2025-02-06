@@ -19,6 +19,33 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
+export type PutSectionNewsIdBody = {
+  Content?: string;
+  Image?: Blob;
+  Published?: boolean;
+  Title?: string;
+};
+
+export type PutSectionNewsIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionNewsIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostSectionNewsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionNewsParams = {
+  Key: string;
+  Language: string;
+};
+
 export type DeleteSectionGalleryParams = {
   id?: number;
   Key: string;
@@ -197,6 +224,7 @@ export interface SiteTranslationsResponse {
   menu?: string;
   monday?: string;
   openHours?: string;
+  openHoursCta?: string;
   orderNow?: string;
   saturday?: string;
   sunday?: string;
@@ -221,12 +249,6 @@ export interface SiteSectionAboutResponse {
   image?: string;
 }
 
-export interface SectionsResponse {
-  about?: SiteSectionAboutResponse;
-  gallery?: SiteSectionGalleryResponse[];
-  hero?: SiteSectionHeroResponse;
-}
-
 export interface SectionVisibilityResponse {
   contactFormVisible?: boolean;
 }
@@ -239,6 +261,24 @@ export interface OpeningHourResponse {
   /** @nullable */
   label?: string | null;
   openTime?: string;
+}
+
+export interface NewsArticleResponse {
+  content?: string;
+  date?: string;
+  id?: number;
+  /** @nullable */
+  image?: string | null;
+  published?: boolean;
+  title?: string;
+  updatedAt?: string;
+}
+
+export interface SectionsResponse {
+  about?: SiteSectionAboutResponse;
+  gallery?: SiteSectionGalleryResponse[];
+  hero?: SiteSectionHeroResponse;
+  newsArticles?: NewsArticleResponse[];
 }
 
 export interface MenuItemResponse {
@@ -366,6 +406,14 @@ export interface AddOpeningHourRequest {
   /** @nullable */
   label?: string | null;
   openTime?: string;
+}
+
+export interface AddNewsArticleRequest {
+  content?: string;
+  /** @nullable */
+  image?: Blob | null;
+  published?: boolean;
+  title?: string;
 }
 
 export interface AddCategoryRequest {
@@ -2743,6 +2791,440 @@ export const useDeleteSectionGallery = <
   TContext
 > => {
   const mutationOptions = getDeleteSectionGalleryMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getSectionNews = (
+  params: GetSectionNewsParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<NewsArticleResponse[]>({
+    url: `/Section/news`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetSectionNewsQueryKey = (params: GetSectionNewsParams) => {
+  return [`/Section/news`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetSectionNewsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSectionNews>>,
+  TError = unknown,
+>(
+  params: GetSectionNewsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionNews>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSectionNewsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSectionNews>>> = ({
+    signal,
+  }) => getSectionNews(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSectionNews>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetSectionNewsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionNews>>
+>;
+export type GetSectionNewsQueryError = unknown;
+
+export function useGetSectionNews<
+  TData = Awaited<ReturnType<typeof getSectionNews>>,
+  TError = unknown,
+>(
+  params: GetSectionNewsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionNews>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionNews>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetSectionNews<
+  TData = Awaited<ReturnType<typeof getSectionNews>>,
+  TError = unknown,
+>(
+  params: GetSectionNewsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionNews>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionNews>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetSectionNews<
+  TData = Awaited<ReturnType<typeof getSectionNews>>,
+  TError = unknown,
+>(
+  params: GetSectionNewsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionNews>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetSectionNews<
+  TData = Awaited<ReturnType<typeof getSectionNews>>,
+  TError = unknown,
+>(
+  params: GetSectionNewsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionNews>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetSectionNewsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const postSectionNews = (
+  addNewsArticleRequest: AddNewsArticleRequest,
+  params: PostSectionNewsParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<void>({
+    url: `/Section/news`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addNewsArticleRequest,
+    params,
+    signal,
+  });
+};
+
+export const getPostSectionNewsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionNews>>,
+    TError,
+    { data: AddNewsArticleRequest; params: PostSectionNewsParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postSectionNews>>,
+  TError,
+  { data: AddNewsArticleRequest; params: PostSectionNewsParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postSectionNews>>,
+    { data: AddNewsArticleRequest; params: PostSectionNewsParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postSectionNews(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostSectionNewsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionNews>>
+>;
+export type PostSectionNewsMutationBody = AddNewsArticleRequest;
+export type PostSectionNewsMutationError = unknown;
+
+export const usePostSectionNews = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionNews>>,
+    TError,
+    { data: AddNewsArticleRequest; params: PostSectionNewsParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postSectionNews>>,
+  TError,
+  { data: AddNewsArticleRequest; params: PostSectionNewsParams },
+  TContext
+> => {
+  const mutationOptions = getPostSectionNewsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getSectionNewsId = (
+  id: number,
+  params: GetSectionNewsIdParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<NewsArticleResponse>({
+    url: `/Section/news/${id}`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetSectionNewsIdQueryKey = (
+  id: number,
+  params: GetSectionNewsIdParams,
+) => {
+  return [`/Section/news/${id}`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetSectionNewsIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSectionNewsId>>,
+  TError = unknown,
+>(
+  id: number,
+  params: GetSectionNewsIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionNewsId>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetSectionNewsIdQueryKey(id, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getSectionNewsId>>
+  > = ({ signal }) => getSectionNewsId(id, params, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSectionNewsId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetSectionNewsIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionNewsId>>
+>;
+export type GetSectionNewsIdQueryError = unknown;
+
+export function useGetSectionNewsId<
+  TData = Awaited<ReturnType<typeof getSectionNewsId>>,
+  TError = unknown,
+>(
+  id: number,
+  params: GetSectionNewsIdParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionNewsId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionNewsId>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetSectionNewsId<
+  TData = Awaited<ReturnType<typeof getSectionNewsId>>,
+  TError = unknown,
+>(
+  id: number,
+  params: GetSectionNewsIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionNewsId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionNewsId>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetSectionNewsId<
+  TData = Awaited<ReturnType<typeof getSectionNewsId>>,
+  TError = unknown,
+>(
+  id: number,
+  params: GetSectionNewsIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionNewsId>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetSectionNewsId<
+  TData = Awaited<ReturnType<typeof getSectionNewsId>>,
+  TError = unknown,
+>(
+  id: number,
+  params: GetSectionNewsIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionNewsId>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetSectionNewsIdQueryOptions(id, params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const putSectionNewsId = (
+  id: number,
+  putSectionNewsIdBody: PutSectionNewsIdBody,
+  params: PutSectionNewsIdParams,
+) => {
+  const formData = new FormData();
+  if (putSectionNewsIdBody.Title !== undefined) {
+    formData.append("Title", putSectionNewsIdBody.Title);
+  }
+  if (putSectionNewsIdBody.Content !== undefined) {
+    formData.append("Content", putSectionNewsIdBody.Content);
+  }
+  if (putSectionNewsIdBody.Published !== undefined) {
+    formData.append("Published", putSectionNewsIdBody.Published.toString());
+  }
+  if (putSectionNewsIdBody.Image !== undefined) {
+    formData.append("Image", putSectionNewsIdBody.Image);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/news/${id}`,
+    method: "PUT",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
+export const getPutSectionNewsIdMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putSectionNewsId>>,
+    TError,
+    { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putSectionNewsId>>,
+  TError,
+  { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putSectionNewsId>>,
+    { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams }
+  > = (props) => {
+    const { id, data, params } = props ?? {};
+
+    return putSectionNewsId(id, data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutSectionNewsIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putSectionNewsId>>
+>;
+export type PutSectionNewsIdMutationBody = PutSectionNewsIdBody;
+export type PutSectionNewsIdMutationError = unknown;
+
+export const usePutSectionNewsId = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putSectionNewsId>>,
+    TError,
+    { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof putSectionNewsId>>,
+  TError,
+  { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+  TContext
+> => {
+  const mutationOptions = getPutSectionNewsIdMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

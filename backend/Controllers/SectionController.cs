@@ -56,5 +56,50 @@ public class SectionController(
         await sectionConfigurationService.RemoveGalleryImage(id, queryParameters);
         return Ok(new { message = "Success" });
     }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpGet("news")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(List<NewsArticleResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListNewsArticles([FromQuery] CommonQueryParameters queryParameters)
+    {
+        var data = await sectionConfigurationService.ListNewsArticles(queryParameters);
+        return Ok(data);
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpGet("news/{id}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NewsArticleResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetNewsArticle(int id, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        var data = await sectionConfigurationService.GetNewsArticle(id, queryParameters);
+        return Ok(data);
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPost("news")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> AddNewsArticle([FromBody] AddNewsArticleRequest request, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.AddNewsArticle(request, queryParameters);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPut("news/{id}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateNewsArticle(int id, [FromForm] AddNewsArticleRequest request, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.UpdateNewsArticle(id, request, queryParameters);
+        return Ok(new { message = "Success" });
+    }
 }
 

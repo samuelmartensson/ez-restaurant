@@ -1,3 +1,5 @@
+using Models.Requests;
+
 namespace Models.Responses
 {
     public class SiteTranslationsResponse
@@ -44,6 +46,7 @@ namespace Models.Responses
         public required SiteSectionHeroResponse Hero { get; set; }
         public required SiteSectionAboutResponse About { get; set; }
         public required List<SiteSectionGalleryResponse> Gallery { get; set; } = new List<SiteSectionGalleryResponse>();
+        public List<NewsArticleResponse> NewsArticles { get; set; } = new List<NewsArticleResponse>();
     }
 
     public class SectionVisibilityResponse

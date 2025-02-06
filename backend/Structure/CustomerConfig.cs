@@ -28,4 +28,5 @@ public class CustomerConfig
     public ICollection<MenuCategory> MenuCategorys { get; set; } = new List<MenuCategory>();
     public ICollection<OpeningHour> OpeningHours { get; set; } = new List<OpeningHour>();
     public ICollection<Translation> Translations { get; set; } = new List<Translation>();
+    public ICollection<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
 }

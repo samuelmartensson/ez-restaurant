@@ -5,6 +5,33 @@
  * OpenAPI spec version: 1.0
  */
 import { authorizedFetch } from "../authorized-fetch";
+export type PutSectionNewsIdBody = {
+  Content?: string;
+  Image?: Blob;
+  Published?: boolean;
+  Title?: string;
+};
+
+export type PutSectionNewsIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionNewsIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostSectionNewsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionNewsParams = {
+  Key: string;
+  Language: string;
+};
+
 export type DeleteSectionGalleryParams = {
   id?: number;
   Key: string;
@@ -208,12 +235,6 @@ export interface SiteSectionAboutResponse {
   image?: string;
 }
 
-export interface SectionsResponse {
-  about?: SiteSectionAboutResponse;
-  gallery?: SiteSectionGalleryResponse[];
-  hero?: SiteSectionHeroResponse;
-}
-
 export interface SectionVisibilityResponse {
   contactFormVisible?: boolean;
 }
@@ -226,6 +247,24 @@ export interface OpeningHourResponse {
   /** @nullable */
   label?: string | null;
   openTime?: string;
+}
+
+export interface NewsArticleResponse {
+  content?: string;
+  date?: string;
+  id?: number;
+  /** @nullable */
+  image?: string | null;
+  published?: boolean;
+  title?: string;
+  updatedAt?: string;
+}
+
+export interface SectionsResponse {
+  about?: SiteSectionAboutResponse;
+  gallery?: SiteSectionGalleryResponse[];
+  hero?: SiteSectionHeroResponse;
+  newsArticles?: NewsArticleResponse[];
 }
 
 export interface MenuItemResponse {
@@ -353,6 +392,14 @@ export interface AddOpeningHourRequest {
   /** @nullable */
   label?: string | null;
   openTime?: string;
+}
+
+export interface AddNewsArticleRequest {
+  content?: string;
+  /** @nullable */
+  image?: Blob | null;
+  published?: boolean;
+  title?: string;
 }
 
 export interface AddCategoryRequest {
@@ -753,6 +800,66 @@ export const deleteSectionGallery = (params: DeleteSectionGalleryParams) => {
   });
 };
 
+export const getSectionNews = (params: GetSectionNewsParams) => {
+  return authorizedFetch<NewsArticleResponse[]>({
+    url: `/Section/news`,
+    method: "GET",
+    params,
+  });
+};
+
+export const postSectionNews = (
+  addNewsArticleRequest: AddNewsArticleRequest,
+  params: PostSectionNewsParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Section/news`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addNewsArticleRequest,
+    params,
+  });
+};
+
+export const getSectionNewsId = (
+  id: number,
+  params: GetSectionNewsIdParams,
+) => {
+  return authorizedFetch<NewsArticleResponse>({
+    url: `/Section/news/${id}`,
+    method: "GET",
+    params,
+  });
+};
+
+export const putSectionNewsId = (
+  id: number,
+  putSectionNewsIdBody: PutSectionNewsIdBody,
+  params: PutSectionNewsIdParams,
+) => {
+  const formData = new FormData();
+  if (putSectionNewsIdBody.Title !== undefined) {
+    formData.append("Title", putSectionNewsIdBody.Title);
+  }
+  if (putSectionNewsIdBody.Content !== undefined) {
+    formData.append("Content", putSectionNewsIdBody.Content);
+  }
+  if (putSectionNewsIdBody.Published !== undefined) {
+    formData.append("Published", putSectionNewsIdBody.Published.toString());
+  }
+  if (putSectionNewsIdBody.Image !== undefined) {
+    formData.append("Image", putSectionNewsIdBody.Image);
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/news/${id}`,
+    method: "PUT",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
 export const postWebhook = () => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
 };
@@ -831,6 +938,18 @@ export type PostSectionGalleryResult = NonNullable<
 >;
 export type DeleteSectionGalleryResult = NonNullable<
   Awaited<ReturnType<typeof deleteSectionGallery>>
+>;
+export type GetSectionNewsResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionNews>>
+>;
+export type PostSectionNewsResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionNews>>
+>;
+export type GetSectionNewsIdResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionNewsId>>
+>;
+export type PutSectionNewsIdResult = NonNullable<
+  Awaited<ReturnType<typeof putSectionNewsId>>
 >;
 export type PostWebhookResult = NonNullable<
   Awaited<ReturnType<typeof postWebhook>>
