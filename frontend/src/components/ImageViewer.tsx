@@ -1,7 +1,15 @@
 "use client";
+import dynamic from "next/dynamic";
 /* eslint-disable @next/next/no-img-element */
 import React, { ReactNode, useState } from "react";
 import { createPortal } from "react-dom";
+
+const NoSSR = ({ children }: { children: ReactNode }) => {
+  const DynamicComponent = dynamic(() => Promise.resolve(() => children), {
+    ssr: false,
+  });
+  return <DynamicComponent />;
+};
 
 const ImageViewer = ({
   url,
@@ -11,6 +19,7 @@ const ImageViewer = ({
   url: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <>
       {createPortal(
@@ -41,4 +50,10 @@ const ImageViewer = ({
   );
 };
 
-export default ImageViewer;
+const Wrapper = ({ url, children }: { children: ReactNode; url: string }) => {
+  <NoSSR>
+    <ImageViewer {...{ url, children }} />
+  </NoSSR>;
+};
+
+export default Wrapper;
