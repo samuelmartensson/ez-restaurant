@@ -17,6 +17,8 @@ public static class TranslationsSwedish
         { "saturday", "Lördag" },
         { "sunday", "Söndag" },
         { "all_rights_reserved", "Alla rättigheter förbehållna" },
-        { "closed", "Stängt" }
+        { "closed", "Stängt" },
+        { "news", "Nyheter" },
+        { "read_more", "Läs mer" },
     };
 }

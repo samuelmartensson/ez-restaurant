@@ -95,6 +95,7 @@ const News = () => {
         Title: data.Title,
         Content: data.Content,
         Published: data.Published,
+        RemoveImage: Object.keys(deletedAssets).length > 0,
       },
       params: { Key: selectedDomain, Language: selectedLanguage },
     });

@@ -20,6 +20,8 @@ namespace Models.Responses
         public required string Sunday { get; set; }
         public required string AllRightsReserved { get; set; }
         public required string Closed { get; set; }
+        public required string News { get; set; }
+        public required string ReadMore { get; set; }
     }
 
     public class SiteSectionHeroResponse

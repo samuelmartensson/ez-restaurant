@@ -209,9 +209,11 @@ export interface SiteTranslationsResponse {
   gallery?: string;
   menu?: string;
   monday?: string;
+  news?: string;
   openHours?: string;
   openHoursCta?: string;
   orderNow?: string;
+  readMore?: string;
   saturday?: string;
   sunday?: string;
   thursday?: string;

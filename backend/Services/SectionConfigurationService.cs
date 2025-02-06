@@ -217,7 +217,7 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
             var url = await s3Service.UploadFileAsync(request.Image, $"{queryParameters.Key}/news/{existingArticle.Id}");
             existingArticle.Image = url;
         }
-        else
+        else if (request.RemoveImage)
         {
             await s3Service.DeleteFileAsync($"{queryParameters.Key}/news/{existingArticle.Id}");
             existingArticle.Image = "";

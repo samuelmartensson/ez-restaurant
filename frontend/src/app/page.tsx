@@ -70,7 +70,10 @@ export default async function Home() {
 
       {(data.sections?.newsArticles ?? [])?.length > 0 && (
         <div className="py-16 px-2">
-          <NewsWidget articles={data.sections?.newsArticles ?? []} />
+          <NewsWidget
+            translations={data.siteTranslations || {}}
+            articles={data.sections?.newsArticles ?? []}
+          />
         </div>
       )}
       {data.sectionVisibility?.contactFormVisible && (

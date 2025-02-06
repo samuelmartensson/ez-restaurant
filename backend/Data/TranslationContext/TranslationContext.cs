@@ -32,7 +32,9 @@ public class TranslationContext
             Saturday = GetTranslation(language, "saturday"),
             Sunday = GetTranslation(language, "sunday"),
             AllRightsReserved = GetTranslation(language, "all_rights_reserved"),
-            Closed = GetTranslation(language, "closed")
+            Closed = GetTranslation(language, "closed"),
+            News = GetTranslation(language, "news"),
+            ReadMore = GetTranslation(language, "read_more")
         };
 
         return response;

@@ -199,7 +199,7 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                     Id = g.Id,
                     Image = g.Image
                 }).ToList(),
-                NewsArticles = customerConfig.NewsArticles.Where(a => a.Published).Select(a => new NewsArticleResponse
+                NewsArticles = customerConfig.NewsArticles.Where(a => a.Published).OrderByDescending(a => a.Date).Select(a => new NewsArticleResponse
                 {
                     Id = a.Id,
                     Title = t(customerConfig.Translations, $"news_title_{a.Id}") ?? a.Title,

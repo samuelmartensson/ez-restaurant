@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { LanguagePicker } from "./LanguagePicker";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { HandPlatter, Images, Info, Menu, X } from "lucide-react";
+import { HandPlatter, Images, Info, Menu, Newspaper, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,8 @@ let timer: NodeJS.Timeout | null = null;
 
 const MobileNavigation = ({ data }: { data: SiteConfig }) => {
   const [expanded, setExpanded] = useState(false);
-  const { menu, gallery, aboutTitle, orderNow } = data.siteTranslations || {};
+  const { menu, gallery, news, aboutTitle, orderNow } =
+    data.siteTranslations || {};
 
   const hasLanguagePicker = data.languages && data.languages?.length > 0;
 
@@ -107,6 +108,18 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
                 </Link>
               </Button>
             )}
+            {(data.sections?.newsArticles ?? [])?.length > 0 && (
+              <Button
+                className="justify-start"
+                onClick={() => setExpanded(false)}
+                asChild
+                variant="ghost"
+              >
+                <Link href="/news">
+                  <Newspaper className="md:!size-5" /> {news ?? "NEWS"}
+                </Link>
+              </Button>
+            )}
             {data.sections?.hero?.orderUrl && (
               <Button
                 className="justify-start"
@@ -131,7 +144,8 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
 
 export function Navigation({ data }: { data: SiteConfig }) {
   const pathname = usePathname();
-  const { menu, aboutTitle, orderNow, gallery } = data.siteTranslations || {};
+  const { menu, aboutTitle, news, orderNow, gallery } =
+    data.siteTranslations || {};
   const [isLoad, setIsLoad] = useState(false);
   const [options, setOptions] = useState({
     hidden: false,
@@ -285,6 +299,27 @@ export function Navigation({ data }: { data: SiteConfig }) {
                     )}
                   />{" "}
                   {gallery ?? "GALLERY"}
+                </Link>
+              </Button>
+            )}
+            {(data.sections?.newsArticles ?? [])?.length > 0 && (
+              <Button
+                size="default"
+                className={cn(
+                  "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
+                  pathname === "/gallery" && "border-primary"
+                )}
+                asChild
+                variant="ghost"
+              >
+                <Link href="/news">
+                  <Newspaper
+                    className={cn(
+                      "md:!size-5 text-accent-foreground",
+                      pathname === "/news" && "text-primary"
+                    )}
+                  />{" "}
+                  {news ?? "NEWS"}
                 </Link>
               </Button>
             )}

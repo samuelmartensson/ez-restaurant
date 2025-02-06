@@ -1,13 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 import SubPageLayout from "@/components/SubPageLayout";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { getCustomerConfig } from "@/mock_db";
+import Link from "next/link";
 import { Fragment } from "react";
 
 const News = async () => {
@@ -47,6 +50,16 @@ const News = async () => {
                   ))}
                 </CardDescription>
               </CardContent>
+              <CardFooter>
+                <small className="text-muted-foreground mt-auto">
+                  {new Date(article.date ?? "").toLocaleDateString()}
+                </small>
+                <Button asChild variant="outline" className="mt-auto ml-auto">
+                  <Link href={`/news/${article.id}`}>
+                    {data.siteTranslations?.readMore}
+                  </Link>
+                </Button>
+              </CardFooter>
             </Card>
           );
         })}

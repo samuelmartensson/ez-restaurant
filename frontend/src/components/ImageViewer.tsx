@@ -51,9 +51,11 @@ const ImageViewer = ({
 };
 
 const Wrapper = ({ url, children }: { children: ReactNode; url: string }) => {
-  <NoSSR>
-    <ImageViewer {...{ url, children }} />
-  </NoSSR>;
+  return (
+    <NoSSR>
+      <ImageViewer {...{ url, children }} />
+    </NoSSR>
+  );
 };
 
 export default Wrapper;
