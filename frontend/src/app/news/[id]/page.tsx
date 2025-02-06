@@ -10,7 +10,7 @@ import {
 import { getCustomerConfig } from "@/mock_db";
 import { Fragment } from "react";
 
-const NewsId = async ({ params }: { params: { id: string } }) => {
+const NewsId = async ({ params }: { params: Promise<{ id: string }> }) => {
   const data = await getCustomerConfig();
   const { id } = await params;
 
