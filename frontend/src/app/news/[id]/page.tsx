@@ -1,12 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import SubPageLayout from "@/components/SubPageLayout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { getCustomerConfig } from "@/mock_db";
 import { Fragment } from "react";
 
