@@ -262,7 +262,7 @@ public class PublicController(
         if (string.IsNullOrEmpty(queryParameters.Key))
             return NotFound(new { message = "Key is required." });
 
-        var customerConfig = await cacheService.GetOrAdd($"customerConfig-{queryParameters.Key}-{queryParameters.Language}", async () =>
+        var customerConfig = await cacheService.GetOrAdd($"customerMenu-{queryParameters.Key}-{queryParameters.Language}", async () =>
         {
             var result = await context.CustomerConfigs
                 .Where(cf => cf.Domain == queryParameters.Key || cf.CustomDomain == queryParameters.Key)
