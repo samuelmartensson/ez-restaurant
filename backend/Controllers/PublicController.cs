@@ -154,7 +154,7 @@ public class PublicController(
     public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-        var customerConfig = await cacheService.GetOrAdd("customerConfig", async () =>
+        var customerConfig = await cacheService.GetOrAdd($"customerConfig-{Key}-{Language}", async () =>
         {
             // If cache misses, fetch data from Supabase
             var result = await context.CustomerConfigs
@@ -262,9 +262,7 @@ public class PublicController(
         if (string.IsNullOrEmpty(queryParameters.Key))
             return NotFound(new { message = "Key is required." });
 
-        string normalizedKey = queryParameters.Key.Trim().ToLower();
-
-        var customerConfig = await cacheService.GetOrAdd("customerMenu", async () =>
+        var customerConfig = await cacheService.GetOrAdd($"customerConfig-{queryParameters.Key}-{queryParameters.Language}", async () =>
         {
             var result = await context.CustomerConfigs
                 .Where(cf => cf.Domain == queryParameters.Key || cf.CustomDomain == queryParameters.Key)
