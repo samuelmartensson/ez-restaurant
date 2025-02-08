@@ -1,9 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Clerk.Net.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Stripe;
 StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 
@@ -76,6 +76,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 builder.Services.AddDbContext<RestaurantContext>(options => options.UseNpgsql(connectionString));
 
+builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<TranslationContext>();
 
 builder.Services.AddScoped<MenuService>();
@@ -87,6 +88,7 @@ builder.Services.AddScoped<SectionConfigurationService>();
 builder.Services.AddScoped<OpeningHourService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<TranslationService>();
+builder.Services.AddScoped<CacheService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();

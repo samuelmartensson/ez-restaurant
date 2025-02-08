@@ -1,4 +1,4 @@
-import { getCustomerConfig } from "@/mock_db";
+import { getCustomerMeta } from "@/mock_db";
 import Image from "next/image";
 import { ReactNode } from "react";
 import { Badge } from "./ui/badge";
@@ -13,20 +13,22 @@ const SubPageLayout = async ({
   className?: string;
   children: ReactNode;
 }) => {
-  const data = await getCustomerConfig();
+  const data = await getCustomerMeta();
   if (!data) return null;
 
   return (
     <div className="relative min-h-svh">
-      <div className="absolute inset-0 bg-white">
-        <Image
-          priority
-          src={data.sections?.hero?.heroImage ?? ""}
-          fill
-          alt="hero"
-          className="object-cover opacity-10"
-        />
-      </div>
+      {data.image && (
+        <div className="absolute inset-0 bg-white">
+          <Image
+            priority
+            src={data.image ?? ""}
+            fill
+            alt="hero"
+            className="object-cover opacity-10"
+          />
+        </div>
+      )}
       <div
         className={cn(
           "relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-md m-auto z-10",

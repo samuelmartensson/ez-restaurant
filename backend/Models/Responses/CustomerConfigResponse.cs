@@ -63,6 +63,7 @@ namespace Models.Responses
         required public string DefaultLanguage { get; set; }
         required public string SiteName { get; set; }
         required public string Currency { get; set; }
+        public string? Image { get; set; }
     }
 
     public class CustomerConfigTranslations

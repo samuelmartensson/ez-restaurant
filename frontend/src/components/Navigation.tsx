@@ -307,7 +307,7 @@ export function Navigation({ data }: { data: SiteConfig }) {
                 size="default"
                 className={cn(
                   "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
-                  pathname === "/gallery" && "border-primary"
+                  pathname === "/news" && "border-primary"
                 )}
                 asChild
                 variant="ghost"

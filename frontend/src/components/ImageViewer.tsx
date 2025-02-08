@@ -1,14 +1,16 @@
 "use client";
-import dynamic from "next/dynamic";
 /* eslint-disable @next/next/no-img-element */
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 const NoSSR = ({ children }: { children: ReactNode }) => {
-  const DynamicComponent = dynamic(() => Promise.resolve(() => children), {
-    ssr: false,
-  });
-  return <DynamicComponent />;
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return isClient ? children : null;
 };
 
 const ImageViewer = ({

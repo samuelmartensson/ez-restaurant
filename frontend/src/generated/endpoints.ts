@@ -9,6 +9,7 @@ export type PutSectionNewsIdBody = {
   Content?: string;
   Image?: Blob;
   Published?: boolean;
+  RemoveImage?: boolean;
   Title?: string;
 };
 
@@ -351,6 +352,8 @@ export interface CustomerConfigMetaResponse {
   currency?: string;
   defaultLanguage?: string;
   domain?: string;
+  /** @nullable */
+  image?: string | null;
   languages?: string[];
   siteName?: string;
 }
@@ -401,6 +404,7 @@ export interface AddNewsArticleRequest {
   /** @nullable */
   image?: Blob | null;
   published?: boolean;
+  removeImage?: boolean;
   title?: string;
 }
 
@@ -848,6 +852,9 @@ export const putSectionNewsId = (
   }
   if (putSectionNewsIdBody.Published !== undefined) {
     formData.append("Published", putSectionNewsIdBody.Published.toString());
+  }
+  if (putSectionNewsIdBody.RemoveImage !== undefined) {
+    formData.append("RemoveImage", putSectionNewsIdBody.RemoveImage.toString());
   }
   if (putSectionNewsIdBody.Image !== undefined) {
     formData.append("Image", putSectionNewsIdBody.Image);

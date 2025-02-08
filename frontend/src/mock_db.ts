@@ -47,6 +47,10 @@ const resolveParams = async () => {
   return [configResponse, params] as const;
 };
 
+export const getCustomerMeta = async () => {
+  return (await resolveParams())[0];
+};
+
 export const getCustomerConfig = async () => {
   const headerList = await headers();
   const cookieList = await cookies();

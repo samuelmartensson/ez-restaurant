@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
@@ -8,11 +9,19 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PublicController(RestaurantContext context, EmailService emailService, TranslationContext translationContext) : ControllerBase
+public class PublicController(
+    RestaurantContext context,
+    EmailService emailService,
+    TranslationContext translationContext,
+    TranslationService translationService,
+    CacheService cacheService
+) : ControllerBase
 {
     private RestaurantContext context = context;
     private TranslationContext translationContext = translationContext;
+    private TranslationService translationService = translationService;
     private EmailService emailService = emailService;
+
 
     private string? t(ICollection<Translation> translations, string key)
     {
@@ -38,10 +47,19 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(CustomerConfigMetaResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerConfigMeta([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
-        var cf = await context.CustomerConfigs.Include(cf => cf.Translations).FirstOrDefaultAsync((x) =>
-                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
-                x.CustomDomain == Key
-            );
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        var cf = await context.CustomerConfigs.Where((x) =>
+                x.Domain == Key || x.CustomDomain == Key
+            ).Select(x => new
+            {
+                x.Languages,
+                x.DefaultLanguage,
+                x.Domain,
+                x.SiteName,
+                x.Currency,
+                x.SiteSectionHero.Image
+            }).FirstOrDefaultAsync();
+
         if (cf == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
@@ -52,13 +70,19 @@ public class PublicController(RestaurantContext context, EmailService emailServi
         {
             return BadRequest(new { message = "Language could not be resolved." });
         }
+
+
+        stopwatch.Stop();
+        Console.WriteLine($"GetCustomerMeta: {stopwatch.ElapsedMilliseconds} milliseconds");
+
         return Ok(new CustomerConfigMetaResponse
         {
             DefaultLanguage = cf.DefaultLanguage,
             Domain = cf.Domain,
             Languages = cf.Languages.Split(",").ToList(),
-            SiteName = t(cf.Translations, "site:name") ?? cf.SiteName,
+            SiteName = await translationService.GetByKey(resolvedLanguage, Key, "site:name") ?? cf.SiteName,
             Currency = cf.Currency,
+            Image = cf.Image
         });
     }
 
@@ -67,22 +91,33 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(SiteSectionAboutResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> About([FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        var key = queryParameters.Key?.Trim().ToLower();
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        var key = queryParameters.Key;
         string language = queryParameters.Language;
         var customerConfig = await context.CustomerConfigs
-            .Include(cf => cf.SiteSectionAbout)
-            .Include(cf => cf.Translations.Where(t => t.LanguageCode == language))
-            .FirstOrDefaultAsync(x => x.Domain.Replace(" ", "").ToLower() == key || x.CustomDomain == queryParameters.Key);
+            .AsNoTracking()
+            .Where(x => x.Domain == key || x.CustomDomain == queryParameters.Key)
+            .Select(cf => new
+            {
+                cf.SiteSectionAbout,
+                Translations = cf.Translations
+                                .Where(t => t.LanguageCode == language)
+            })
+            .FirstOrDefaultAsync();
 
         if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
 
+
+        stopwatch.Stop();
+        Console.WriteLine($"About: {stopwatch.ElapsedMilliseconds} milliseconds");
+
         return Ok(new SiteSectionAboutResponse
         {
             Image = customerConfig.SiteSectionAbout?.Image ?? string.Empty,
-            Description = t(customerConfig.Translations, "about:description") ?? string.Empty,
+            Description = t(customerConfig.Translations.ToList(), "about:description") ?? string.Empty,
             AboutTitle = translationContext.GetTranslation(language, "about:title")
         });
     }
@@ -118,35 +153,36 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language)
     {
-
-        var cf = await context.CustomerConfigs.FirstOrDefaultAsync((x) =>
-                        x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
-                        x.CustomDomain == Key
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        var customerConfig = await cacheService.GetOrAdd("customerConfig", async () =>
+        {
+            // If cache misses, fetch data from Supabase
+            var result = await context.CustomerConfigs
+                    .Include(cf => cf.SiteSectionHero)
+                    .Include(cf => cf.SiteSectionAbout)
+                    .Include(cf => cf.SiteSectionGallery)
+                    .Include(cf => cf.SectionVisibility)
+                    .Include(cf => cf.OpeningHours)
+                    .Include(cf => cf.NewsArticles)
+                    .AsSplitQuery()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync((x) =>
+                        x.Domain == Key || x.CustomDomain == Key
                     );
-        string resolvedLanguage = Language ?? cf?.Languages.Split(",").First() ?? "";
+
+            return result;
+        });
+
+        string resolvedLanguage = Language ?? customerConfig?.Languages.Split(",").First() ?? "";
 
         if (string.IsNullOrEmpty(resolvedLanguage))
         {
             return BadRequest(new { message = "Language could not be resolved." });
         }
-
-        var customerConfig = await context.CustomerConfigs
-            .Include(cf => cf.SiteSectionHero)
-            .Include(cf => cf.SiteSectionAbout)
-            .Include(cf => cf.SiteSectionGallery)
-            .Include(cf => cf.SectionVisibility)
-            .Include(cf => cf.OpeningHours)
-            .Include(cf => cf.NewsArticles)
-            .FirstOrDefaultAsync((x) =>
-                x.Domain.Replace(" ", "").ToLower() == Key.Replace(" ", "").ToLower() ||
-                x.CustomDomain == Key
-            );
-
         if (customerConfig == null)
         {
             return NotFound(new { message = "CustomerConfig not found for the provided Key." });
         }
-
 
         var translations = await context.Translations
             .Where(t => t.CustomerConfigDomain == customerConfig.Domain && t.LanguageCode == resolvedLanguage)
@@ -211,6 +247,8 @@ public class PublicController(RestaurantContext context, EmailService emailServi
             },
             SiteTranslations = translationContext.GetBaseTranslations(resolvedLanguage)
         };
+        stopwatch.Stop();
+        Console.WriteLine($"GetCustomerConfig: {stopwatch.ElapsedMilliseconds} milliseconds");
 
         return Ok(response);
     }
@@ -220,16 +258,23 @@ public class PublicController(RestaurantContext context, EmailService emailServi
     [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] CommonQueryParameters queryParameters)
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         if (string.IsNullOrEmpty(queryParameters.Key))
             return NotFound(new { message = "Key is required." });
 
         string normalizedKey = queryParameters.Key.Trim().ToLower();
 
-        var customerConfig = await context.CustomerConfigs
-            .Where(cf => cf.Domain.Trim().ToLower() == normalizedKey || cf.CustomDomain == normalizedKey)
-            .Include(cf => cf.MenuCategorys)
-            .ThenInclude(mc => mc.MenuItems)
-            .FirstOrDefaultAsync();
+        var customerConfig = await cacheService.GetOrAdd("customerMenu", async () =>
+        {
+            var result = await context.CustomerConfigs
+                .Where(cf => cf.Domain == queryParameters.Key || cf.CustomDomain == queryParameters.Key)
+                .Include(cf => cf.MenuCategorys)
+                .ThenInclude(mc => mc.MenuItems)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync();
+
+            return result;
+        });
 
         if (customerConfig == null)
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
@@ -266,6 +311,9 @@ public class PublicController(RestaurantContext context, EmailService emailServi
                 Order = mi.Order
             })
             .ToList();
+
+        stopwatch.Stop();
+        Console.WriteLine($"GetCustomerMenu: {stopwatch.ElapsedMilliseconds} milliseconds");
 
         return Ok(new MenuResponse
         {
