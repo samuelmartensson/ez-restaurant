@@ -26,7 +26,7 @@ const LanguageManager = () => {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [defaultLanguageValue, setDefaultLanguage] = useState("");
   const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig(
-    params,
+    { ...params, cache: false },
     { query: { enabled: !!selectedDomain && !!selectedLanguage } },
   );
 

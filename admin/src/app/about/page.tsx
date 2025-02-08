@@ -60,6 +60,7 @@ const About = () => {
   const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
     Key: selectedDomain,
     Language: selectedLanguage,
+    cache: false,
   });
 
   const { mutateAsync: uploadAbout } = usePostSectionAbout();

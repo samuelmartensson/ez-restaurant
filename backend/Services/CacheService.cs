@@ -1,19 +1,14 @@
 using Microsoft.Extensions.Caching.Memory;
 
-public class CacheService
+public class CacheService(IMemoryCache memoryCache)
 {
-    private readonly IMemoryCache _memoryCache;
+    private readonly IMemoryCache memoryCache = memoryCache;
     private readonly TimeSpan _defaultCacheDuration = TimeSpan.FromMinutes(2);  // Default cache duration
 
-    public CacheService(IMemoryCache memoryCache)
-    {
-        _memoryCache = memoryCache;
-    }
-
     // Retrieve data from the cache or fetch it if it's not cached
-    public T GetOrAdd<T>(string key, Func<T> fetchData)
+    public T GetOrAdd<T>(string key, Func<T> fetchData, bool use = true)
     {
-        if (_memoryCache.TryGetValue(key, out T? cachedData))
+        if (memoryCache.TryGetValue(key, out T? cachedData) && use)
         {
             // Return cached data if it exists
             return cachedData;
@@ -24,7 +19,7 @@ public class CacheService
             var data = fetchData();
 
             // Cache the new data with an expiration time
-            _memoryCache.Set(key, data, _defaultCacheDuration);
+            memoryCache.Set(key, data, _defaultCacheDuration);
             return data;
         }
     }
@@ -32,7 +27,7 @@ public class CacheService
     // Clear cache for a specific key
     public void Remove(string key)
     {
-        _memoryCache.Remove(key);
+        memoryCache.Remove(key);
     }
 
     // Clear all cached items (use cautiously)

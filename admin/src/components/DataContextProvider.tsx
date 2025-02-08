@@ -60,6 +60,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     {
       Key: selectedDomain,
       Language: selectedLanguage,
+      cache: false,
     },
     { query: { enabled: !!selectedDomain && !!selectedLanguage } },
   );

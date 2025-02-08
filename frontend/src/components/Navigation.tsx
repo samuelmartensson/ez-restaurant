@@ -48,6 +48,7 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
               className={hasLanguagePicker ? "" : "ml-auto"}
               size="icon"
               variant="secondary"
+              aria-label="Navigation"
             >
               <Menu className="!size-6" />
             </Button>

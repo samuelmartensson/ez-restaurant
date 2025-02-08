@@ -95,6 +95,7 @@ export type GetPublicGetCustomerMenuParams = {
 export type GetPublicGetCustomerConfigParams = {
   Key: string;
   Language: string;
+  cache?: boolean;
 };
 
 export type GetPublicGetCustomerTranslationsParams = {
@@ -366,6 +367,8 @@ export interface CustomerConfigMetaResponse {
   currency?: string;
   defaultLanguage?: string;
   domain?: string;
+  /** @nullable */
+  image?: string | null;
   languages?: string[];
   siteName?: string;
 }

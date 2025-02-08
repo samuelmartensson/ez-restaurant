@@ -118,6 +118,7 @@ const MenuRender = ({
             <TabsList className="justify-start md:h-11">
               {data.categories.map((c) => (
                 <TabsTrigger
+                  aria-label={`Menu category ${c.name}`}
                   value={String(c.id)}
                   key={c.id}
                   className="w-full font-customer md:text-lg"

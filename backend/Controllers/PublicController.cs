@@ -151,8 +151,9 @@ public class PublicController(
     [HttpGet("get-customer-config")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language)
+    public async Task<IActionResult> GetCustomerConfig([FromQuery, Required] string Key, [FromQuery, Required] string Language, [FromQuery] bool cache)
     {
+        Console.Write(HttpContext.Request.Host);
         Stopwatch stopwatch = Stopwatch.StartNew();
         var customerConfig = await cacheService.GetOrAdd($"customerConfig-{Key}-{Language}", async () =>
         {
@@ -171,7 +172,7 @@ public class PublicController(
                     );
 
             return result;
-        });
+        }, cache);
 
         string resolvedLanguage = Language ?? customerConfig?.Languages.Split(",").First() ?? "";
 
@@ -256,7 +257,7 @@ public class PublicController(
     [HttpGet("get-customer-menu")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] CommonQueryParameters queryParameters)
+    public async Task<IActionResult> GetCustomerMenu([FromQuery, Required] CommonQueryParameters queryParameters, [FromQuery] bool cache)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         if (string.IsNullOrEmpty(queryParameters.Key))
@@ -272,7 +273,7 @@ public class PublicController(
                 .FirstOrDefaultAsync();
 
             return result;
-        });
+        }, cache);
 
         if (customerConfig == null)
             return NotFound(new { message = "CustomerConfig not found for the provided key." });

@@ -16,6 +16,7 @@ const NewsId = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   if (!data) return null;
   const article = data.sections?.newsArticles?.find((a) => a.id === Number(id));
+  const { news } = data.siteTranslations || {};
 
   if (!article)
     return (
@@ -26,13 +27,10 @@ const NewsId = async ({ params }: { params: Promise<{ id: string }> }) => {
     );
 
   return (
-    <SubPageLayout title={"News"}>
-      <title>{`News | ${data?.siteName}`}</title>
+    <SubPageLayout title={article.title}>
+      <title>{`${news} | ${data?.siteName}`}</title>
       <div className="container gap-2 grid mx-auto">
         <Card key={article.id} className="border-none">
-          <CardHeader>
-            <CardTitle className="text-xl">{article.title}</CardTitle>
-          </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {article.image && (
               <img

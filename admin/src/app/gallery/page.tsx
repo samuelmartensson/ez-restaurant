@@ -43,6 +43,7 @@ const Gallery = () => {
   const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig({
     Key: selectedDomain,
     Language: selectedLanguage,
+    cache: false,
   });
 
   const { mutateAsync: uploadImages } = usePostSectionGallery();
