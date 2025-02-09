@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { gtagEvent } from "@/utils";
 
 let timer: NodeJS.Timeout | null = null;
 
@@ -30,7 +31,10 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
           <div className="flex-1 flex items-center gap-x-0 p-2">
             {data.sections?.hero?.orderUrl && (
               <Button
-                onClick={() => window.open(data.sections?.hero?.orderUrl)}
+                onClick={() => {
+                  gtagEvent((c) => c.ORDER_NOW_CLICKS, "Navigation");
+                  window.open(data.sections?.hero?.orderUrl);
+                }}
               >
                 <HandPlatter /> {orderNow ?? "ORDER NOW"}
               </Button>
@@ -83,7 +87,10 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
               asChild
               variant="ghost"
             >
-              <Link href="/menu">
+              <Link
+                href="/menu"
+                onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Navigation")}
+              >
                 <Menu className="md:!size-5" /> {menu ?? "MENU"}
               </Link>
             </Button>
@@ -124,7 +131,10 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
             {data.sections?.hero?.orderUrl && (
               <Button
                 className="justify-start"
-                onClick={() => window.open(data.sections?.hero?.orderUrl)}
+                onClick={() => {
+                  gtagEvent((c) => c.ORDER_NOW_CLICKS, "Navigation");
+                  window.open(data.sections?.hero?.orderUrl);
+                }}
               >
                 <HandPlatter className="md:!size-5" /> {orderNow ?? "ORDER NOW"}
               </Button>
@@ -253,7 +263,10 @@ export function Navigation({ data }: { data: SiteConfig }) {
               asChild
               variant="ghost"
             >
-              <Link href="/menu">
+              <Link
+                href="/menu"
+                onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Navigation")}
+              >
                 <Menu
                   className={cn(
                     "md:!size-5 text-accent-foreground",

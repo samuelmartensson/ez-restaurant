@@ -4,7 +4,6 @@ import { getCustomerConfig } from "@/mock_db";
 import "./globals.css";
 import DomainNotFound from "@/components/DomainNotFound";
 import Footer from "@/components/Footer";
-import { GoogleTagManager } from "@next/third-parties/google";
 import { Metadata } from "next";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
@@ -69,8 +68,14 @@ export default async function RootLayout({
         {data.themeColorConfig}
       </style>
       <title>{data?.siteName}</title>
-      <GoogleAnalytics gaId="G-6EEDB0K566" domain={data?.domain ?? ""} />
-      <GoogleTagManager gtmId="GTM-5FCPD5P9" />
+      <GoogleAnalytics
+        gaId={
+          process.env.NODE_ENV === "production"
+            ? "G-HXVWGBHTFG"
+            : "G-6EEDB0K566"
+        }
+        domain={data?.domain ?? ""}
+      />
       <FontInitializer fontUrl={data.font} />
       <body className="antialiased relative">
         <Navigation data={data} />
