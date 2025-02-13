@@ -2,6 +2,7 @@ import ContactForm from "@/components/ContactForm";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
 import NewsWidget from "@/components/NewsWidget";
+import { Separator } from "@/components/ui/separator";
 import { getCustomerConfig } from "@/mock_db";
 
 export default async function Home() {
@@ -13,7 +14,7 @@ export default async function Home() {
       <Hero data={data} />
 
       {(data.sections?.newsArticles ?? [])?.length > 0 && (
-        <div className="py-16 px-2">
+        <div className="pt-16 px-2">
           <NewsWidget
             translations={data.siteTranslations || {}}
             articles={data.sections?.newsArticles ?? []}

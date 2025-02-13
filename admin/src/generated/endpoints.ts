@@ -19,18 +19,27 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { authorizedFetch } from "../authorized-fetch";
-export type PutSectionNewsIdBody = {
-  Content?: string;
+export type PutSectionNewsIdAssetsBody = {
   Image?: Blob;
-  Published?: boolean;
-  RemoveImage?: boolean;
-  Title?: string;
+  removedAssets?: string[];
+};
+
+export type PutSectionNewsIdAssetsParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PutSectionNewsIdParams = {
   Key: string;
   Language: string;
 };
+
+export type DeleteSectionNewsIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionNewsId200 = { [key: string]: NewsArticleResponse };
 
 export type GetSectionNewsIdParams = {
   Key: string;
@@ -62,13 +71,24 @@ export type PostSectionGalleryParams = {
   Language: string;
 };
 
-export type PostSectionAboutBody = {
-  Description?: string;
+export type PostSectionAboutAssetsBody = {
   Image?: Blob;
   removedAssets?: string[];
 };
 
+export type PostSectionAboutAssetsParams = {
+  Key: string;
+  Language: string;
+};
+
 export type PostSectionAboutParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionAbout200 = { [key: string]: AboutResponse };
+
+export type GetSectionAboutParams = {
   Key: string;
   Language: string;
 };
@@ -90,6 +110,7 @@ export type PostPublicContactParams = {
 export type GetPublicGetCustomerMenuParams = {
   Key: string;
   Language: string;
+  cache?: boolean;
 };
 
 export type GetPublicGetCustomerConfigParams = {
@@ -207,6 +228,19 @@ export type DeleteCustomerConfigParams = {
   key: string;
 };
 
+export interface UploadAboutLocalizedFields {
+  /** @nullable */
+  description?: string | null;
+}
+
+export type UploadAboutRequestLocalizedFields = {
+  [key: string]: UploadAboutLocalizedFields;
+};
+
+export interface UploadAboutRequest {
+  localizedFields?: UploadAboutRequestLocalizedFields;
+}
+
 export type SubscriptionState =
   (typeof SubscriptionState)[keyof typeof SubscriptionState];
 
@@ -314,14 +348,6 @@ export interface MenuResponse {
   menuItems: MenuItemResponse[];
 }
 
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
-  domain?: string;
-  isFirstSignIn?: boolean;
-  subscription?: SubscriptionState;
-}
-
 export interface CustomerConfigTranslations {
   siteTranslations?: SiteTranslationsResponse;
 }
@@ -405,6 +431,14 @@ export interface CancelInfo {
   periodEnd?: string | null;
 }
 
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  isFirstSignIn?: boolean;
+  subscription?: SubscriptionState;
+}
+
 export interface AddOpeningHourRequest {
   closeTime?: string;
   id?: number;
@@ -414,13 +448,19 @@ export interface AddOpeningHourRequest {
   openTime?: string;
 }
 
-export interface AddNewsArticleRequest {
+export interface AddNewsArticleLocalizedFields {
   content?: string;
-  /** @nullable */
-  image?: Blob | null;
+  title?: string;
+}
+
+export type AddNewsArticleRequestLocalizedFields = {
+  [key: string]: AddNewsArticleLocalizedFields;
+};
+
+export interface AddNewsArticleRequest {
+  localizedFields?: AddNewsArticleRequestLocalizedFields;
   published?: boolean;
   removeImage?: boolean;
-  title?: string;
 }
 
 export interface AddCategoryRequest {
@@ -430,6 +470,11 @@ export interface AddCategoryRequest {
   name?: string;
   /** @nullable */
   order?: number | null;
+}
+
+export interface AboutResponse {
+  description?: string;
+  image?: string;
 }
 
 export const getCustomerCustomer = (signal?: AbortSignal) => {
@@ -2573,29 +2618,157 @@ export const usePostSectionHero = <
   return useMutation(mutationOptions);
 };
 
+export const getSectionAbout = (
+  params: GetSectionAboutParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<GetSectionAbout200>({
+    url: `/Section/about`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetSectionAboutQueryKey = (params: GetSectionAboutParams) => {
+  return [`/Section/about`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetSectionAboutQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSectionAbout>>,
+  TError = unknown,
+>(
+  params: GetSectionAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionAbout>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSectionAboutQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSectionAbout>>> = ({
+    signal,
+  }) => getSectionAbout(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSectionAbout>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetSectionAboutQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionAbout>>
+>;
+export type GetSectionAboutQueryError = unknown;
+
+export function useGetSectionAbout<
+  TData = Awaited<ReturnType<typeof getSectionAbout>>,
+  TError = unknown,
+>(
+  params: GetSectionAboutParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionAbout>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionAbout>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetSectionAbout<
+  TData = Awaited<ReturnType<typeof getSectionAbout>>,
+  TError = unknown,
+>(
+  params: GetSectionAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionAbout>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionAbout>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetSectionAbout<
+  TData = Awaited<ReturnType<typeof getSectionAbout>>,
+  TError = unknown,
+>(
+  params: GetSectionAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionAbout>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetSectionAbout<
+  TData = Awaited<ReturnType<typeof getSectionAbout>>,
+  TError = unknown,
+>(
+  params: GetSectionAboutParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSectionAbout>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetSectionAboutQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 export const postSectionAbout = (
-  postSectionAboutBody: PostSectionAboutBody,
+  uploadAboutRequest: UploadAboutRequest,
   params: PostSectionAboutParams,
   signal?: AbortSignal,
 ) => {
-  const formData = new FormData();
-  if (postSectionAboutBody.Image !== undefined) {
-    formData.append("Image", postSectionAboutBody.Image);
-  }
-  if (postSectionAboutBody.removedAssets !== undefined) {
-    postSectionAboutBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-  if (postSectionAboutBody.Description !== undefined) {
-    formData.append("Description", postSectionAboutBody.Description);
-  }
-
   return authorizedFetch<void>({
     url: `/Section/about`,
     method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
+    headers: { "Content-Type": "application/json" },
+    data: uploadAboutRequest,
     params,
     signal,
   });
@@ -2608,20 +2781,20 @@ export const getPostSectionAboutMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionAbout>>,
     TError,
-    { data: PostSectionAboutBody; params: PostSectionAboutParams },
+    { data: UploadAboutRequest; params: PostSectionAboutParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postSectionAbout>>,
   TError,
-  { data: PostSectionAboutBody; params: PostSectionAboutParams },
+  { data: UploadAboutRequest; params: PostSectionAboutParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postSectionAbout>>,
-    { data: PostSectionAboutBody; params: PostSectionAboutParams }
+    { data: UploadAboutRequest; params: PostSectionAboutParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -2634,7 +2807,7 @@ export const getPostSectionAboutMutationOptions = <
 export type PostSectionAboutMutationResult = NonNullable<
   Awaited<ReturnType<typeof postSectionAbout>>
 >;
-export type PostSectionAboutMutationBody = PostSectionAboutBody;
+export type PostSectionAboutMutationBody = UploadAboutRequest;
 export type PostSectionAboutMutationError = unknown;
 
 export const usePostSectionAbout = <
@@ -2644,16 +2817,98 @@ export const usePostSectionAbout = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionAbout>>,
     TError,
-    { data: PostSectionAboutBody; params: PostSectionAboutParams },
+    { data: UploadAboutRequest; params: PostSectionAboutParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postSectionAbout>>,
   TError,
-  { data: PostSectionAboutBody; params: PostSectionAboutParams },
+  { data: UploadAboutRequest; params: PostSectionAboutParams },
   TContext
 > => {
   const mutationOptions = getPostSectionAboutMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postSectionAboutAssets = (
+  postSectionAboutAssetsBody: PostSectionAboutAssetsBody,
+  params: PostSectionAboutAssetsParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postSectionAboutAssetsBody.Image !== undefined) {
+    formData.append("Image", postSectionAboutAssetsBody.Image);
+  }
+  if (postSectionAboutAssetsBody.removedAssets !== undefined) {
+    postSectionAboutAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/about/assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostSectionAboutAssetsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionAboutAssets>>,
+    TError,
+    { data: PostSectionAboutAssetsBody; params: PostSectionAboutAssetsParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postSectionAboutAssets>>,
+  TError,
+  { data: PostSectionAboutAssetsBody; params: PostSectionAboutAssetsParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postSectionAboutAssets>>,
+    { data: PostSectionAboutAssetsBody; params: PostSectionAboutAssetsParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postSectionAboutAssets(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostSectionAboutAssetsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionAboutAssets>>
+>;
+export type PostSectionAboutAssetsMutationBody = PostSectionAboutAssetsBody;
+export type PostSectionAboutAssetsMutationError = unknown;
+
+export const usePostSectionAboutAssets = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionAboutAssets>>,
+    TError,
+    { data: PostSectionAboutAssetsBody; params: PostSectionAboutAssetsParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postSectionAboutAssets>>,
+  TError,
+  { data: PostSectionAboutAssetsBody; params: PostSectionAboutAssetsParams },
+  TContext
+> => {
+  const mutationOptions = getPostSectionAboutAssetsMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -3000,7 +3255,7 @@ export const getSectionNewsId = (
   params: GetSectionNewsIdParams,
   signal?: AbortSignal,
 ) => {
-  return authorizedFetch<NewsArticleResponse>({
+  return authorizedFetch<GetSectionNewsId200>({
     url: `/Section/news/${id}`,
     method: "GET",
     params,
@@ -3151,33 +3406,84 @@ export function useGetSectionNewsId<
   return query;
 }
 
+export const deleteSectionNewsId = (
+  id: number,
+  params: DeleteSectionNewsIdParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Section/news/${id}`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const getDeleteSectionNewsIdMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSectionNewsId>>,
+    TError,
+    { id: number; params: DeleteSectionNewsIdParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteSectionNewsId>>,
+  TError,
+  { id: number; params: DeleteSectionNewsIdParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteSectionNewsId>>,
+    { id: number; params: DeleteSectionNewsIdParams }
+  > = (props) => {
+    const { id, params } = props ?? {};
+
+    return deleteSectionNewsId(id, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteSectionNewsIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteSectionNewsId>>
+>;
+
+export type DeleteSectionNewsIdMutationError = unknown;
+
+export const useDeleteSectionNewsId = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSectionNewsId>>,
+    TError,
+    { id: number; params: DeleteSectionNewsIdParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteSectionNewsId>>,
+  TError,
+  { id: number; params: DeleteSectionNewsIdParams },
+  TContext
+> => {
+  const mutationOptions = getDeleteSectionNewsIdMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
 export const putSectionNewsId = (
   id: number,
-  putSectionNewsIdBody: PutSectionNewsIdBody,
+  addNewsArticleRequest: AddNewsArticleRequest,
   params: PutSectionNewsIdParams,
 ) => {
-  const formData = new FormData();
-  if (putSectionNewsIdBody.Title !== undefined) {
-    formData.append("Title", putSectionNewsIdBody.Title);
-  }
-  if (putSectionNewsIdBody.Content !== undefined) {
-    formData.append("Content", putSectionNewsIdBody.Content);
-  }
-  if (putSectionNewsIdBody.Published !== undefined) {
-    formData.append("Published", putSectionNewsIdBody.Published.toString());
-  }
-  if (putSectionNewsIdBody.RemoveImage !== undefined) {
-    formData.append("RemoveImage", putSectionNewsIdBody.RemoveImage.toString());
-  }
-  if (putSectionNewsIdBody.Image !== undefined) {
-    formData.append("Image", putSectionNewsIdBody.Image);
-  }
-
   return authorizedFetch<void>({
     url: `/Section/news/${id}`,
     method: "PUT",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
+    headers: { "Content-Type": "application/json" },
+    data: addNewsArticleRequest,
     params,
   });
 };
@@ -3189,20 +3495,20 @@ export const getPutSectionNewsIdMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putSectionNewsId>>,
     TError,
-    { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+    { id: number; data: AddNewsArticleRequest; params: PutSectionNewsIdParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putSectionNewsId>>,
   TError,
-  { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+  { id: number; data: AddNewsArticleRequest; params: PutSectionNewsIdParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putSectionNewsId>>,
-    { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams }
+    { id: number; data: AddNewsArticleRequest; params: PutSectionNewsIdParams }
   > = (props) => {
     const { id, data, params } = props ?? {};
 
@@ -3215,7 +3521,7 @@ export const getPutSectionNewsIdMutationOptions = <
 export type PutSectionNewsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof putSectionNewsId>>
 >;
-export type PutSectionNewsIdMutationBody = PutSectionNewsIdBody;
+export type PutSectionNewsIdMutationBody = AddNewsArticleRequest;
 export type PutSectionNewsIdMutationError = unknown;
 
 export const usePutSectionNewsId = <
@@ -3225,16 +3531,117 @@ export const usePutSectionNewsId = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putSectionNewsId>>,
     TError,
-    { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+    { id: number; data: AddNewsArticleRequest; params: PutSectionNewsIdParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof putSectionNewsId>>,
   TError,
-  { id: number; data: PutSectionNewsIdBody; params: PutSectionNewsIdParams },
+  { id: number; data: AddNewsArticleRequest; params: PutSectionNewsIdParams },
   TContext
 > => {
   const mutationOptions = getPutSectionNewsIdMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const putSectionNewsIdAssets = (
+  id: number,
+  putSectionNewsIdAssetsBody: PutSectionNewsIdAssetsBody,
+  params: PutSectionNewsIdAssetsParams,
+) => {
+  const formData = new FormData();
+  if (putSectionNewsIdAssetsBody.Image !== undefined) {
+    formData.append("Image", putSectionNewsIdAssetsBody.Image);
+  }
+  if (putSectionNewsIdAssetsBody.removedAssets !== undefined) {
+    putSectionNewsIdAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/news/${id}/assets`,
+    method: "PUT",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
+export const getPutSectionNewsIdAssetsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putSectionNewsIdAssets>>,
+    TError,
+    {
+      id: number;
+      data: PutSectionNewsIdAssetsBody;
+      params: PutSectionNewsIdAssetsParams;
+    },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putSectionNewsIdAssets>>,
+  TError,
+  {
+    id: number;
+    data: PutSectionNewsIdAssetsBody;
+    params: PutSectionNewsIdAssetsParams;
+  },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putSectionNewsIdAssets>>,
+    {
+      id: number;
+      data: PutSectionNewsIdAssetsBody;
+      params: PutSectionNewsIdAssetsParams;
+    }
+  > = (props) => {
+    const { id, data, params } = props ?? {};
+
+    return putSectionNewsIdAssets(id, data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutSectionNewsIdAssetsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putSectionNewsIdAssets>>
+>;
+export type PutSectionNewsIdAssetsMutationBody = PutSectionNewsIdAssetsBody;
+export type PutSectionNewsIdAssetsMutationError = unknown;
+
+export const usePutSectionNewsIdAssets = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putSectionNewsIdAssets>>,
+    TError,
+    {
+      id: number;
+      data: PutSectionNewsIdAssetsBody;
+      params: PutSectionNewsIdAssetsParams;
+    },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof putSectionNewsIdAssets>>,
+  TError,
+  {
+    id: number;
+    data: PutSectionNewsIdAssetsBody;
+    params: PutSectionNewsIdAssetsParams;
+  },
+  TContext
+> => {
+  const mutationOptions = getPutSectionNewsIdAssetsMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

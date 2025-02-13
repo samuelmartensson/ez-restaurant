@@ -8,7 +8,7 @@ const FormImagePreview = ({
   image,
   isStagedDelete,
 }: {
-  file?: File;
+  file?: File | Blob;
   image: string;
   isStagedDelete: boolean;
 }) =>

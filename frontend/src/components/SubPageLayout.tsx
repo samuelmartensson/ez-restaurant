@@ -37,7 +37,9 @@ const SubPageLayout = async ({
       >
         {title && (
           <Badge className="mb-4">
-            <h1 className="text-5xl font-bold font-customer">{title}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold font-customer break-all">
+              {title}
+            </h1>
           </Badge>
         )}
         {children}

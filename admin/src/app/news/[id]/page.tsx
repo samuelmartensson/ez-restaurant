@@ -1,9 +1,10 @@
 "use client";
 
-import CycleLanguageLabel from "@/components/CycleLanguageLabel";
+import ActionBar from "@/components/ActionBar";
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import hasDomain from "@/components/hasDomain";
+import LocalizedFormField from "@/components/LocalizedFormField";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,10 +18,13 @@ import { FileInput, Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  PutSectionNewsIdBody,
+  AddNewsArticleRequest,
+  PutSectionNewsIdAssetsBody,
   useGetSectionNewsId,
   usePutSectionNewsId,
+  usePutSectionNewsIdAssets,
 } from "@/generated/endpoints";
+import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { ChevronLeft, Save } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -29,13 +33,13 @@ import { toast } from "sonner";
 
 const inputSchema = [
   {
-    id: "Title",
+    id: "title",
     label: "Title",
     type: "text",
     translate: true,
   },
   {
-    id: "Content",
+    id: "content",
     label: "Content",
     type: "textarea",
     translate: true,
@@ -53,17 +57,15 @@ const assetsInputSchema = [
 const News = () => {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const { selectedDomain, selectedLanguage } = useDataContext();
-  const form = useForm<PutSectionNewsIdBody>({
+  const { selectedDomain, selectedLanguage, selectedConfig } = useDataContext();
+  const form = useForm<AddNewsArticleRequest & PutSectionNewsIdAssetsBody>({
     defaultValues: {
-      Title: "",
-      Content: "",
-      Published: false,
+      published: false,
     },
   });
-  const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
-    {},
-  );
+
+  const [uploadedAssets, setUploadedAssets] =
+    useState<PutSectionNewsIdAssetsBody>({});
   const [deletedAssets, setDeletedAssets] = useState<Record<string, boolean>>(
     {},
   );
@@ -74,31 +76,52 @@ const News = () => {
     Language: selectedLanguage,
   });
 
-  const { mutateAsync: addNewsArticle } = usePutSectionNewsId();
+  const { mutateAsync: updateNewsArticle } = usePutSectionNewsId();
+  const { mutateAsync: updateNewsArticleAssets } = usePutSectionNewsIdAssets();
 
   useEffect(() => {
     if (!articleData) return;
 
     form.reset({
-      Image: articleData.image ?? "",
-      Content: articleData?.content ?? "",
-      Title: articleData?.title ?? "",
-      Published: articleData.published ?? false,
+      Image: articleData[selectedLanguage].image ?? "",
+      published: articleData[selectedLanguage].published ?? false,
+      localizedFields: mapToLocalizedFields(
+        selectedConfig?.languages ?? [],
+        articleData,
+        ["content", "title"],
+      ),
     });
-  }, [articleData, form]);
+  }, [articleData, form, selectedConfig?.languages, selectedLanguage]);
 
-  async function onSubmit(data: PutSectionNewsIdBody) {
-    await addNewsArticle({
+  async function onSubmit(data: AddNewsArticleRequest) {
+    const payload = {
       id: articleId,
-      data: {
-        ...uploadedAssets,
-        Title: data.Title,
-        Content: data.Content,
-        Published: data.Published,
-        RemoveImage: Object.keys(deletedAssets).length > 0,
+      params: {
+        Key: selectedDomain,
+        Language: selectedLanguage,
       },
-      params: { Key: selectedDomain, Language: selectedLanguage },
+    };
+    await updateNewsArticle({
+      ...payload,
+      data: {
+        localizedFields: mapToLocalizedFields(
+          selectedConfig?.languages ?? [],
+          data.localizedFields ?? {},
+          ["content", "title"],
+        ),
+        published: data.published ?? false,
+        removeImage: Object.keys(deletedAssets).length > 0,
+      },
     });
+    updateNewsArticleAssets({
+      ...payload,
+      data: {
+        Image: uploadedAssets.Image,
+        removedAssets: Object.keys(deletedAssets),
+      },
+    });
+    console.log(deletedAssets);
+
     await refetch();
     toast.success("Article updated.");
   }
@@ -106,36 +129,51 @@ const News = () => {
   return (
     <Form {...form}>
       <form
-        className="grid max-w-lg gap-4 overflow-auto"
+        className="grid max-w-lg gap-4 overflow-auto pb-20"
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        <FormField
+          control={form.control}
+          name="published"
+          render={({ field }) => {
+            return (
+              <FormItem className="grid gap-2">
+                <FormLabel className="pb-0">Published</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
         {inputSchema.map((input) => (
-          <FormField
-            key={input.id}
-            control={form.control}
-            name={input.id}
-            render={({ field }) => {
-              let render = <Input {...field} />;
+          <LocalizedFormField key={input.id} name={input.id}>
+            {(name) => (
+              <FormField
+                control={form.control}
+                name={`localizedFields.${name}`}
+                render={({ field }) => {
+                  let render = <Input {...field} />;
 
-              if (input.type === "textarea") {
-                render = <Textarea rows={8} {...field} />;
-              }
+                  if (input.type === "textarea") {
+                    render = <Textarea rows={8} {...field} />;
+                  }
 
-              return (
-                <FormItem>
-                  <FormLabel>
-                    {input.translate ? (
-                      <CycleLanguageLabel label={input.label} />
-                    ) : (
-                      input.label
-                    )}
-                  </FormLabel>
-                  <FormControl>{render}</FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+                  return (
+                    <FormItem>
+                      <FormLabel>{input.label}</FormLabel>
+                      <FormControl>{render}</FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            )}
+          </LocalizedFormField>
         ))}
         {assetsInputSchema.map((input) => (
           <FormField
@@ -200,37 +238,21 @@ const News = () => {
             }}
           />
         ))}
-        <FormField
-          control={form.control}
-          name="Published"
-          render={({ field }) => {
-            return (
-              <FormItem className="grid gap-2">
-                <FormLabel className="pb-0">Published</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
 
-        <div className="grid grid-flow-col gap-2">
-          <Button
-            onClick={() => router.push("/news")}
-            variant="secondary"
-            type="button"
-          >
-            <ChevronLeft /> Back
-          </Button>
-          <Button type="submit">
-            <Save /> Save
-          </Button>
-        </div>
+        <ActionBar>
+          <div className="grid grid-flow-col gap-2">
+            <Button
+              onClick={() => router.push("/news")}
+              variant="secondary"
+              type="button"
+            >
+              <ChevronLeft /> Back
+            </Button>
+            <Button type="submit">
+              <Save /> Save
+            </Button>
+          </div>
+        </ActionBar>
       </form>
     </Form>
   );

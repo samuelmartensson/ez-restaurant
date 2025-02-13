@@ -25,7 +25,7 @@ const NewsId = async ({ params }: { params: Promise<{ id: string }> }) => {
       <title>{`${news} | ${data?.siteName}`}</title>
       <div className="container gap-2 grid mx-auto">
         <Card key={article.id} className="border-none">
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="pt-6 flex flex-col gap-4">
             {article.image && (
               <img
                 className="w-full max-h-96 rounded-lg object-cover"
@@ -33,7 +33,7 @@ const NewsId = async ({ params }: { params: Promise<{ id: string }> }) => {
                 alt=""
               />
             )}
-            <CardDescription className="mb-4 text-muted-foreground text-pretty">
+            <CardDescription className="text-foreground text-base text-pretty">
               {article.content?.split("\n")?.map((line, index) => (
                 <Fragment key={index}>
                   {line}

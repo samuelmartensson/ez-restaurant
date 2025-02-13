@@ -147,7 +147,7 @@ const Domain = () => {
                   <DialogDescription>
                     Configuration instructions for using a custom domain.
                   </DialogDescription>
-                  <ol className="grid list-disc gap-2 pl-5 pt-5">
+                  <ol className="grid max-h-[50vh] list-disc gap-2 overflow-auto pl-5 pt-5">
                     <li>
                       <strong>Log in to your DNS providers dashboard</strong>:
                       This could be your domain registrar (like GoDaddy,

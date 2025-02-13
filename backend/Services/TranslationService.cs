@@ -84,4 +84,23 @@ public class TranslationService(RestaurantContext context)
         }
     }
 
+    public async Task CreateOrUpdateByKeys(List<(string language, Dictionary<string, string> keyValuePairs)> localizedTranslations, string domain)
+    {
+        foreach (var translation in localizedTranslations)
+        {
+            foreach (var keyValue in translation.keyValuePairs)
+            {
+                var translationKey = keyValue.Key;
+                var value = keyValue.Value;
+                await CreateOrUpdateByKey(
+                    translation.language,
+                    domain,
+                    translationKey,
+                    value
+                );
+            }
+
+        }
+    }
+
 }

@@ -28,7 +28,7 @@ const About = async () => {
             </div>
           )}
           <CardContent className="p-8 grid gap-4 justify-items-start">
-            <CardDescription className="md:text-lg mb-4 text-muted-foreground text-pretty">
+            <CardDescription className="text-base mb-4 text-foreground text-pretty">
               {descriptionLines?.map((line, index) => (
                 <Fragment key={index}>
                   {line}

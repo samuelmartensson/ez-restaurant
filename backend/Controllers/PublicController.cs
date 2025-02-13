@@ -159,17 +159,16 @@ public class PublicController(
         {
             // If cache misses, fetch data from Supabase
             var result = await context.CustomerConfigs
+                    .AsNoTracking()
+                    .AsSplitQuery()
+                    .Where((x) => x.Domain == Key || x.CustomDomain == Key)
                     .Include(cf => cf.SiteSectionHero)
                     .Include(cf => cf.SiteSectionAbout)
                     .Include(cf => cf.SiteSectionGallery)
                     .Include(cf => cf.SectionVisibility)
                     .Include(cf => cf.OpeningHours)
                     .Include(cf => cf.NewsArticles)
-                    .AsSplitQuery()
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync((x) =>
-                        x.Domain == Key || x.CustomDomain == Key
-                    );
+                    .FirstOrDefaultAsync();
 
             return result;
         }, cache);

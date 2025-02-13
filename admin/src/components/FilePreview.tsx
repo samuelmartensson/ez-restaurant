@@ -2,7 +2,13 @@
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect } from "react";
 
-function FilePreview({ file, className }: { file: File; className?: string }) {
+function FilePreview({
+  file,
+  className,
+}: {
+  file: File | Blob;
+  className?: string;
+}) {
   const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {

@@ -26,12 +26,34 @@ public class SectionController(
 
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
+    [HttpGet("about")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(Dictionary<string, AboutResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAbout([FromQuery] CommonQueryParameters queryParameters)
+    {
+        var data = await sectionConfigurationService.GetAbout(queryParameters);
+        return Ok(data);
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("about")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadAbout([FromForm] UploadAboutAssetsRequest assets, [FromForm] List<string> removedAssets, [FromForm] UploadAboutRequest fields, [FromQuery] CommonQueryParameters queryParameters)
+    public async Task<IActionResult> UploadAbout([FromBody] UploadAboutRequest fields, [FromQuery] CommonQueryParameters queryParameters)
     {
-        await sectionConfigurationService.UpdateAbout(assets, removedAssets, fields, queryParameters);
+        await sectionConfigurationService.UpdateAbout(fields, queryParameters);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPost("about/assets")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadAboutAssets([FromForm] UploadAboutAssetsRequest assets, [FromForm] List<string> removedAssets, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.UpdateAboutAssets(assets, removedAssets, queryParameters);
         return Ok(new { message = "Success" });
     }
 
@@ -73,7 +95,7 @@ public class SectionController(
     [HttpGet("news/{id}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NewsArticleResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Dictionary<string, NewsArticleResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetNewsArticle(int id, [FromQuery] CommonQueryParameters queryParameters)
     {
         var data = await sectionConfigurationService.GetNewsArticle(id, queryParameters);
@@ -93,12 +115,34 @@ public class SectionController(
 
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
+    [HttpDelete("news/{id}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteNewsArticle(int id, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.RemoveNewsArticle(id, queryParameters);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPut("news/{id}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateNewsArticle(int id, [FromForm] AddNewsArticleRequest request, [FromQuery] CommonQueryParameters queryParameters)
+    public async Task<IActionResult> UpdateNewsArticle(int id, [FromBody] AddNewsArticleRequest request, [FromQuery] CommonQueryParameters queryParameters)
     {
         await sectionConfigurationService.UpdateNewsArticle(id, request, queryParameters);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPut("news/{id}/assets")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateNewsArticleAssets(int id, [FromForm] AddNewsArticleAssetsRequest request, [FromForm] List<string> removedAssets, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.UpdateNewsArticleAssets(id, request, removedAssets, queryParameters);
         return Ok(new { message = "Success" });
     }
 }
