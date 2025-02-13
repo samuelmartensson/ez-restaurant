@@ -35,7 +35,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./backend/publish ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com:app
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./backend/publish ec2-user@ec2-13-61-21-245.eu-north-1.compute.amazonaws.com:app
 
       # Step 5: Update environment variables in the systemd service file
       - name: Update environment variables
@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo bash -c '\
+          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-61-21-245.eu-north-1.compute.amazonaws.com "sudo bash -c '\
           sed -i \"/^Environment=/d\" /etc/systemd/system/backend.service
           sed -i \"/^\[Service\]/a \\
           Environment=DUMMY=0\\n\\
@@ -70,4 +70,4 @@ jobs:
         run: |
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-60-78-69.eu-north-1.compute.amazonaws.com "sudo systemctl daemon-reload && sudo systemctl restart backend.service"
+          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-61-21-245.eu-north-1.compute.amazonaws.com "sudo systemctl daemon-reload && sudo systemctl restart backend.service"
