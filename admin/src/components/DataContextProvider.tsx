@@ -6,9 +6,16 @@ import {
   useGetPublicGetCustomerConfig,
 } from "@/generated/endpoints";
 import { useUser } from "@clerk/nextjs";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import AppLoader from "./AppLoader";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const DataContext = createContext<{
   configs: CustomerConfigResponse[];
@@ -54,6 +61,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedDomain, setSelectedDomain] = useState(
     sessionStorage.getItem(domainKey) ?? "",
   );
+  const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useGetCustomerCustomer();
   const { data: selectedConfig } = useGetPublicGetCustomerConfig(
@@ -66,14 +74,25 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const configs = data?.customerConfigs ?? [];
 
-  const setSelectedLanguageInternal = (language: string) => {
-    setSelectedLanguage(language);
-    sessionStorage.setItem(languageKey, language);
-  };
+  const setSelectedLanguageInternal = useCallback(
+    (language: string) => {
+      setSelectedLanguage(language);
+      sessionStorage.setItem(languageKey, language);
+    },
+    [languageKey],
+  );
 
-  const setSelectedDomainInternal = (domain: string) => {
+  const setSelectedDomainInternal = async (domain: string) => {
+    queryClient.clear();
     setSelectedDomain(domain);
-    setSelectedLanguage(data?.customerConfigs?.[0]?.languages?.[0] ?? "");
+    const newDomain = await refetch();
+    const languages = newDomain?.data?.customerConfigs?.find(
+      (cf) => cf.domain === domain,
+    )?.languages;
+
+    if (!languages?.includes(selectedLanguage)) {
+      setSelectedLanguage(languages?.[0] ?? "");
+    }
     sessionStorage.setItem(domainKey, domain);
   };
 
@@ -87,6 +106,14 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
         ? selectedConfig.languages[0]
         : selectedConfig.languages[index + 1]) ?? "",
     );
+  };
+
+  const selectedLanguageOrDefault = () => {
+    if (!selectedConfig?.languages?.includes(selectedLanguage)) {
+      return selectedConfig?.languages?.[0] ?? "";
+    }
+
+    return selectedLanguage;
   };
 
   useEffect(() => {
@@ -120,7 +147,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedDomain: setSelectedDomainInternal,
         setSelectedLanguage: setSelectedLanguageInternal,
         selectedDomain,
-        selectedLanguage,
+        selectedLanguage: selectedLanguageOrDefault(),
         selectedConfig,
         customDomain: selectedConfig?.customDomain ?? "",
         cycleLanguage,

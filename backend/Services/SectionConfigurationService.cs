@@ -116,12 +116,12 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
         return responseDictionary;
     }
 
-    public async Task<Dictionary<string, AboutResponse>> GetAbout(CommonQueryParameters queryParameters)
+    public async Task<Dictionary<string, AboutResponse>?> GetAbout(CommonQueryParameters queryParameters)
     {
         var about = await context.SiteSectionAbouts
             .FirstOrDefaultAsync((x) => x.CustomerConfigDomain == queryParameters.Key);
 
-        if (about == null) throw new Exception("About not found.");
+        if (about == null) return null;
 
         var languages = (await context.CustomerConfigs
             .Select(x => new { x.Languages, x.Domain })

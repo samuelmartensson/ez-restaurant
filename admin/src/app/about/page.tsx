@@ -131,7 +131,7 @@ const About = () => {
                         <Textarea
                           rows={8}
                           {...field}
-                          value={String(field.value)}
+                          value={field.value ?? ""}
                         />
                       </FormControl>
                       <FormMessage />

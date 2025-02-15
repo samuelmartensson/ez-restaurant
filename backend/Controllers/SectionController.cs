@@ -54,6 +54,10 @@ public class SectionController(
     public async Task<IActionResult> GetAbout([FromQuery] CommonQueryParameters queryParameters)
     {
         var data = await sectionConfigurationService.GetAbout(queryParameters);
+        if (data == null)
+        {
+            return NotFound("About not found.");
+        }
         return Ok(data);
     }
 
