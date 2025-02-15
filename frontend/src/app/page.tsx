@@ -2,7 +2,6 @@ import ContactForm from "@/components/ContactForm";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
 import NewsWidget from "@/components/NewsWidget";
-import { Separator } from "@/components/ui/separator";
 import { getCustomerConfig } from "@/mock_db";
 
 export default async function Home() {

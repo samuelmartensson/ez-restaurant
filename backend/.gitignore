@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+ez-rest-service-account.json 
 
 # User-specific files
 *.rsuser

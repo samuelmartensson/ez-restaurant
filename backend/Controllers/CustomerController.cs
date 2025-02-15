@@ -15,6 +15,7 @@ public class CustomerController(
     RestaurantContext context,
     SiteConfigurationService siteConfigurationService,
     UserService userService,
+    AnalyticsService analyticsService,
     VercelService vercelService,
     ClerkApiClient clerkApiClient,
     TranslationContext translationContext
@@ -22,6 +23,7 @@ public class CustomerController(
 {
     private RestaurantContext context = context;
     private UserService userService = userService;
+    private AnalyticsService analyticsService = analyticsService;
     private VercelService vercelService = vercelService;
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
     private ClerkApiClient clerkApiClient = clerkApiClient;
@@ -287,5 +289,15 @@ public class CustomerController(
             return BadRequest(new { message = errorResponse?.error?.message ?? "Error removing domain", error = errorResponse?.error?.code ?? "unknown" });
         }
     }
-}
 
+    [Authorize(Policy = "KeyPolicy")]
+    [HttpGet("analytics")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(AnalyticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAnalytics([FromQuery, Required] string key)
+    {
+        var result = await analyticsService.GetReport(key);
+        return Ok(result);
+    }
+
+}

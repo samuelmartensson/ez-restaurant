@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Stripe;
 StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 
@@ -19,7 +20,32 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SupportNonNullableReferenceTypes();
+
+    // Add JWT Bearer token authorization to Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
 });
+
 builder.Services.AddClerkApiClient(config =>
 {
     config.SecretKey = Environment.GetEnvironmentVariable("CLERK_SECRET_KEY") ?? "";
@@ -89,6 +115,7 @@ builder.Services.AddScoped<OpeningHourService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<TranslationService>();
 builder.Services.AddScoped<CacheService>();
+builder.Services.AddScoped<AnalyticsService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, KeyAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();

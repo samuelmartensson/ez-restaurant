@@ -182,7 +182,7 @@ const News = () => {
       <div className="grid gap-2">
         {data?.map((d) => (
           <div
-            className="flex items-center justify-between gap-2 rounded border border-input p-4"
+            className="flex items-center justify-between gap-2 rounded-xl border border-input p-6 shadow"
             key={d.id}
           >
             <div className="grid">

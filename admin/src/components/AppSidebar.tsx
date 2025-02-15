@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/sidebar";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import {
+  BarChart,
   Clock,
-  Coffee,
   CreditCard,
   Globe,
   Home,
@@ -112,9 +112,6 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <div className="flex w-full items-center justify-center gap-2 border-b bg-accent p-6 text-base font-thin text-accent-foreground">
-        <Coffee className="size-5" /> EZRest - Admin
-      </div>
       <SidebarHeader className="gap-1">
         <ConfigSwitcher domains={configs.map((c) => c.domain ?? "")} />
         <LanguageSwitcher languages={selectedConfig?.languages ?? []} />
@@ -152,6 +149,18 @@ export function AppSidebar() {
                     <Link href="/domains">
                       <Globe />
                       <span>Domain & DNS</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setOpenMobile(false)}
+                    asChild
+                    isActive={"/analytics" === pathname}
+                  >
+                    <Link href="/analytics">
+                      <BarChart />
+                      <span>Analytics</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

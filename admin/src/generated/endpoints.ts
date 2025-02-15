@@ -183,6 +183,10 @@ export type PostMenuItemsParams = {
   Language: string;
 };
 
+export type GetCustomerAnalyticsParams = {
+  key: string;
+};
+
 export type DeleteCustomerDomainParams = {
   key: string;
 };
@@ -313,6 +317,13 @@ export interface SiteSectionAboutResponse {
   image?: string;
 }
 
+export interface SectionsResponse {
+  about?: SiteSectionAboutResponse;
+  gallery?: SiteSectionGalleryResponse[];
+  hero?: SiteSectionHeroResponse;
+  newsArticles?: NewsArticleResponse[];
+}
+
 export interface SectionVisibilityResponse {
   contactFormVisible?: boolean;
 }
@@ -336,13 +347,6 @@ export interface NewsArticleResponse {
   published?: boolean;
   title?: string;
   updatedAt?: string;
-}
-
-export interface SectionsResponse {
-  about?: SiteSectionAboutResponse;
-  gallery?: SiteSectionGalleryResponse[];
-  hero?: SiteSectionHeroResponse;
-  newsArticles?: NewsArticleResponse[];
 }
 
 export interface MenuItemResponse {
@@ -422,6 +426,14 @@ export interface CustomerConfigResponse {
   tiktokUrl?: string | null;
 }
 
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  isFirstSignIn?: boolean;
+  subscription?: SubscriptionState;
+}
+
 export interface CustomerConfigMetaResponse {
   currency?: string;
   defaultLanguage?: string;
@@ -464,12 +476,19 @@ export interface CancelInfo {
   periodEnd?: string | null;
 }
 
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
-  domain?: string;
-  isFirstSignIn?: boolean;
-  subscription?: SubscriptionState;
+export type AnalyticsResponsePreviousMenu = { [key: string]: string };
+
+export type AnalyticsResponsePrevious = { [key: string]: string };
+
+export type AnalyticsResponseCurrentMenu = { [key: string]: string };
+
+export type AnalyticsResponseCurrent = { [key: string]: string };
+
+export interface AnalyticsResponse {
+  current?: AnalyticsResponseCurrent;
+  currentMenu?: AnalyticsResponseCurrentMenu;
+  previous?: AnalyticsResponsePrevious;
+  previousMenu?: AnalyticsResponsePreviousMenu;
 }
 
 export interface AddOpeningHourRequest {
@@ -1220,6 +1239,150 @@ export const useDeleteCustomerDomain = <
 
   return useMutation(mutationOptions);
 };
+
+export const getCustomerAnalytics = (
+  params: GetCustomerAnalyticsParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<AnalyticsResponse>({
+    url: `/Customer/analytics`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetCustomerAnalyticsQueryKey = (
+  params: GetCustomerAnalyticsParams,
+) => {
+  return [`/Customer/analytics`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetCustomerAnalyticsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCustomerAnalytics>>,
+  TError = unknown,
+>(
+  params: GetCustomerAnalyticsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCustomerAnalytics>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCustomerAnalyticsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCustomerAnalytics>>
+  > = ({ signal }) => getCustomerAnalytics(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCustomerAnalytics>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetCustomerAnalyticsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCustomerAnalytics>>
+>;
+export type GetCustomerAnalyticsQueryError = unknown;
+
+export function useGetCustomerAnalytics<
+  TData = Awaited<ReturnType<typeof getCustomerAnalytics>>,
+  TError = unknown,
+>(
+  params: GetCustomerAnalyticsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCustomerAnalytics>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCustomerAnalytics>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetCustomerAnalytics<
+  TData = Awaited<ReturnType<typeof getCustomerAnalytics>>,
+  TError = unknown,
+>(
+  params: GetCustomerAnalyticsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCustomerAnalytics>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCustomerAnalytics>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetCustomerAnalytics<
+  TData = Awaited<ReturnType<typeof getCustomerAnalytics>>,
+  TError = unknown,
+>(
+  params: GetCustomerAnalyticsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCustomerAnalytics>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetCustomerAnalytics<
+  TData = Awaited<ReturnType<typeof getCustomerAnalytics>>,
+  TError = unknown,
+>(
+  params: GetCustomerAnalyticsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCustomerAnalytics>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetCustomerAnalyticsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 export const postMenuItems = (
   postMenuItemsBody: PostMenuItemsBody,

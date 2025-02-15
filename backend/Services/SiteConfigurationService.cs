@@ -2,11 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Models.Requests;
 using Models.Responses;
 
-public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService, TranslationService translationService)
+public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService)
 {
     private readonly RestaurantContext context = context;
     private readonly S3Service s3Service = s3Service;
-    private TranslationService translationService = translationService;
 
     private readonly OpeningHourService openingHourService = openingHourService;
 
