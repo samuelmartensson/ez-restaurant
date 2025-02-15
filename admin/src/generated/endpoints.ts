@@ -93,14 +93,25 @@ export type GetSectionAboutParams = {
   Language: string;
 };
 
-export type PostSectionHeroBody = {
+export type PostSectionHeroAssetsBody = {
   Image?: Blob;
-  OrderUrl?: string;
   removedAssets?: string[];
+};
+
+export type PostSectionHeroAssetsParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PostSectionHeroParams = {
   key: string;
+};
+
+export type GetSectionHero200 = { [key: string]: HeroResponse };
+
+export type GetSectionHeroParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PostPublicContactParams = {
@@ -212,8 +223,6 @@ export type PostCustomerSiteConfigurationBody = {
   Logo?: string;
   MapUrl?: string;
   Phone?: string;
-  SiteMetaTitle?: string;
-  SiteName?: string;
   Theme?: string;
   ThemeColorConfig?: string;
   TiktokUrl?: string;
@@ -227,6 +236,21 @@ export type PostCustomerSiteConfigurationParams = {
 export type DeleteCustomerConfigParams = {
   key: string;
 };
+
+export interface UploadHeroLocalizedFields {
+  siteMetaTitle?: string;
+  siteName?: string;
+}
+
+export type UploadHeroRequestLocalizedFields = {
+  [key: string]: UploadHeroLocalizedFields;
+};
+
+export interface UploadHeroRequest {
+  localizedFields?: UploadHeroRequestLocalizedFields;
+  /** @nullable */
+  orderUrl?: string | null;
+}
 
 export interface UploadAboutLocalizedFields {
   /** @nullable */
@@ -274,6 +298,8 @@ export interface SiteTranslationsResponse {
 export interface SiteSectionHeroResponse {
   heroImage?: string;
   orderUrl?: string;
+  siteMetaTitle?: string;
+  siteName?: string;
 }
 
 export interface SiteSectionGalleryResponse {
@@ -346,6 +372,13 @@ export interface MenuCategoryResponse {
 export interface MenuResponse {
   categories: MenuCategoryResponse[];
   menuItems: MenuItemResponse[];
+}
+
+export interface HeroResponse {
+  heroImage?: string;
+  orderUrl?: string;
+  siteMetaTitle?: string;
+  siteName?: string;
 }
 
 export interface CustomerConfigTranslations {
@@ -736,15 +769,6 @@ export const postCustomerSiteConfiguration = (
   signal?: AbortSignal,
 ) => {
   const formData = new FormData();
-  if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
-    formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
-  }
-  if (postCustomerSiteConfigurationBody.SiteMetaTitle !== undefined) {
-    formData.append(
-      "SiteMetaTitle",
-      postCustomerSiteConfigurationBody.SiteMetaTitle,
-    );
-  }
   if (postCustomerSiteConfigurationBody.Theme !== undefined) {
     formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
@@ -2533,29 +2557,137 @@ export const usePostPublicContact = <
   return useMutation(mutationOptions);
 };
 
+export const getSectionHero = (
+  params: GetSectionHeroParams,
+  signal?: AbortSignal,
+) => {
+  return authorizedFetch<GetSectionHero200>({
+    url: `/Section/hero`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetSectionHeroQueryKey = (params: GetSectionHeroParams) => {
+  return [`/Section/hero`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetSectionHeroQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSectionHero>>,
+  TError = unknown,
+>(
+  params: GetSectionHeroParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionHero>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSectionHeroQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSectionHero>>> = ({
+    signal,
+  }) => getSectionHero(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSectionHero>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetSectionHeroQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionHero>>
+>;
+export type GetSectionHeroQueryError = unknown;
+
+export function useGetSectionHero<
+  TData = Awaited<ReturnType<typeof getSectionHero>>,
+  TError = unknown,
+>(
+  params: GetSectionHeroParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionHero>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionHero>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetSectionHero<
+  TData = Awaited<ReturnType<typeof getSectionHero>>,
+  TError = unknown,
+>(
+  params: GetSectionHeroParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionHero>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSectionHero>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetSectionHero<
+  TData = Awaited<ReturnType<typeof getSectionHero>>,
+  TError = unknown,
+>(
+  params: GetSectionHeroParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionHero>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetSectionHero<
+  TData = Awaited<ReturnType<typeof getSectionHero>>,
+  TError = unknown,
+>(
+  params: GetSectionHeroParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getSectionHero>>, TError, TData>
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetSectionHeroQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 export const postSectionHero = (
-  postSectionHeroBody: PostSectionHeroBody,
+  uploadHeroRequest: UploadHeroRequest,
   params: PostSectionHeroParams,
   signal?: AbortSignal,
 ) => {
-  const formData = new FormData();
-  if (postSectionHeroBody.Image !== undefined) {
-    formData.append("Image", postSectionHeroBody.Image);
-  }
-  if (postSectionHeroBody.removedAssets !== undefined) {
-    postSectionHeroBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-  if (postSectionHeroBody.OrderUrl !== undefined) {
-    formData.append("OrderUrl", postSectionHeroBody.OrderUrl);
-  }
-
   return authorizedFetch<void>({
     url: `/Section/hero`,
     method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
+    headers: { "Content-Type": "application/json" },
+    data: uploadHeroRequest,
     params,
     signal,
   });
@@ -2568,20 +2700,20 @@ export const getPostSectionHeroMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionHero>>,
     TError,
-    { data: PostSectionHeroBody; params: PostSectionHeroParams },
+    { data: UploadHeroRequest; params: PostSectionHeroParams },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postSectionHero>>,
   TError,
-  { data: PostSectionHeroBody; params: PostSectionHeroParams },
+  { data: UploadHeroRequest; params: PostSectionHeroParams },
   TContext
 > => {
   const { mutation: mutationOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postSectionHero>>,
-    { data: PostSectionHeroBody; params: PostSectionHeroParams }
+    { data: UploadHeroRequest; params: PostSectionHeroParams }
   > = (props) => {
     const { data, params } = props ?? {};
 
@@ -2594,7 +2726,7 @@ export const getPostSectionHeroMutationOptions = <
 export type PostSectionHeroMutationResult = NonNullable<
   Awaited<ReturnType<typeof postSectionHero>>
 >;
-export type PostSectionHeroMutationBody = PostSectionHeroBody;
+export type PostSectionHeroMutationBody = UploadHeroRequest;
 export type PostSectionHeroMutationError = unknown;
 
 export const usePostSectionHero = <
@@ -2604,16 +2736,98 @@ export const usePostSectionHero = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postSectionHero>>,
     TError,
-    { data: PostSectionHeroBody; params: PostSectionHeroParams },
+    { data: UploadHeroRequest; params: PostSectionHeroParams },
     TContext
   >;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postSectionHero>>,
   TError,
-  { data: PostSectionHeroBody; params: PostSectionHeroParams },
+  { data: UploadHeroRequest; params: PostSectionHeroParams },
   TContext
 > => {
   const mutationOptions = getPostSectionHeroMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postSectionHeroAssets = (
+  postSectionHeroAssetsBody: PostSectionHeroAssetsBody,
+  params: PostSectionHeroAssetsParams,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  if (postSectionHeroAssetsBody.Image !== undefined) {
+    formData.append("Image", postSectionHeroAssetsBody.Image);
+  }
+  if (postSectionHeroAssetsBody.removedAssets !== undefined) {
+    postSectionHeroAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/Section/hero/assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    signal,
+  });
+};
+
+export const getPostSectionHeroAssetsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionHeroAssets>>,
+    TError,
+    { data: PostSectionHeroAssetsBody; params: PostSectionHeroAssetsParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postSectionHeroAssets>>,
+  TError,
+  { data: PostSectionHeroAssetsBody; params: PostSectionHeroAssetsParams },
+  TContext
+> => {
+  const { mutation: mutationOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postSectionHeroAssets>>,
+    { data: PostSectionHeroAssetsBody; params: PostSectionHeroAssetsParams }
+  > = (props) => {
+    const { data, params } = props ?? {};
+
+    return postSectionHeroAssets(data, params);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostSectionHeroAssetsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionHeroAssets>>
+>;
+export type PostSectionHeroAssetsMutationBody = PostSectionHeroAssetsBody;
+export type PostSectionHeroAssetsMutationError = unknown;
+
+export const usePostSectionHeroAssets = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postSectionHeroAssets>>,
+    TError,
+    { data: PostSectionHeroAssetsBody; params: PostSectionHeroAssetsParams },
+    TContext
+  >;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postSectionHeroAssets>>,
+  TError,
+  { data: PostSectionHeroAssetsBody; params: PostSectionHeroAssetsParams },
+  TContext
+> => {
+  const mutationOptions = getPostSectionHeroAssetsMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

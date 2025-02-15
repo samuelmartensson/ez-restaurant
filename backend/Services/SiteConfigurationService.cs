@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
+using Models.Responses;
 
 public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService, TranslationService translationService)
 {
@@ -24,10 +25,12 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest siteConfiguration, CommonQueryParameters queryParameters)
+    public async Task UpdateSiteConfiguration(UpdateSiteConfigurationRequest request, CommonQueryParameters queryParameters)
     {
         var key = queryParameters.Key;
-        var customerConfig = await context.CustomerConfigs.Include(cf => cf.SectionVisibility).FirstOrDefaultAsync((x) => x.Domain == key);
+        var customerConfig = await context.CustomerConfigs
+            .Include(cf => cf.SectionVisibility)
+            .FirstOrDefaultAsync((x) => x.Domain == key);
         if (customerConfig == null)
         {
             throw new Exception("CustomerConfig not found for the provided key.");
@@ -40,30 +43,24 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
             };
         }
 
-        await translationService.CreateOrUpdateByKey(queryParameters.Language, queryParameters.Key, "site:name", siteConfiguration.SiteName);
-        await translationService.CreateOrUpdateByKey(queryParameters.Language, queryParameters.Key, "site:short_description", siteConfiguration.SiteMetaTitle);
+        customerConfig.Theme = request.Theme;
+        customerConfig.Adress = request.Adress;
+        customerConfig.Email = request.Email;
+        customerConfig.InstagramUrl = request.InstagramUrl;
+        customerConfig.TiktokUrl = request.TiktokUrl;
+        customerConfig.FacebookUrl = request.FacebookUrl;
+        customerConfig.Currency = request.Currency;
+        customerConfig.MapUrl = request.MapUrl;
+        customerConfig.Phone = request.Phone;
+        customerConfig.ThemeColorConfig = request.ThemeColorConfig;
+        customerConfig.SectionVisibility.ContactFormVisible = request.ContactFormVisible;
 
-
-        customerConfig.SiteName = siteConfiguration.SiteName;
-        customerConfig.SiteMetaTitle = siteConfiguration.SiteMetaTitle;
-        customerConfig.Theme = siteConfiguration.Theme;
-        customerConfig.Adress = siteConfiguration.Adress;
-        customerConfig.Email = siteConfiguration.Email;
-        customerConfig.InstagramUrl = siteConfiguration.InstagramUrl;
-        customerConfig.TiktokUrl = siteConfiguration.TiktokUrl;
-        customerConfig.FacebookUrl = siteConfiguration.FacebookUrl;
-        customerConfig.Currency = siteConfiguration.Currency;
-        customerConfig.MapUrl = siteConfiguration.MapUrl;
-        customerConfig.Phone = siteConfiguration.Phone;
-        customerConfig.ThemeColorConfig = siteConfiguration.ThemeColorConfig;
-        customerConfig.SectionVisibility.ContactFormVisible = siteConfiguration.ContactFormVisible;
-
-        if (siteConfiguration.Logo == "REMOVE")
+        if (request.Logo == "REMOVE")
         {
             await s3Service.DeleteFileAsync($"{key}/logo");
             customerConfig.Logo = "";
         }
-        if (siteConfiguration.Font == "REMOVE")
+        if (request.Font == "REMOVE")
         {
             await s3Service.DeleteFileAsync($"{key}/font");
             customerConfig.Font = "";

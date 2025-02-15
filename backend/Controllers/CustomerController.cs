@@ -1,11 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+using Clerk.Net.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models.Responses;
 using Models.Requests;
+using Models.Responses;
 using Stripe;
-using Clerk.Net.Client;
-using System.ComponentModel.DataAnnotations;
 
 namespace webapi.Controllers;
 
@@ -96,8 +96,8 @@ public class CustomerController(
 
 
         var customer = await context.Customers
-        .Include(c => c.CustomerConfigs)
-        .FirstOrDefaultAsync(c => c.Id == user.CustomerId);
+            .Include(c => c.CustomerConfigs)
+            .FirstOrDefaultAsync(c => c.Id == user.CustomerId);
         var customerConfigs = customer?.CustomerConfigs.Select(c => new CustomerConfigResponse
         {
             Domain = c.Domain,

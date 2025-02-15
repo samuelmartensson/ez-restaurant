@@ -221,6 +221,8 @@ public class PublicController(
             {
                 Hero = new SiteSectionHeroResponse
                 {
+                    SiteMetaTitle = t(customerConfig.Translations, "site:short_description") ?? customerConfig.SiteMetaTitle,
+                    SiteName = t(customerConfig.Translations, "site:name") ?? customerConfig.SiteName,
                     HeroImage = customerConfig.SiteSectionHero?.Image ?? "",
                     OrderUrl = customerConfig.SiteSectionHero?.OrderUrl ?? ""
                 },

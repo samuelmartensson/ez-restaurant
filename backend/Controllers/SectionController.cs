@@ -15,12 +15,34 @@ public class SectionController(
 
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
+    [HttpGet("hero")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(Dictionary<string, HeroResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHero([FromQuery] CommonQueryParameters queryParameters)
+    {
+        var data = await sectionConfigurationService.GetHero(queryParameters);
+        return Ok(data);
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("hero")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> UploadHero([FromForm] UploadHeroAssetsRequest assets, [FromForm] List<string> removedAssets, [FromForm] UploadHeroRequest fields, [FromQuery, Required] string key)
+    public async Task<IActionResult> UploadHero([FromBody] UploadHeroRequest fields, [FromQuery, Required] string key)
     {
-        await sectionConfigurationService.UpdateHero(assets, removedAssets, fields, key);
+        await sectionConfigurationService.UpdateHero(fields, key);
+        return Ok(new { message = "Success" });
+    }
+
+    [Authorize(Policy = "KeyPolicy")]
+    [RequireSubscription(SubscriptionState.Premium)]
+    [HttpPost("hero/assets")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UploadHeroAssets([FromForm] UploadHeroAssetsRequest assets, [FromForm] List<string> removedAssets, [FromQuery] CommonQueryParameters queryParameters)
+    {
+        await sectionConfigurationService.UpdateHeroAssets(assets, removedAssets, queryParameters);
         return Ok(new { message = "Success" });
     }
 

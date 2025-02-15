@@ -13,10 +13,9 @@ namespace Models.Requests
         required public string DefaultLanguage { get; set; }
     }
 
+
     public class UpdateSiteConfigurationRequest
     {
-        required public string SiteName { get; set; }
-        required public string SiteMetaTitle { get; set; }
         required public string Theme { get; set; }
         required public string Currency { get; set; }
         public bool ContactFormVisible { get; set; }

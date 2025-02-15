@@ -41,18 +41,6 @@ import { toast } from "sonner";
 
 const inputSchema = [
   {
-    id: "SiteName",
-    label: "Name",
-    translate: true,
-    description: "",
-  },
-  {
-    id: "SiteMetaTitle",
-    label: "Short description / Slogan",
-    translate: true,
-    description: "",
-  },
-  {
     id: "Currency",
     label: "Currency",
     translate: false,
@@ -135,16 +123,18 @@ const Site = () => {
   const isSocials = searchParams.get("socials") === "true";
   const isMedia = searchParams.get("media") === "true";
 
-  const { selectedDomain, selectedLanguage, setSelectedLanguage } =
-    useDataContext();
+  const {
+    selectedConfig,
+    selectedDomain,
+    selectedLanguage,
+    setSelectedLanguage,
+  } = useDataContext();
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, File>>(
     {},
   );
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const form = useForm<PostCustomerSiteConfigurationBody>({
     defaultValues: {
-      SiteName: "",
-      SiteMetaTitle: "",
       Logo: "",
       Theme: "",
       Adress: "",
@@ -186,8 +176,6 @@ const Site = () => {
     if (!customerConfig) return;
 
     form.reset({
-      SiteName: customerConfig.siteName ?? "",
-      SiteMetaTitle: customerConfig.siteMetaTitle ?? "",
       Logo: customerConfig.logo ?? "",
       Font: customerConfig.font ?? "",
       Theme: customerConfig.theme ?? "",
@@ -202,7 +190,7 @@ const Site = () => {
       ContactFormVisible: customerConfig.sectionVisibility?.contactFormVisible,
       ThemeColorConfig: currentThemePrimary,
     });
-  }, [currentThemePrimary, customerConfig, form]);
+  }, [currentThemePrimary, customerConfig, form, selectedConfig?.languages]);
 
   async function onSubmit(data: PostCustomerSiteConfigurationBody) {
     const params = { Key: selectedDomain, Language: selectedLanguage };

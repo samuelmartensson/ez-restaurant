@@ -62,7 +62,6 @@ const About = () => {
   });
   const { mutateAsync: uploadAbout } = usePostSectionAbout();
   const { mutateAsync: uploadAboutAssets } = usePostSectionAboutAssets();
-  console.log(selectedConfig);
 
   useEffect(() => {
     if (!aboutSection) return;

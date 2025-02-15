@@ -61,14 +61,14 @@ const settings = [
 
 const sections = [
   {
-    title: "Menu page",
-    url: "/menu",
-    icon: SquareMenu,
-  },
-  {
     title: "Home page",
     url: "/hero",
     icon: Home,
+  },
+  {
+    title: "Menu page",
+    url: "/menu",
+    icon: SquareMenu,
   },
   {
     title: "About page",

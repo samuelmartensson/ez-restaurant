@@ -10,8 +10,7 @@ const LocalizedFormField = <T extends string>({
   name: T;
   children: (name: `${string}.${T}`) => ReactNode;
 }) => {
-  const { selectedConfig, selectedLanguage, setSelectedLanguage } =
-    useDataContext();
+  const { selectedConfig, selectedLanguage } = useDataContext();
   const [internalSelectedLanguage, setInternalSelectedLanguage] =
     useState(selectedLanguage);
 
@@ -25,7 +24,7 @@ const LocalizedFormField = <T extends string>({
         <Tabs
           value={internalSelectedLanguage}
           onValueChange={(lang) => {
-            setSelectedLanguage(lang);
+            setInternalSelectedLanguage(lang);
           }}
         >
           <TabsList className="justify-start md:h-11">
@@ -41,8 +40,8 @@ const LocalizedFormField = <T extends string>({
           </TabsList>
         </Tabs>
       </div>
-      <div key={selectedLanguage}>
-        {children(`${selectedLanguage}.${name}`)}
+      <div key={internalSelectedLanguage}>
+        {children(`${internalSelectedLanguage}.${name}`)}
       </div>
     </div>
   );
