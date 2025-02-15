@@ -12,23 +12,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  postCustomerLanguages,
   PostSectionHeroMutationBody,
   usePostSectionHero,
 } from "@/generated/endpoints";
 import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { useForm } from "react-hook-form";
-
-const inputSchema = [
-  {
-    id: "SiteName",
-    label: "Name",
-  },
-] as const;
+import { LanguagePicker } from "./LanguagePicker";
+import { useState } from "react";
 
 const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
   const { selectedDomain, selectedLanguage, selectedConfig } = useDataContext();
   const { mutateAsync: uploadHero, isPending } = usePostSectionHero();
   const form = useForm<PostSectionHeroMutationBody>();
+  const [defaultLanguageValue, setDefaultLanguage] = useState("");
 
   async function onSubmit(data: PostSectionHeroMutationBody) {
     await uploadHero({
@@ -41,6 +38,16 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
         ),
       },
     });
+    await postCustomerLanguages(
+      {
+        Languages: [defaultLanguageValue],
+        DefaultLanguage: defaultLanguageValue,
+      },
+      {
+        Key: selectedDomain,
+        Language: selectedLanguage,
+      },
+    );
     onNextClick();
   }
 
@@ -48,34 +55,41 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
     <Form {...form}>
       <div>
         <h2 className="mb-2 text-xl">Site setup</h2>
-        <p className="mb-8 text-pretty text-muted-foreground">
+        <p className="mb-2">Choose your default language.</p>
+        <div className="mb-6">
+          <LanguagePicker
+            onChange={(val) => setDefaultLanguage(val)}
+            defaultLanguage={defaultLanguageValue ?? ""}
+            languages={selectedConfig?.availableLanguages ?? []}
+          />
+        </div>
+        <p className="mb-2 text-pretty">
           Next, give your site a name, formatted like you would market it.
         </p>
         <form
           className="grid w-full gap-2"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          {inputSchema.map((input) => (
-            <FormField
-              key={input.id}
-              control={form.control}
-              name={`localizedFields.${selectedLanguage}.siteName`}
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel>{input.label}</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-          ))}
+          <FormField
+            control={form.control}
+            defaultValue=""
+            name={`localizedFields.${selectedLanguage}.siteName`}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="EZ Pizza" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
           <Button
             disabled={
               isPending ||
+              !defaultLanguageValue ||
               form
                 .watch(`localizedFields.${selectedLanguage}.siteName`)
                 ?.trim() === ""

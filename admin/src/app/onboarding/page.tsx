@@ -21,7 +21,7 @@ const Onboarding = () => {
   const router = useRouter();
   const { selectedDomain } = useDataContext();
 
-  const [step, setStep] = useState<Steps>(selectedDomain ? "menu" : "start");
+  const [step, setStep] = useState<Steps>(selectedDomain ? "site" : "start");
 
   return (
     <div className="fixed inset-0 z-10 grid place-items-center bg-white">

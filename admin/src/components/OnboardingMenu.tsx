@@ -84,7 +84,7 @@ const OnboardingMenu = ({ onNextClick }: { onNextClick: () => void }) => {
         <form className="grid w-full gap-2">
           <Input
             className="flex-1"
-            placeholder="Add category..."
+            placeholder="Pizza, drinks, sides ..."
             value={addCategory}
             onChange={(e) => setAddCategory(e.target.value)}
           />

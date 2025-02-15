@@ -32,25 +32,31 @@ const queryClient = new QueryClient({
 });
 
 const Content = ({ children }: { children: React.ReactNode }) => {
-  const { selectedLanguage, selectedDomain, cycleLanguage } = useDataContext();
+  const { selectedLanguage, selectedDomain, cycleLanguage, selectedConfig } =
+    useDataContext();
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <main className="w-full">
         <div className="sticky top-0 z-10 flex items-center gap-1 border-b bg-white py-3 pl-2 md:pl-4">
           <SidebarTrigger />
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => cycleLanguage()}
-            className="flex"
-          >
-            <Languages />
-            <div className="grid gap-0 text-left text-sm leading-none">
-              <span>{selectedDomain}</span>
-              <span className="text-muted-foreground">{selectedLanguage}</span>
-            </div>
-          </Button>
+          {(selectedConfig?.languages ?? []).length > 1 && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => cycleLanguage()}
+              className="flex"
+            >
+              <Languages />
+              <div className="grid gap-0 text-left text-sm leading-none">
+                <span>{selectedDomain}</span>
+                <span className="text-muted-foreground">
+                  {selectedLanguage}
+                </span>
+              </div>
+            </Button>
+          )}
         </div>
         {children}
       </main>

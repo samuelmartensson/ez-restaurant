@@ -131,6 +131,7 @@ public class CustomerController(
 
     public record CreateConfigRequest(string domain);
     [HttpPut("config")]
+    [RequireSubscription(SubscriptionState.Free)]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateConfig([FromBody] CreateConfigRequest config)
@@ -207,7 +208,7 @@ public class CustomerController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("languages")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -293,6 +294,7 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [HttpGet("analytics")]
     [Produces("application/json")]
+    [RequireSubscription(SubscriptionState.Premium)]
     [ProducesResponseType(typeof(AnalyticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAnalytics([FromQuery, Required] string key)
     {

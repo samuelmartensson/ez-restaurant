@@ -14,7 +14,7 @@ public class SectionController(
     private SectionConfigurationService sectionConfigurationService = sectionConfigurationService;
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpGet("hero")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Dictionary<string, HeroResponse>), StatusCodes.Status200OK)]
@@ -25,7 +25,7 @@ public class SectionController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("hero")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -36,7 +36,7 @@ public class SectionController(
     }
 
     [Authorize(Policy = "KeyPolicy")]
-    [RequireSubscription(SubscriptionState.Premium)]
+    [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("hero/assets")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

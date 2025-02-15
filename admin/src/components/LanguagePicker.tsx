@@ -30,7 +30,6 @@ export function LanguagePicker({
       <Select
         onValueChange={(val) => {
           onChange(val);
-          console.log(val);
         }}
         value={defaultLanguage}
       >

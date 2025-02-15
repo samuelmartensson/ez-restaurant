@@ -64,14 +64,15 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useGetCustomerCustomer();
-  const { data: selectedConfig } = useGetPublicGetCustomerConfig(
-    {
-      Key: selectedDomain,
-      Language: selectedLanguage,
-      cache: false,
-    },
-    { query: { enabled: !!selectedDomain && !!selectedLanguage } },
-  );
+  const { data: selectedConfig, refetch: refetchCf } =
+    useGetPublicGetCustomerConfig(
+      {
+        Key: selectedDomain,
+        Language: selectedLanguage,
+        cache: false,
+      },
+      { query: { enabled: !!selectedDomain && !!selectedLanguage } },
+    );
   const configs = data?.customerConfigs ?? [];
 
   const setSelectedLanguageInternal = useCallback(
@@ -154,6 +155,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
         params: { Key: selectedDomain, Language: selectedLanguage },
         refetch: async () => {
           await refetch();
+          refetchCf();
         },
       }}
     >

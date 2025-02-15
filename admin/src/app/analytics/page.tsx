@@ -32,7 +32,7 @@ const StatisticCard = ({
         ) : (
           <div className="mb-4 text-2xl font-bold">{value}</div>
         )}
-        <p className="grid gap-0.5 text-xs text-muted-foreground">
+        <div className="grid gap-0.5 text-xs text-muted-foreground">
           <span>Last 30 days</span>
           {isLoading ? (
             <Skeleton className="h-4 w-8 rounded" />
@@ -47,7 +47,7 @@ const StatisticCard = ({
               {periodDiff}
             </span>
           )}
-        </p>
+        </div>
       </CardContent>
     </Card>
   );

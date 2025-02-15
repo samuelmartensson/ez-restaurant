@@ -7,8 +7,8 @@ namespace Models.Requests
 
     public class UploadHeroLocalizedFields
     {
-        public string SiteName { get; set; }
-        public string SiteMetaTitle { get; set; }
+        public string? SiteName { get; set; }
+        public string? SiteMetaTitle { get; set; }
 
     }
     public class UploadHeroRequest

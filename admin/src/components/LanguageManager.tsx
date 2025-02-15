@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  postCustomerLanguages,
-  useGetPublicGetCustomerConfig,
-} from "@/generated/endpoints";
+import { postCustomerLanguages } from "@/generated/endpoints";
 import { useEffect, useState } from "react";
 import { useDataContext } from "./DataContextProvider";
 import { Switch } from "./ui/switch";
@@ -14,6 +11,7 @@ import { toast } from "sonner";
 
 const LanguageManager = () => {
   const {
+    selectedConfig,
     selectedDomain,
     selectedLanguage,
     refetch: refetchCustomer,
@@ -25,20 +23,15 @@ const LanguageManager = () => {
   };
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [defaultLanguageValue, setDefaultLanguage] = useState("");
-  const { data: customerConfig, refetch } = useGetPublicGetCustomerConfig(
-    { ...params, cache: false },
-    { query: { enabled: !!selectedDomain && !!selectedLanguage } },
-  );
 
   const { availableLanguages, languages, defaultLanguage } =
-    customerConfig || {};
+    selectedConfig || {};
 
   const onSubmitInternal = async () => {
     await postCustomerLanguages(
       { Languages: selectedLanguages, DefaultLanguage: defaultLanguageValue },
       params,
     );
-    refetch();
     refetchCustomer();
     toast.success("Languages updated.");
   };
@@ -48,6 +41,8 @@ const LanguageManager = () => {
   }, [languages]);
 
   useEffect(() => {
+    console.log("xd");
+
     if (!defaultLanguageValue) setDefaultLanguage(defaultLanguage ?? "");
   }, [defaultLanguage, defaultLanguageValue]);
 

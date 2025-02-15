@@ -4,6 +4,7 @@ import { useDataContext } from "@/components/DataContextProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePutCustomerConfig } from "@/generated/endpoints";
+import { containsOnlyLetters } from "@/lib/utils";
 import { useState } from "react";
 
 interface Props {
@@ -34,13 +35,23 @@ const OnboardingDomain = ({ onNextClick }: Props) => {
         one will need its own unique domain name to identify it.
       </p>
       <p className="mb-2">Start by naming and creating your first domain.</p>
-      <div className="grid w-full gap-2">
-        <Input
-          placeholder="My restaurant name"
-          value={domainNameValue}
-          className={isError ? "border border-red-500" : ""}
-          onChange={(e) => setDomainNameValue(e.target.value)}
-        />
+      <div className="grid w-full gap-4">
+        <div>
+          <Input
+            placeholder="My restaurant name"
+            value={domainNameValue}
+            className={isError ? "border border-red-500" : ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (containsOnlyLetters(value) || value === "") {
+                setDomainNameValue(value);
+              }
+            }}
+          />
+          <div className="pt-1 text-sm text-muted-foreground">
+            Only letters and numbers are allowed.
+          </div>
+        </div>
         <Button
           disabled={isPending || domainNameValue.trim() === ""}
           onClick={() => handleCreateConfig()}

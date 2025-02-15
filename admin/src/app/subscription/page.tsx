@@ -22,11 +22,13 @@ const StripeBuyButton = ({ email }: { email: string }) => {
 
 const Subscription = () => {
   const { user } = useUser();
-  const { data } = useGetCustomerCustomer();
+  const { data, isLoading } = useGetCustomerCustomer();
 
   const periodEnd =
     data?.cancelInfo?.periodEnd &&
     new Date(data?.cancelInfo?.periodEnd).toLocaleString();
+
+  if (isLoading) return null;
 
   if (data?.subscription === SubscriptionState.NUMBER_0) {
     return (

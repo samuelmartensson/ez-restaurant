@@ -1,3 +1,4 @@
+"use client";
 import { useDataContext } from "@/components/DataContextProvider";
 import {
   Sidebar,
@@ -114,7 +115,9 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="gap-1">
         <ConfigSwitcher domains={configs.map((c) => c.domain ?? "")} />
-        <LanguageSwitcher languages={selectedConfig?.languages ?? []} />
+        {(selectedConfig?.languages ?? []).length > 1 && (
+          <LanguageSwitcher languages={selectedConfig?.languages ?? []} />
+        )}
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>Website</SidebarGroupLabel>
