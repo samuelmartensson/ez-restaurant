@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  PostCustomerSiteConfigurationBody,
-  usePostCustomerSiteConfiguration,
+  PostSectionHeroMutationBody,
+  usePostSectionHero,
 } from "@/generated/endpoints";
+import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { useForm } from "react-hook-form";
 
 const inputSchema = [
@@ -25,38 +26,20 @@ const inputSchema = [
 ] as const;
 
 const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
-  const { selectedDomain, selectedLanguage } = useDataContext();
-  const form = useForm<PostCustomerSiteConfigurationBody>({
-    defaultValues: {
-      SiteName: "",
-      SiteMetaTitle: "",
-      Logo: "",
-      Theme: "",
-      Adress: "",
-      Phone: "",
-      Email: "",
-      InstagramUrl: "",
-      MapUrl: "",
-    },
-  });
+  const { selectedDomain, selectedLanguage, selectedConfig } = useDataContext();
+  const { mutateAsync: uploadHero, isPending } = usePostSectionHero();
+  const form = useForm<PostSectionHeroMutationBody>();
 
-  const { mutateAsync: uploadSiteConfiguration, isPending: isPendingData } =
-    usePostCustomerSiteConfiguration();
-
-  const isPending = isPendingData;
-
-  async function onSubmit(data: PostCustomerSiteConfigurationBody) {
-    const params = { Key: selectedDomain, Language: selectedLanguage };
-    await uploadSiteConfiguration({
+  async function onSubmit(data: PostSectionHeroMutationBody) {
+    await uploadHero({
+      params: { key: selectedDomain },
       data: {
-        ...data,
-        SiteMetaTitle: "-",
-        Theme: "modern",
-        Logo: "",
-        Font: "",
-        Currency: "SEK",
+        localizedFields: mapToLocalizedFields(
+          selectedConfig?.languages ?? [],
+          data.localizedFields || {},
+          ["siteName"],
+        ),
       },
-      params,
     });
     onNextClick();
   }
@@ -76,7 +59,7 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
             <FormField
               key={input.id}
               control={form.control}
-              name={input.id}
+              name={`localizedFields.${selectedLanguage}.siteName`}
               render={({ field }) => {
                 return (
                   <FormItem>
@@ -91,7 +74,12 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
             />
           ))}
           <Button
-            disabled={isPending || form.watch("SiteName")?.trim() === ""}
+            disabled={
+              isPending ||
+              form
+                .watch(`localizedFields.${selectedLanguage}.siteName`)
+                ?.trim() === ""
+            }
             type="submit"
           >
             Next
