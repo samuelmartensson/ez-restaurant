@@ -2,6 +2,7 @@
 
 import {
   CustomerConfigResponse,
+  CustomerResponse,
   useGetCustomerCustomer,
   useGetPublicGetCustomerConfig,
 } from "@/generated/endpoints";
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
 const DataContext = createContext<{
+  customer: CustomerResponse | undefined;
   configs: CustomerConfigResponse[];
   selectedDomain: string;
   selectedLanguage: string;
@@ -32,6 +34,7 @@ const DataContext = createContext<{
     Language: string;
   };
 }>({
+  customer: undefined,
   configs: [],
   selectedDomain: "",
   selectedLanguage: "",
@@ -63,7 +66,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const queryClient = useQueryClient();
 
-  const { data, isLoading, refetch } = useGetCustomerCustomer();
+  const { data: customer, isLoading, refetch } = useGetCustomerCustomer();
   const { data: selectedConfig, refetch: refetchCf } =
     useGetPublicGetCustomerConfig(
       {
@@ -73,7 +76,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
       },
       { query: { enabled: !!selectedDomain && !!selectedLanguage } },
     );
-  const configs = data?.customerConfigs ?? [];
+  const configs = customer?.customerConfigs ?? [];
 
   const setSelectedLanguageInternal = useCallback(
     (language: string) => {
@@ -119,13 +122,13 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!selectedDomain) {
-      setSelectedDomain(data?.customerConfigs?.[0]?.domain ?? "");
+      setSelectedDomain(customer?.customerConfigs?.[0]?.domain ?? "");
     }
-  }, [data, selectedDomain]);
+  }, [customer, selectedDomain]);
 
   useEffect(() => {
     if (!selectedLanguage) {
-      const languages = data?.customerConfigs?.[0]?.languages;
+      const languages = customer?.customerConfigs?.[0]?.languages;
       const cachedLanguage = sessionStorage.getItem(languageKey) ?? "";
       setSelectedLanguage(
         (languages?.includes(cachedLanguage)
@@ -133,17 +136,18 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
           : languages?.[0]) ?? "",
       );
     }
-  }, [data, languageKey, selectedDomain, selectedLanguage]);
+  }, [customer, languageKey, selectedDomain, selectedLanguage]);
 
   if (isLoading) return <AppLoader />;
 
-  if (data?.isFirstSignIn) {
+  if (customer?.isFirstSignIn) {
     router.replace("/onboarding");
   }
 
   return (
     <DataContext.Provider
       value={{
+        customer,
         configs,
         setSelectedDomain: setSelectedDomainInternal,
         setSelectedLanguage: setSelectedLanguageInternal,

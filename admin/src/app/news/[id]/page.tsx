@@ -4,6 +4,7 @@ import ActionBar from "@/components/ActionBar";
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import hasDomain from "@/components/hasDomain";
+import hasSubscription from "@/components/hasSubscription";
 import LocalizedFormField from "@/components/LocalizedFormField";
 import { Button } from "@/components/ui/button";
 import {
@@ -258,4 +259,4 @@ const News = () => {
   );
 };
 
-export default hasDomain(News);
+export default hasDomain(hasSubscription(News));

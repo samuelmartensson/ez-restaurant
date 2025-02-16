@@ -18,7 +18,8 @@ public class CustomerController(
     AnalyticsService analyticsService,
     VercelService vercelService,
     ClerkApiClient clerkApiClient,
-    TranslationContext translationContext
+    TranslationContext translationContext,
+    IHttpContextAccessor httpContext
 ) : ControllerBase
 {
     private RestaurantContext context = context;
@@ -28,6 +29,7 @@ public class CustomerController(
     private SiteConfigurationService siteConfigurationService = siteConfigurationService;
     private ClerkApiClient clerkApiClient = clerkApiClient;
     private TranslationContext translationContext = translationContext;
+    private readonly IHttpContextAccessor httpContext = httpContext;
 
     private async Task<Database.Models.User> assertUser()
     {
@@ -89,18 +91,29 @@ public class CustomerController(
             periodEnd = subscription?.CurrentPeriodEnd,
             IsExpired = DateTime.Now > subscription?.CurrentPeriodEnd
         };
-        if (subscription != null)
-        {
-            cancelInfo.IsCanceled = subscription.CancelAt.HasValue;
-            cancelInfo.periodEnd = subscription.CurrentPeriodEnd;
-            cancelInfo.IsExpired = DateTime.Now > subscription.CurrentPeriodEnd;
-        }
-
 
         var customer = await context.Customers
             .Include(c => c.CustomerConfigs)
             .FirstOrDefaultAsync(c => c.Id == user.CustomerId);
-        var customerConfigs = customer?.CustomerConfigs.Select(c => new CustomerConfigResponse
+        if (customer == null)
+        {
+            throw new Exception("Customer not found");
+        }
+
+        if (subscription != null)
+        {
+            var IsExpired = DateTime.Now > subscription.CurrentPeriodEnd;
+            cancelInfo.IsCanceled = subscription.CancelAt.HasValue;
+            cancelInfo.periodEnd = subscription.CurrentPeriodEnd;
+            cancelInfo.IsExpired = IsExpired;
+            if (IsExpired)
+            {
+                customer.Subscription = SubscriptionState.Free;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        var customerConfigs = customer.CustomerConfigs.Select(c => new CustomerConfigResponse
         {
             Domain = c.Domain,
             Languages = c.Languages.Split(",").ToList(),
@@ -122,11 +135,11 @@ public class CustomerController(
             new CustomerResponse
             {
                 IsFirstSignIn = false,
-                Subscription = subscription != null ? customer?.Subscription ?? SubscriptionState.Free : SubscriptionState.Free,
-                CustomerConfigs = customerConfigs ?? new List<CustomerConfigResponse>(),
+                Subscription = subscription != null ? customer.Subscription : SubscriptionState.Free,
+                CustomerConfigs = customerConfigs,
                 CancelInfo = cancelInfo,
             }
-            );
+        );
     }
 
     public record CreateConfigRequest(string domain);
@@ -228,15 +241,7 @@ public class CustomerController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> RegisterDomain([FromQuery, Required] string key, [FromQuery] string domainName)
     {
-        var customerConfig = await context.CustomerConfigs
-            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
-
-        if (customerConfig == null)
-        {
-            return NotFound(new { message = "CustomerConfig not found for the provided key." });
-        }
-        ;
-
+        var customerConfig = ContextHelper.GetConfig(HttpContext);
         var response = await vercelService.CreateDomain(domainName);
         if (response.IsSuccessStatusCode)
         {
@@ -262,20 +267,12 @@ public class CustomerController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteDomain([FromQuery, Required] string key)
     {
-        var customerConfig = await context.CustomerConfigs
-            .FirstOrDefaultAsync((x) => x.Domain.Replace(" ", "").ToLower() == key.Replace(" ", "").ToLower());
-
-        if (customerConfig == null)
-        {
-            return NotFound(new { message = "CustomerConfig not found for the provided key." });
-        }
-        ;
+        var customerConfig = ContextHelper.GetConfig(httpContext.HttpContext);
 
         if (string.IsNullOrEmpty(customerConfig.CustomDomain) || customerConfig.CustomDomain == null)
         {
             return NotFound(new { message = "Custom domain not found." });
         }
-        ;
 
         var response = await vercelService.DeleteDomain(customerConfig.CustomDomain);
         if (response.IsSuccessStatusCode)

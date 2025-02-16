@@ -2,6 +2,7 @@
 
 import { useDataContext } from "@/components/DataContextProvider";
 import hasDomain from "@/components/hasDomain";
+import hasSubscription from "@/components/hasSubscription";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetCustomerAnalytics } from "@/generated/endpoints";
@@ -53,11 +54,18 @@ const StatisticCard = ({
   );
 };
 
-const Hero = () => {
+const Analytics = () => {
   const { selectedDomain } = useDataContext();
-  const { data, isLoading } = useGetCustomerAnalytics({
-    key: selectedDomain,
-  });
+  const { data, isLoading } = useGetCustomerAnalytics(
+    {
+      key: selectedDomain,
+    },
+    {
+      query: {
+        staleTime: 300_000,
+      },
+    },
+  );
 
   return (
     <div className="grid gap-2 md:grid-cols-3">
@@ -83,4 +91,4 @@ const Hero = () => {
   );
 };
 
-export default hasDomain(Hero);
+export default hasDomain(hasSubscription(Analytics));

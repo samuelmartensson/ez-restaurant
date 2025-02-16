@@ -43,6 +43,11 @@ public class KeyAuthorizationHandler(RestaurantContext dbContext) : Authorizatio
             return;
         }
 
+        if (httpContext != null)
+        {
+            httpContext.Items["config"] = config;
+            httpContext.Items["user"] = user;
+        }
         context.Succeed(requirement);
     }
 }

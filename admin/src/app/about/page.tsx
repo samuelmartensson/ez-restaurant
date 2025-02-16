@@ -3,6 +3,7 @@
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import hasDomain from "@/components/hasDomain";
+import hasSubscription from "@/components/hasSubscription";
 import LocalizedFormField from "@/components/LocalizedFormField";
 import { Button } from "@/components/ui/button";
 import {
@@ -211,4 +212,4 @@ const About = () => {
   );
 };
 
-export default hasDomain(About);
+export default hasDomain(hasSubscription(About));

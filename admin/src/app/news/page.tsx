@@ -35,6 +35,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import ActionBar from "@/components/ActionBar";
 import { useState } from "react";
+import LocalizedFormField from "@/components/LocalizedFormField";
+import hasSubscription from "@/components/hasSubscription";
 
 const inputSchema = [
   {
@@ -139,34 +141,38 @@ const News = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
               >
                 {inputSchema.map((input) => (
-                  <FormField
-                    key={input.id}
-                    control={form.control}
-                    name={`localizedFields.${input.id}`}
-                    render={({ field }) => {
-                      let render = (
-                        <Input {...field} value={String(field.value)} />
-                      );
+                  <LocalizedFormField name={input.id} key={input.id}>
+                    {(name) => (
+                      <FormField
+                        key={input.id}
+                        control={form.control}
+                        name={`localizedFields.${name}`}
+                        render={({ field }) => {
+                          let render = (
+                            <Input {...field} value={field.value ?? ""} />
+                          );
 
-                      if (input.type === "textarea") {
-                        render = (
-                          <Textarea
-                            rows={8}
-                            {...field}
-                            value={String(field.value)}
-                          />
-                        );
-                      }
+                          if (input.type === "textarea") {
+                            render = (
+                              <Textarea
+                                rows={8}
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            );
+                          }
 
-                      return (
-                        <FormItem>
-                          <FormLabel>{input.label}</FormLabel>
-                          <FormControl>{render}</FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
-                  />
+                          return (
+                            <FormItem>
+                              <FormLabel>{input.label}</FormLabel>
+                              <FormControl>{render}</FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    )}
+                  </LocalizedFormField>
                 ))}
                 <DialogFooter>
                   <Button>
@@ -224,4 +230,4 @@ const News = () => {
   );
 };
 
-export default hasDomain(News);
+export default hasDomain(hasSubscription(News));

@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { JSX } from "react";
+import { ReactElement } from "react";
 import { useDataContext } from "./DataContextProvider";
 import { Button } from "./ui/button";
 
-const Wrapper = (Component: () => JSX.Element) => {
+const Wrapper = (Component: () => ReactElement) => {
   return function Export() {
     const { configs } = useDataContext();
 

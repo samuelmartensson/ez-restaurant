@@ -3,6 +3,7 @@
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import hasDomain from "@/components/hasDomain";
+import hasSubscription from "@/components/hasSubscription";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -166,4 +167,4 @@ const Gallery = () => {
   );
 };
 
-export default hasDomain(Gallery);
+export default hasDomain(hasSubscription(Gallery));

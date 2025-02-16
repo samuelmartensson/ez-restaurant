@@ -49,7 +49,7 @@ const settings = [
     icon: Languages,
   },
   {
-    title: "Media & Theme",
+    title: "Media, Theme & Font",
     url: "/?media=true",
     icon: Image,
   },
@@ -94,8 +94,8 @@ const sections = [
 ];
 
 const groups = [
-  { title: "Settings", items: settings },
   { title: "Sections", items: sections },
+  { title: "Settings", items: settings },
 ];
 
 export function AppSidebar() {

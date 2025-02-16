@@ -3,6 +3,7 @@ using Clerk.Net.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Stripe;
@@ -104,6 +105,7 @@ builder.Services.AddDbContext<RestaurantContext>(options => options.UseNpgsql(co
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<TranslationContext>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<MenuService>();
 builder.Services.AddScoped<SiteConfigurationService>();

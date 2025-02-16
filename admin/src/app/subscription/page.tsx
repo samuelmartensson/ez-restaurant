@@ -1,9 +1,6 @@
 "use client";
+import { useDataContext } from "@/components/DataContextProvider";
 import { Button } from "@/components/ui/button";
-import {
-  SubscriptionState,
-  useGetCustomerCustomer,
-} from "@/generated/endpoints";
 import { useUser } from "@clerk/nextjs";
 import React from "react";
 
@@ -22,29 +19,19 @@ const StripeBuyButton = ({ email }: { email: string }) => {
 
 const Subscription = () => {
   const { user } = useUser();
-  const { data, isLoading } = useGetCustomerCustomer();
+  const { customer } = useDataContext();
 
   const periodEnd =
-    data?.cancelInfo?.periodEnd &&
-    new Date(data?.cancelInfo?.periodEnd).toLocaleString();
+    customer?.cancelInfo?.periodEnd &&
+    new Date(customer?.cancelInfo?.periodEnd).toLocaleString();
 
-  if (isLoading) return null;
-
-  if (data?.subscription === SubscriptionState.NUMBER_0) {
-    return (
-      <div className="grid h-svh place-items-center p-4 md:h-auto">
-        <StripeBuyButton
-          email={user?.primaryEmailAddress?.emailAddress ?? ""}
-        />
-      </div>
-    );
-  }
+  if (!customer) return null;
 
   return (
     <div className="grid place-items-center p-4">
       <title>EZ Rest - Subscription</title>
 
-      {data?.cancelInfo?.isExpired ? (
+      {customer?.cancelInfo?.isExpired ? (
         <>
           <div className="mb-4 text-pretty">
             Your subscription expired{" "}
@@ -71,7 +58,7 @@ const Subscription = () => {
         <div className="grid gap-2">
           <h1 className="text-2xl">EZ Rest Premium</h1>
           <div className="text-sm">
-            {data?.cancelInfo?.isCanceled ? "Expires" : "Renews"}
+            {customer?.cancelInfo?.isCanceled ? "Expires" : "Renews"}
             {": "}
             <span className="font-semibold">{periodEnd}</span>
           </div>

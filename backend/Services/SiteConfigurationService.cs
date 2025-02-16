@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Models.Requests;
 using Models.Responses;
 
-public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService)
+public class SiteConfigurationService(RestaurantContext context, S3Service s3Service, OpeningHourService openingHourService, IHttpContextAccessor httpContext)
 {
     private readonly RestaurantContext context = context;
+    private readonly IHttpContextAccessor httpContext = httpContext;
     private readonly S3Service s3Service = s3Service;
 
     private readonly OpeningHourService openingHourService = openingHourService;
@@ -12,12 +13,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
 
     public async Task UpdateSiteLanguages(UpdateSiteLanguagesRequest request, CommonQueryParameters queryParameters)
     {
-        var key = queryParameters.Key;
-        var customerConfig = await context.CustomerConfigs.FirstOrDefaultAsync((x) => x.Domain == key);
-        if (customerConfig == null)
-        {
-            throw new Exception("CustomerConfig not found for the provided key.");
-        }
+        var customerConfig = ContextHelper.GetConfig(httpContext.HttpContext);
 
         customerConfig.Languages = string.Join(",", request.Languages);
         customerConfig.DefaultLanguage = request.DefaultLanguage;
@@ -70,11 +66,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
     public async Task UpdateSiteConfigurationAssets(UploadSiteConfigurationAssetsRequest assets, CommonQueryParameters queryParameters)
     {
         var key = queryParameters.Key;
-        var customerConfig = context.CustomerConfigs.FirstOrDefault((x) => x.Domain == key);
-        if (customerConfig == null)
-        {
-            throw new Exception("CustomerConfig not found for the provided key.");
-        }
+        var customerConfig = ContextHelper.GetConfig(httpContext.HttpContext);
 
         if (assets.Logo != null)
         {
@@ -118,11 +110,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
 
     public async Task RemoveSiteConfiguration(string domain)
     {
-        var config = await context.CustomerConfigs.FirstOrDefaultAsync(c => c.Domain == domain);
-        if (config == null)
-        {
-            throw new Exception("CustomerConfig not found");
-        }
+        var config = ContextHelper.GetConfig(httpContext.HttpContext);
         context.CustomerConfigs.Remove(config);
         await s3Service.DeleteAllFilesAsync(domain);
         await context.SaveChangesAsync();
