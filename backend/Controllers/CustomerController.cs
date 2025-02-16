@@ -44,7 +44,6 @@ public class CustomerController(
 
     [Authorize(Policy = "UserPolicy")]
     [HttpGet("customer")]
-    [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrCreateCustomer()
     {
@@ -145,7 +144,6 @@ public class CustomerController(
     public record CreateConfigRequest(string domain);
     [HttpPut("config")]
     [RequireSubscription(SubscriptionState.Free)]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateConfig([FromBody] CreateConfigRequest config)
     {
@@ -183,7 +181,6 @@ public class CustomerController(
     [HttpDelete("config")]
     [RequireSubscription(SubscriptionState.Free)]
     [Authorize(Policy = "KeyPolicy")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> RemoveConfig([FromQuery, Required] string key)
     {
@@ -201,7 +198,6 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("site-configuration")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadSiteConfiguration([FromForm] UpdateSiteConfigurationRequest siteConfiguration, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
@@ -212,7 +208,6 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("site-configuration-assets")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadSiteConfigurationAssets([FromForm] UploadSiteConfigurationAssetsRequest assets, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
@@ -223,7 +218,6 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("languages")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateSiteLanguages([FromForm] UpdateSiteLanguagesRequest request, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
@@ -237,7 +231,6 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost("domain")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> RegisterDomain([FromQuery, Required] string key, [FromQuery] string domainName)
     {
@@ -263,7 +256,6 @@ public class CustomerController(
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
     [HttpDelete("domain")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteDomain([FromQuery, Required] string key)
     {
@@ -290,7 +282,6 @@ public class CustomerController(
 
     [Authorize(Policy = "KeyPolicy")]
     [HttpGet("analytics")]
-    [Produces("application/json")]
     [RequireSubscription(SubscriptionState.Premium)]
     [ProducesResponseType(typeof(AnalyticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAnalytics([FromQuery, Required] string key)

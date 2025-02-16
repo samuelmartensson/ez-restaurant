@@ -16,9 +16,9 @@ import {
 import { FileInput } from "@/components/ui/input";
 import {
   SiteSectionGalleryResponse,
-  useDeleteSectionGallery,
+  useDeleteGallery,
   useGetPublicGetCustomerConfig,
-  usePostSectionGallery,
+  usePostGallery,
 } from "@/generated/endpoints";
 import { Upload } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -48,9 +48,9 @@ const Gallery = () => {
   });
 
   const { mutateAsync: uploadImages, isPending: isPendingUpload } =
-    usePostSectionGallery();
+    usePostGallery();
   const { mutateAsync: deleteImage, isPending: isPendingDelete } =
-    useDeleteSectionGallery();
+    useDeleteGallery();
 
   const isPending = isPendingUpload || isPendingDelete;
 

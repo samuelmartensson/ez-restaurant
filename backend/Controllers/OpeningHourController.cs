@@ -1,23 +1,22 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.Responses;
 using Models.Requests;
+using Models.Responses;
 
 namespace webapi.Controllers;
 
+[Authorize(Policy = "KeyPolicy")]
 [ApiController]
 [Route("[controller]")]
 public class OpeningHourController(
-    OpeningHourService openingHourService
+OpeningHourService openingHourService
 ) : ControllerBase
 {
     private readonly OpeningHourService openingHourService = openingHourService;
 
-    [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpGet]
-    [Produces("application/json")]
     [ProducesResponseType(typeof(List<OpeningHourResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOpeningHours([FromQuery, Required] CommonQueryParameters queryParameters)
     {
@@ -37,7 +36,6 @@ public class OpeningHourController(
     [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Premium)]
     [HttpPost]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateOpeningHours(List<AddOpeningHourRequest> newOpeningHours, [FromQuery, Required] CommonQueryParameters queryParameters)
     {

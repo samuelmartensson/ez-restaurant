@@ -98,4 +98,34 @@ public class S3Service
         }
     }
 
+    public async Task UpdateAssets<T>(T section, string bucketKey, object assets, List<string> removedAssets)
+    {
+        var sectionType = section!.GetType();
+
+        foreach (var name in removedAssets)
+        {
+            await DeleteFileAsync($"{bucketKey}/{name}");
+            var matchingProperty = sectionType.GetProperty(name);
+            if (matchingProperty != null)
+            {
+                matchingProperty.SetValue(section, "");
+            }
+        }
+
+        var uploadRequestType = assets.GetType();
+        foreach (var property in uploadRequestType.GetProperties())
+        {
+            var file = property.GetValue(assets) as IFormFile;
+            if (file != null)
+            {
+                string url = await UploadFileAsync(file, $"{bucketKey}/{property.Name.ToLowerInvariant()}");
+                var matchingProperty = sectionType.GetProperty(property.Name);
+                if (matchingProperty != null)
+                {
+                    matchingProperty.SetValue(section, url);
+                }
+            }
+        }
+    }
+
 }

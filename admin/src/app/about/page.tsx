@@ -17,11 +17,11 @@ import {
 import { FileInput } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  PostSectionAboutAssetsBody,
-  PostSectionAboutMutationBody,
-  useGetSectionAbout,
-  usePostSectionAbout,
-  usePostSectionAboutAssets,
+  PostAboutAssetsBody,
+  PostAboutMutationBody,
+  useGetAbout,
+  usePostAbout,
+  usePostAboutAssets,
 } from "@/generated/endpoints";
 import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { Save } from "lucide-react";
@@ -48,21 +48,18 @@ const assetsInputSchema = [
 
 const About = () => {
   const { selectedDomain, selectedLanguage, selectedConfig } = useDataContext();
-  const [uploadedAssets, setUploadedAssets] =
-    useState<PostSectionAboutAssetsBody>({});
+  const [uploadedAssets, setUploadedAssets] = useState<PostAboutAssetsBody>({});
   const [deletedAssets, setDeletedAssets] = useState<Record<string, boolean>>(
     {},
   );
-  const form = useForm<
-    PostSectionAboutMutationBody & PostSectionAboutAssetsBody
-  >();
+  const form = useForm<PostAboutMutationBody & PostAboutAssetsBody>();
 
-  const { data: aboutSection, refetch } = useGetSectionAbout({
+  const { data: aboutSection, refetch } = useGetAbout({
     Key: selectedDomain,
     Language: selectedLanguage,
   });
-  const { mutateAsync: uploadAbout } = usePostSectionAbout();
-  const { mutateAsync: uploadAboutAssets } = usePostSectionAboutAssets();
+  const { mutateAsync: uploadAbout } = usePostAbout();
+  const { mutateAsync: uploadAboutAssets } = usePostAboutAssets();
 
   useEffect(() => {
     if (!aboutSection) return;
@@ -77,7 +74,7 @@ const About = () => {
     });
   }, [aboutSection, form, selectedConfig?.languages, selectedLanguage]);
 
-  async function onSubmit(data: PostSectionAboutMutationBody) {
+  async function onSubmit(data: PostAboutMutationBody) {
     await uploadAbout({
       data: {
         localizedFields: mapToLocalizedFields(

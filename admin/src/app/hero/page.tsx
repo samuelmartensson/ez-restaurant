@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/form";
 import { FileInput, Input } from "@/components/ui/input";
 import {
-  PostSectionHeroAssetsMutationBody,
-  PostSectionHeroMutationBody,
-  useGetSectionHero,
-  usePostSectionHero,
-  usePostSectionHeroAssets,
+  PostHeroAssetsMutationBody,
+  PostHeroMutationBody,
+  useGetHero,
+  usePostHero,
+  usePostHeroAssets,
 } from "@/generated/endpoints";
 import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { Save } from "lucide-react";
@@ -67,18 +67,16 @@ const Hero = () => {
   const [deletedAssets, setDeletedAssets] = useState<Record<string, boolean>>(
     {},
   );
-  const form = useForm<
-    PostSectionHeroMutationBody & PostSectionHeroAssetsMutationBody
-  >({
+  const form = useForm<PostHeroMutationBody & PostHeroAssetsMutationBody>({
     defaultValues: {
       Image: "",
       orderUrl: "",
     },
   });
 
-  const { mutateAsync: uploadHero } = usePostSectionHero();
-  const { mutateAsync: uploadHeroAssets } = usePostSectionHeroAssets();
-  const { data: hero, refetch } = useGetSectionHero({
+  const { mutateAsync: uploadHero } = usePostHero();
+  const { mutateAsync: uploadHeroAssets } = usePostHeroAssets();
+  const { data: hero, refetch } = useGetHero({
     Key: selectedDomain,
     Language: selectedLanguage,
   });
@@ -103,7 +101,7 @@ const Hero = () => {
     });
   }, [form, hero, selectedConfig?.languages, selectedLanguage]);
 
-  async function onSubmit(data: PostSectionHeroMutationBody) {
+  async function onSubmit(data: PostHeroMutationBody) {
     await uploadHero({
       data: {
         localizedFields: mapToLocalizedFields(
@@ -158,7 +156,7 @@ const Hero = () => {
                         <FormItem>
                           <FormLabel>{input.label}</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} value={field.value ?? ""} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

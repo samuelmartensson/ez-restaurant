@@ -2,8 +2,8 @@ using System.Security.Claims;
 using Clerk.Net.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Stripe;
@@ -52,17 +52,10 @@ builder.Services.AddClerkApiClient(config =>
     config.SecretKey = Environment.GetEnvironmentVariable("CLERK_SECRET_KEY") ?? "";
 });
 
-builder.Services.AddControllers();
-builder.Services.AddCors(options =>
-  {
-      options.AddPolicy("Prod",
-          builder => builder
-                .WithOrigins("https://*.ezrest.se", "https://ez-restaurant-admin.vercel.app", "https://www.ezrest.se")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-              );
-  });
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new ProducesAttribute("application/json"));
+});
 
 builder.Services.AddCors(options =>
 {
@@ -71,6 +64,14 @@ builder.Services.AddCors(options =>
             .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod());
+
+    options.AddPolicy("Prod",
+        builder => builder
+              .WithOrigins("https://*.ezrest.se", "https://ez-restaurant-admin.vercel.app", "https://www.ezrest.se")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+            );
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -112,7 +113,10 @@ builder.Services.AddScoped<SiteConfigurationService>();
 builder.Services.AddScoped<S3Service>();
 builder.Services.AddScoped<VercelService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<SectionConfigurationService>();
+builder.Services.AddScoped<GalleryService>();
+builder.Services.AddScoped<AboutService>();
+builder.Services.AddScoped<HeroService>();
+builder.Services.AddScoped<NewsArticleService>();
 builder.Services.AddScoped<OpeningHourService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<TranslationService>();

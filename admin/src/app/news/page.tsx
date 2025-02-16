@@ -13,10 +13,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  PostSectionNewsMutationBody,
-  useDeleteSectionNewsId,
-  useGetSectionNews,
-  usePostSectionNews,
+  PostNewsArticleMutationBody,
+  useDeleteNewsArticleId,
+  useGetNewsArticle,
+  usePostNewsArticle,
 } from "@/generated/endpoints";
 import { useForm } from "react-hook-form";
 import {
@@ -58,17 +58,17 @@ const News = () => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(-1);
   const { selectedDomain, selectedLanguage } = useDataContext();
-  const form = useForm<PostSectionNewsMutationBody>();
+  const form = useForm<PostNewsArticleMutationBody>();
 
-  const { data, refetch } = useGetSectionNews({
+  const { data, refetch } = useGetNewsArticle({
     Key: selectedDomain,
     Language: selectedLanguage,
   });
 
-  const { mutateAsync: addNewsArticle } = usePostSectionNews();
-  const { mutateAsync: deleteNewsArticle } = useDeleteSectionNewsId();
+  const { mutateAsync: addNewsArticle } = usePostNewsArticle();
+  const { mutateAsync: deleteNewsArticle } = useDeleteNewsArticleId();
 
-  async function onSubmit(data: PostSectionNewsMutationBody) {
+  async function onSubmit(data: PostNewsArticleMutationBody) {
     await addNewsArticle({
       data,
       params: { Key: selectedDomain, Language: selectedLanguage },

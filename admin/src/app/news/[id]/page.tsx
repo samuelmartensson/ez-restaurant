@@ -20,10 +20,10 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AddNewsArticleRequest,
-  PutSectionNewsIdAssetsBody,
-  useGetSectionNewsId,
-  usePutSectionNewsId,
-  usePutSectionNewsIdAssets,
+  PutNewsArticleIdAssetsBody,
+  useGetNewsArticleId,
+  usePutNewsArticleId,
+  usePutNewsArticleIdAssets,
 } from "@/generated/endpoints";
 import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { ChevronLeft, Save } from "lucide-react";
@@ -59,26 +59,26 @@ const News = () => {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { selectedDomain, selectedLanguage, selectedConfig } = useDataContext();
-  const form = useForm<AddNewsArticleRequest & PutSectionNewsIdAssetsBody>({
+  const form = useForm<AddNewsArticleRequest & PutNewsArticleIdAssetsBody>({
     defaultValues: {
       published: false,
     },
   });
 
   const [uploadedAssets, setUploadedAssets] =
-    useState<PutSectionNewsIdAssetsBody>({});
+    useState<PutNewsArticleIdAssetsBody>({});
   const [deletedAssets, setDeletedAssets] = useState<Record<string, boolean>>(
     {},
   );
   const articleId = Number(params.id);
 
-  const { data: articleData, refetch } = useGetSectionNewsId(articleId, {
+  const { data: articleData, refetch } = useGetNewsArticleId(articleId, {
     Key: selectedDomain,
     Language: selectedLanguage,
   });
 
-  const { mutateAsync: updateNewsArticle } = usePutSectionNewsId();
-  const { mutateAsync: updateNewsArticleAssets } = usePutSectionNewsIdAssets();
+  const { mutateAsync: updateNewsArticle } = usePutNewsArticleId();
+  const { mutateAsync: updateNewsArticleAssets } = usePutNewsArticleIdAssets();
 
   useEffect(() => {
     if (!articleData) return;

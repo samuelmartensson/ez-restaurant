@@ -5,18 +5,15 @@ using Models.Requests;
 
 namespace webapi.Controllers;
 
+[Authorize(Policy = "KeyPolicy")]
 [ApiController]
 [Route("[controller]")]
-public class MenuController(
-    MenuService menuService
-) : ControllerBase
+public class MenuController(MenuService menuService) : ControllerBase
 {
     private MenuService menuService = menuService;
 
-    [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("items")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadCustomerMenu([FromForm] string menuItemsJson, [FromForm] List<IFormFile> files, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
@@ -24,10 +21,8 @@ public class MenuController(
         return Ok(new { message = "Success" });
     }
 
-    [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("category")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AddCategory(AddCategoryRequest request, [FromQuery, Required] CommonQueryParameters queryParameters)
     {
@@ -35,10 +30,8 @@ public class MenuController(
         return Ok(new { message = "Success" });
     }
 
-    [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpPost("category/order")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateCategoryOrder(List<AddCategoryRequest> request, [FromQuery, Required] string key)
     {
@@ -46,24 +39,13 @@ public class MenuController(
         return Ok(new { message = "Success" });
     }
 
-    [Authorize(Policy = "KeyPolicy")]
     [RequireSubscription(SubscriptionState.Free)]
     [HttpDelete("category")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteCategory([FromQuery] int id, [FromQuery, Required] string key)
     {
         await menuService.DeleteCategory(id, key);
         return Ok(new { message = "Success" });
     }
-    // [Authorize(Policy = "KeyPolicy")]
-    [HttpPost("importqoplamenu")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> ImportQoplaMenu([FromQuery] string url)
-    {
-        return Ok(new { message = await QoplaService.FetchQoplaMenu(url) });
-    }
-
 }
 
