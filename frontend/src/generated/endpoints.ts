@@ -427,6 +427,7 @@ export interface CustomerConfigMetaResponse {
   currency?: string;
   defaultLanguage?: string;
   domain?: string;
+  hasMenu?: boolean;
   /** @nullable */
   image?: string | null;
   languages?: string[];

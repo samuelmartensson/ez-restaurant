@@ -23,7 +23,7 @@ const Subscription = () => {
 
   const periodEnd =
     customer?.cancelInfo?.periodEnd &&
-    new Date(customer?.cancelInfo?.periodEnd).toLocaleString();
+    new Date(customer.cancelInfo.periodEnd).toLocaleDateString();
 
   if (!customer) return null;
 

@@ -1,10 +1,9 @@
 import { Navigation } from "@/components/Navigation";
 import { CustomerConfigResponse } from "@/generated/endpoints";
-import { getCustomerConfig } from "@/mock_db";
+import { getCustomerConfig, getCustomerMeta } from "@/mock_db";
 import "./globals.css";
 import DomainNotFound from "@/components/DomainNotFound";
 import Footer from "@/components/Footer";
-import { Metadata } from "next";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 const themes = (font: string) =>
@@ -41,23 +40,13 @@ const FontInitializer = ({
   );
 };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const data = await getCustomerConfig();
-
-  return {
-    title: {
-      template: `%s | ${data?.siteName}`,
-      default: data?.siteName ?? "",
-    },
-  };
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const data = await getCustomerConfig();
+  const meta = await getCustomerMeta();
   if (!data?.ok) return <DomainNotFound />;
 
   const resolvedFont = data.font ? "Customer" : "Roboto";
@@ -78,7 +67,7 @@ export default async function RootLayout({
       />
       <FontInitializer fontUrl={data.font} />
       <body className="antialiased relative">
-        <Navigation data={data} />
+        <Navigation data={data} meta={meta} />
         {children}
         <Footer data={data} />
       </body>

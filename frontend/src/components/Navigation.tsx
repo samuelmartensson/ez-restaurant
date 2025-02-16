@@ -11,10 +11,17 @@ import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { gtagEvent } from "@/utils";
+import { CustomerConfigMetaResponse } from "@/generated/endpoints";
 
 let timer: NodeJS.Timeout | null = null;
 
-const MobileNavigation = ({ data }: { data: SiteConfig }) => {
+const MobileNavigation = ({
+  data,
+  meta,
+}: {
+  data: SiteConfig;
+  meta: CustomerConfigMetaResponse;
+}) => {
   const [expanded, setExpanded] = useState(false);
   const { menu, gallery, news, aboutTitle, orderNow } =
     data.siteTranslations || {};
@@ -81,19 +88,22 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
               )}
             </Link>
             <Separator className="bg-primary/25" />
-            <Button
-              className="justify-start"
-              onClick={() => setExpanded(false)}
-              asChild
-              variant="ghost"
-            >
-              <Link
-                href="/menu"
-                onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Navigation")}
+            {meta?.hasMenu && (
+              <Button
+                className="justify-start"
+                onClick={() => setExpanded(false)}
+                asChild
+                variant="ghost"
               >
-                <Menu className="md:!size-5" /> {menu ?? "MENU"}
-              </Link>
-            </Button>
+                <Link
+                  href="/menu"
+                  onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Navigation")}
+                >
+                  <Menu className="md:!size-5" /> {menu ?? "MENU"}
+                </Link>
+              </Button>
+            )}
+
             <Button
               className="justify-start"
               onClick={() => setExpanded(false)}
@@ -153,7 +163,13 @@ const MobileNavigation = ({ data }: { data: SiteConfig }) => {
   );
 };
 
-export function Navigation({ data }: { data: SiteConfig }) {
+export function Navigation({
+  data,
+  meta,
+}: {
+  data: SiteConfig;
+  meta: CustomerConfigMetaResponse;
+}) {
   const pathname = usePathname();
   const { menu, aboutTitle, news, orderNow, gallery } =
     data.siteTranslations || {};
@@ -253,29 +269,31 @@ export function Navigation({ data }: { data: SiteConfig }) {
               <span className="mr-4 font-bold text-xl">{data.siteName}</span>
             )}
           </Link>
-          <div className="">
-            <Button
-              size="default"
-              className={cn(
-                "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
-                pathname === "/menu" && "border-primary"
-              )}
-              asChild
-              variant="ghost"
-            >
-              <Link
-                href="/menu"
-                onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Navigation")}
+          <div>
+            {meta?.hasMenu && (
+              <Button
+                size="default"
+                className={cn(
+                  "w-22 flex-col gap-1.5 border-b-2 border-transparent duration-500 text-accent-foreground/70 text-sm h-auto py-4 rounded-none",
+                  pathname === "/menu" && "border-primary"
+                )}
+                asChild
+                variant="ghost"
               >
-                <Menu
-                  className={cn(
-                    "md:!size-5 text-accent-foreground",
-                    pathname === "/menu" && "text-primary"
-                  )}
-                />{" "}
-                {menu ?? "MENU"}
-              </Link>
-            </Button>
+                <Link
+                  href="/menu"
+                  onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Navigation")}
+                >
+                  <Menu
+                    className={cn(
+                      "md:!size-5 text-accent-foreground",
+                      pathname === "/menu" && "text-primary"
+                    )}
+                  />{" "}
+                  {menu ?? "MENU"}
+                </Link>
+              </Button>
+            )}
             <Button
               size="default"
               className={cn(

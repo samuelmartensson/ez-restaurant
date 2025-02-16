@@ -2,15 +2,16 @@ import ContactForm from "@/components/ContactForm";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
 import NewsWidget from "@/components/NewsWidget";
-import { getCustomerConfig } from "@/mock_db";
+import { getCustomerConfig, getCustomerMeta } from "@/mock_db";
 
 export default async function Home() {
   const data = await getCustomerConfig();
+  const meta = await getCustomerMeta();
   if (!data) return null;
 
   return (
     <main>
-      <Hero data={data} />
+      <Hero data={data} meta={meta} />
       {(data.sections?.newsArticles ?? [])?.length > 0 && (
         <div className="py-16 px-2 bg-gray-100">
           <NewsWidget

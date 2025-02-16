@@ -1,12 +1,21 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { CustomerConfigResponse } from "@/generated/endpoints";
+import {
+  CustomerConfigMetaResponse,
+  CustomerConfigResponse,
+} from "@/generated/endpoints";
 import { gtagEvent } from "@/utils";
 import { ChevronDown, HandPlatter, Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-const Hero = ({ data }: { data: CustomerConfigResponse }) => {
+const Hero = ({
+  data,
+  meta,
+}: {
+  data: CustomerConfigResponse;
+  meta: CustomerConfigMetaResponse | null;
+}) => {
   const { orderNow, menu, openHoursToday, openHoursCta } =
     data.siteTranslations || {};
   const heroSection = data?.sections?.hero;
@@ -36,20 +45,22 @@ const Hero = ({ data }: { data: CustomerConfigResponse }) => {
             {data.siteMetaTitle}
           </p>
           <div className="grid gap-2 grid-flow-col">
-            <Button
-              size="lg"
-              asChild
-              variant="outline"
-              className="bg-transparent text-background"
-            >
-              <Link
-                href="/menu"
-                onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Home page")}
+            {meta?.hasMenu && (
+              <Button
+                size="lg"
+                asChild
+                variant="outline"
+                className="bg-transparent text-background"
               >
-                <Menu className="!size-6" />
-                {menu ?? "Menu"}
-              </Link>
-            </Button>
+                <Link
+                  href="/menu"
+                  onClick={() => gtagEvent((c) => c.MENU_CLICKS, "Home page")}
+                >
+                  <Menu className="!size-6" />
+                  {menu ?? "Menu"}
+                </Link>
+              </Button>
+            )}
             {heroSection?.orderUrl && (
               <Button size="lg" asChild>
                 <Link
