@@ -79,7 +79,11 @@ const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="EZ Pizza" {...field} />
+                    <Input
+                      placeholder="EZ Pizza"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
