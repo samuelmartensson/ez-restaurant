@@ -282,7 +282,9 @@ public class PublicController(
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
 
         var translations = await context.Translations
-            .Where(t => t.LanguageCode == queryParameters.Language && (t.Key.StartsWith("menu_item") || t.Key.StartsWith("menu_category")))
+            .Where(t => t.CustomerConfigDomain == customerConfig.Domain &&
+                        t.LanguageCode == queryParameters.Language &&
+                        (t.Key.StartsWith("menu_item") || t.Key.StartsWith("menu_category")))
             .ToListAsync();
 
         var translationMap = translations.ToDictionary(t => t.Key);

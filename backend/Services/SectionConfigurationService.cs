@@ -251,11 +251,17 @@ public class SectionConfigurationService(RestaurantContext context, S3Service s3
         var articles = await context.NewsArticles
             .Where((x) => x.CustomerConfigDomain == queryParameters.Key).OrderBy(a => a.UpdatedAt).Reverse().ToListAsync();
 
+        var translations = await context.Translations
+            .Where(t => t.CustomerConfigDomain == queryParameters.Key &&
+                        t.LanguageCode == queryParameters.Language &&
+                        t.Key.StartsWith("news_"))
+            .ToListAsync();
+
         return articles?.Select(a => new NewsArticleResponse
         {
             Id = a.Id,
-            Title = a.Title,
-            Content = a.Content,
+            Title = translations.FirstOrDefault(t => t.Key == $"news_title_{a.Id}")?.Value ?? a.Title,
+            Content = translations.FirstOrDefault(t => t.Key == $"news_content_{a.Id}")?.Value ?? a.Content,
             Date = a.Date,
             UpdatedAt = a.UpdatedAt,
             Published = a.Published
