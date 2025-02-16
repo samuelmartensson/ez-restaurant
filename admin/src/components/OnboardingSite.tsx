@@ -13,8 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   postCustomerLanguages,
-  PostSectionHeroMutationBody,
-  usePostSectionHero,
+  PostHeroMutationBody,
+  usePostHero,
 } from "@/generated/endpoints";
 import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { useForm } from "react-hook-form";
@@ -23,11 +23,11 @@ import { useState } from "react";
 
 const OnboardingSite = ({ onNextClick }: { onNextClick: () => void }) => {
   const { selectedDomain, selectedLanguage, selectedConfig } = useDataContext();
-  const { mutateAsync: uploadHero, isPending } = usePostSectionHero();
-  const form = useForm<PostSectionHeroMutationBody>();
+  const { mutateAsync: uploadHero, isPending } = usePostHero();
+  const form = useForm<PostHeroMutationBody>();
   const [defaultLanguageValue, setDefaultLanguage] = useState("");
 
-  async function onSubmit(data: PostSectionHeroMutationBody) {
+  async function onSubmit(data: PostHeroMutationBody) {
     await uploadHero({
       params: { key: selectedDomain },
       data: {
