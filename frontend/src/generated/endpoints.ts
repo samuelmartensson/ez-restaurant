@@ -5,18 +5,27 @@
  * OpenAPI spec version: 1.0
  */
 import { authorizedFetch } from "../authorized-fetch";
-export type PutSectionNewsIdBody = {
-  Content?: string;
+export type PutSectionNewsIdAssetsBody = {
   Image?: Blob;
-  Published?: boolean;
-  RemoveImage?: boolean;
-  Title?: string;
+  removedAssets?: string[];
+};
+
+export type PutSectionNewsIdAssetsParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PutSectionNewsIdParams = {
   Key: string;
   Language: string;
 };
+
+export type DeleteSectionNewsIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetSectionNewsId200 = { [key: string]: NewsArticleResponse };
 
 export type GetSectionNewsIdParams = {
   Key: string;
@@ -48,10 +57,14 @@ export type PostSectionGalleryParams = {
   Language: string;
 };
 
-export type PostSectionAboutBody = {
-  Description?: string;
+export type PostSectionAboutAssetsBody = {
   Image?: Blob;
   removedAssets?: string[];
+};
+
+export type PostSectionAboutAssetsParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PostSectionAboutParams = {
@@ -59,14 +72,32 @@ export type PostSectionAboutParams = {
   Language: string;
 };
 
-export type PostSectionHeroBody = {
+export type GetSectionAbout200 = { [key: string]: AboutResponse };
+
+export type GetSectionAboutParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostSectionHeroAssetsBody = {
   Image?: Blob;
-  OrderUrl?: string;
   removedAssets?: string[];
+};
+
+export type PostSectionHeroAssetsParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PostSectionHeroParams = {
   key: string;
+};
+
+export type GetSectionHero200 = { [key: string]: HeroResponse };
+
+export type GetSectionHeroParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PostPublicContactParams = {
@@ -76,11 +107,13 @@ export type PostPublicContactParams = {
 export type GetPublicGetCustomerMenuParams = {
   Key: string;
   Language: string;
+  cache?: boolean;
 };
 
 export type GetPublicGetCustomerConfigParams = {
   Key: string;
   Language: string;
+  cache?: boolean;
 };
 
 export type GetPublicGetCustomerTranslationsParams = {
@@ -136,6 +169,10 @@ export type PostMenuItemsParams = {
   Language: string;
 };
 
+export type GetCustomerAnalyticsParams = {
+  key: string;
+};
+
 export type DeleteCustomerDomainParams = {
   key: string;
 };
@@ -176,8 +213,6 @@ export type PostCustomerSiteConfigurationBody = {
   Logo?: string;
   MapUrl?: string;
   Phone?: string;
-  SiteMetaTitle?: string;
-  SiteName?: string;
   Theme?: string;
   ThemeColorConfig?: string;
   TiktokUrl?: string;
@@ -191,6 +226,36 @@ export type PostCustomerSiteConfigurationParams = {
 export type DeleteCustomerConfigParams = {
   key: string;
 };
+
+export interface UploadHeroLocalizedFields {
+  /** @nullable */
+  siteMetaTitle?: string | null;
+  /** @nullable */
+  siteName?: string | null;
+}
+
+export type UploadHeroRequestLocalizedFields = {
+  [key: string]: UploadHeroLocalizedFields;
+};
+
+export interface UploadHeroRequest {
+  localizedFields?: UploadHeroRequestLocalizedFields;
+  /** @nullable */
+  orderUrl?: string | null;
+}
+
+export interface UploadAboutLocalizedFields {
+  /** @nullable */
+  description?: string | null;
+}
+
+export type UploadAboutRequestLocalizedFields = {
+  [key: string]: UploadAboutLocalizedFields;
+};
+
+export interface UploadAboutRequest {
+  localizedFields?: UploadAboutRequestLocalizedFields;
+}
 
 export type SubscriptionState =
   (typeof SubscriptionState)[keyof typeof SubscriptionState];
@@ -213,6 +278,7 @@ export interface SiteTranslationsResponse {
   news?: string;
   openHours?: string;
   openHoursCta?: string;
+  openHoursToday?: string;
   orderNow?: string;
   readMore?: string;
   saturday?: string;
@@ -225,6 +291,8 @@ export interface SiteTranslationsResponse {
 export interface SiteSectionHeroResponse {
   heroImage?: string;
   orderUrl?: string;
+  siteMetaTitle?: string;
+  siteName?: string;
 }
 
 export interface SiteSectionGalleryResponse {
@@ -236,6 +304,13 @@ export interface SiteSectionAboutResponse {
   aboutTitle?: string;
   description?: string;
   image?: string;
+}
+
+export interface SectionsResponse {
+  about?: SiteSectionAboutResponse;
+  gallery?: SiteSectionGalleryResponse[];
+  hero?: SiteSectionHeroResponse;
+  newsArticles?: NewsArticleResponse[];
 }
 
 export interface SectionVisibilityResponse {
@@ -261,13 +336,6 @@ export interface NewsArticleResponse {
   published?: boolean;
   title?: string;
   updatedAt?: string;
-}
-
-export interface SectionsResponse {
-  about?: SiteSectionAboutResponse;
-  gallery?: SiteSectionGalleryResponse[];
-  hero?: SiteSectionHeroResponse;
-  newsArticles?: NewsArticleResponse[];
 }
 
 export interface MenuItemResponse {
@@ -299,12 +367,11 @@ export interface MenuResponse {
   menuItems: MenuItemResponse[];
 }
 
-export interface CustomerResponse {
-  cancelInfo?: CancelInfo;
-  customerConfigs?: CustomerConfigResponse[];
-  domain?: string;
-  isFirstSignIn?: boolean;
-  subscription?: SubscriptionState;
+export interface HeroResponse {
+  heroImage?: string;
+  orderUrl?: string;
+  siteMetaTitle?: string;
+  siteName?: string;
 }
 
 export interface CustomerConfigTranslations {
@@ -346,6 +413,14 @@ export interface CustomerConfigResponse {
   themeColorConfig?: string | null;
   /** @nullable */
   tiktokUrl?: string | null;
+}
+
+export interface CustomerResponse {
+  cancelInfo?: CancelInfo;
+  customerConfigs?: CustomerConfigResponse[];
+  domain?: string;
+  isFirstSignIn?: boolean;
+  subscription?: SubscriptionState;
 }
 
 export interface CustomerConfigMetaResponse {
@@ -390,6 +465,21 @@ export interface CancelInfo {
   periodEnd?: string | null;
 }
 
+export type AnalyticsResponsePreviousMenu = { [key: string]: string };
+
+export type AnalyticsResponsePrevious = { [key: string]: string };
+
+export type AnalyticsResponseCurrentMenu = { [key: string]: string };
+
+export type AnalyticsResponseCurrent = { [key: string]: string };
+
+export interface AnalyticsResponse {
+  current?: AnalyticsResponseCurrent;
+  currentMenu?: AnalyticsResponseCurrentMenu;
+  previous?: AnalyticsResponsePrevious;
+  previousMenu?: AnalyticsResponsePreviousMenu;
+}
+
 export interface AddOpeningHourRequest {
   closeTime?: string;
   id?: number;
@@ -399,13 +489,19 @@ export interface AddOpeningHourRequest {
   openTime?: string;
 }
 
-export interface AddNewsArticleRequest {
+export interface AddNewsArticleLocalizedFields {
   content?: string;
-  /** @nullable */
-  image?: Blob | null;
+  title?: string;
+}
+
+export type AddNewsArticleRequestLocalizedFields = {
+  [key: string]: AddNewsArticleLocalizedFields;
+};
+
+export interface AddNewsArticleRequest {
+  localizedFields?: AddNewsArticleRequestLocalizedFields;
   published?: boolean;
   removeImage?: boolean;
-  title?: string;
 }
 
 export interface AddCategoryRequest {
@@ -415,6 +511,11 @@ export interface AddCategoryRequest {
   name?: string;
   /** @nullable */
   order?: number | null;
+}
+
+export interface AboutResponse {
+  description?: string;
+  image?: string;
 }
 
 export const getCustomerCustomer = () => {
@@ -446,15 +547,6 @@ export const postCustomerSiteConfiguration = (
   params: PostCustomerSiteConfigurationParams,
 ) => {
   const formData = new FormData();
-  if (postCustomerSiteConfigurationBody.SiteName !== undefined) {
-    formData.append("SiteName", postCustomerSiteConfigurationBody.SiteName);
-  }
-  if (postCustomerSiteConfigurationBody.SiteMetaTitle !== undefined) {
-    formData.append(
-      "SiteMetaTitle",
-      postCustomerSiteConfigurationBody.SiteMetaTitle,
-    );
-  }
   if (postCustomerSiteConfigurationBody.Theme !== undefined) {
     formData.append("Theme", postCustomerSiteConfigurationBody.Theme);
   }
@@ -575,6 +667,14 @@ export const deleteCustomerDomain = (params: DeleteCustomerDomainParams) => {
   return authorizedFetch<void>({
     url: `/Customer/domain`,
     method: "DELETE",
+    params,
+  });
+};
+
+export const getCustomerAnalytics = (params: GetCustomerAnalyticsParams) => {
+  return authorizedFetch<AnalyticsResponse>({
+    url: `/Customer/analytics`,
+    method: "GET",
     params,
   });
 };
@@ -726,25 +826,43 @@ export const postPublicContact = (
   });
 };
 
+export const getSectionHero = (params: GetSectionHeroParams) => {
+  return authorizedFetch<GetSectionHero200>({
+    url: `/Section/hero`,
+    method: "GET",
+    params,
+  });
+};
+
 export const postSectionHero = (
-  postSectionHeroBody: PostSectionHeroBody,
+  uploadHeroRequest: UploadHeroRequest,
   params: PostSectionHeroParams,
 ) => {
+  return authorizedFetch<void>({
+    url: `/Section/hero`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: uploadHeroRequest,
+    params,
+  });
+};
+
+export const postSectionHeroAssets = (
+  postSectionHeroAssetsBody: PostSectionHeroAssetsBody,
+  params: PostSectionHeroAssetsParams,
+) => {
   const formData = new FormData();
-  if (postSectionHeroBody.Image !== undefined) {
-    formData.append("Image", postSectionHeroBody.Image);
+  if (postSectionHeroAssetsBody.Image !== undefined) {
+    formData.append("Image", postSectionHeroAssetsBody.Image);
   }
-  if (postSectionHeroBody.removedAssets !== undefined) {
-    postSectionHeroBody.removedAssets.forEach((value) =>
+  if (postSectionHeroAssetsBody.removedAssets !== undefined) {
+    postSectionHeroAssetsBody.removedAssets.forEach((value) =>
       formData.append("removedAssets", value),
     );
   }
-  if (postSectionHeroBody.OrderUrl !== undefined) {
-    formData.append("OrderUrl", postSectionHeroBody.OrderUrl);
-  }
 
   return authorizedFetch<void>({
-    url: `/Section/hero`,
+    url: `/Section/hero/assets`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -752,25 +870,43 @@ export const postSectionHero = (
   });
 };
 
+export const getSectionAbout = (params: GetSectionAboutParams) => {
+  return authorizedFetch<GetSectionAbout200>({
+    url: `/Section/about`,
+    method: "GET",
+    params,
+  });
+};
+
 export const postSectionAbout = (
-  postSectionAboutBody: PostSectionAboutBody,
+  uploadAboutRequest: UploadAboutRequest,
   params: PostSectionAboutParams,
 ) => {
+  return authorizedFetch<void>({
+    url: `/Section/about`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: uploadAboutRequest,
+    params,
+  });
+};
+
+export const postSectionAboutAssets = (
+  postSectionAboutAssetsBody: PostSectionAboutAssetsBody,
+  params: PostSectionAboutAssetsParams,
+) => {
   const formData = new FormData();
-  if (postSectionAboutBody.Image !== undefined) {
-    formData.append("Image", postSectionAboutBody.Image);
+  if (postSectionAboutAssetsBody.Image !== undefined) {
+    formData.append("Image", postSectionAboutAssetsBody.Image);
   }
-  if (postSectionAboutBody.removedAssets !== undefined) {
-    postSectionAboutBody.removedAssets.forEach((value) =>
+  if (postSectionAboutAssetsBody.removedAssets !== undefined) {
+    postSectionAboutAssetsBody.removedAssets.forEach((value) =>
       formData.append("removedAssets", value),
     );
   }
-  if (postSectionAboutBody.Description !== undefined) {
-    formData.append("Description", postSectionAboutBody.Description);
-  }
 
   return authorizedFetch<void>({
-    url: `/Section/about`,
+    url: `/Section/about/assets`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -831,37 +967,55 @@ export const getSectionNewsId = (
   id: number,
   params: GetSectionNewsIdParams,
 ) => {
-  return authorizedFetch<NewsArticleResponse>({
+  return authorizedFetch<GetSectionNewsId200>({
     url: `/Section/news/${id}`,
     method: "GET",
     params,
   });
 };
 
+export const deleteSectionNewsId = (
+  id: number,
+  params: DeleteSectionNewsIdParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Section/news/${id}`,
+    method: "DELETE",
+    params,
+  });
+};
+
 export const putSectionNewsId = (
   id: number,
-  putSectionNewsIdBody: PutSectionNewsIdBody,
+  addNewsArticleRequest: AddNewsArticleRequest,
   params: PutSectionNewsIdParams,
 ) => {
+  return authorizedFetch<void>({
+    url: `/Section/news/${id}`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    data: addNewsArticleRequest,
+    params,
+  });
+};
+
+export const putSectionNewsIdAssets = (
+  id: number,
+  putSectionNewsIdAssetsBody: PutSectionNewsIdAssetsBody,
+  params: PutSectionNewsIdAssetsParams,
+) => {
   const formData = new FormData();
-  if (putSectionNewsIdBody.Title !== undefined) {
-    formData.append("Title", putSectionNewsIdBody.Title);
+  if (putSectionNewsIdAssetsBody.Image !== undefined) {
+    formData.append("Image", putSectionNewsIdAssetsBody.Image);
   }
-  if (putSectionNewsIdBody.Content !== undefined) {
-    formData.append("Content", putSectionNewsIdBody.Content);
-  }
-  if (putSectionNewsIdBody.Published !== undefined) {
-    formData.append("Published", putSectionNewsIdBody.Published.toString());
-  }
-  if (putSectionNewsIdBody.RemoveImage !== undefined) {
-    formData.append("RemoveImage", putSectionNewsIdBody.RemoveImage.toString());
-  }
-  if (putSectionNewsIdBody.Image !== undefined) {
-    formData.append("Image", putSectionNewsIdBody.Image);
+  if (putSectionNewsIdAssetsBody.removedAssets !== undefined) {
+    putSectionNewsIdAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
   }
 
   return authorizedFetch<void>({
-    url: `/Section/news/${id}`,
+    url: `/Section/news/${id}/assets`,
     method: "PUT",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -896,6 +1050,9 @@ export type PostCustomerDomainResult = NonNullable<
 >;
 export type DeleteCustomerDomainResult = NonNullable<
   Awaited<ReturnType<typeof deleteCustomerDomain>>
+>;
+export type GetCustomerAnalyticsResult = NonNullable<
+  Awaited<ReturnType<typeof getCustomerAnalytics>>
 >;
 export type PostMenuItemsResult = NonNullable<
   Awaited<ReturnType<typeof postMenuItems>>
@@ -936,11 +1093,23 @@ export type GetPublicGetCustomerMenuResult = NonNullable<
 export type PostPublicContactResult = NonNullable<
   Awaited<ReturnType<typeof postPublicContact>>
 >;
+export type GetSectionHeroResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionHero>>
+>;
 export type PostSectionHeroResult = NonNullable<
   Awaited<ReturnType<typeof postSectionHero>>
 >;
+export type PostSectionHeroAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionHeroAssets>>
+>;
+export type GetSectionAboutResult = NonNullable<
+  Awaited<ReturnType<typeof getSectionAbout>>
+>;
 export type PostSectionAboutResult = NonNullable<
   Awaited<ReturnType<typeof postSectionAbout>>
+>;
+export type PostSectionAboutAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof postSectionAboutAssets>>
 >;
 export type PostSectionGalleryResult = NonNullable<
   Awaited<ReturnType<typeof postSectionGallery>>
@@ -957,8 +1126,14 @@ export type PostSectionNewsResult = NonNullable<
 export type GetSectionNewsIdResult = NonNullable<
   Awaited<ReturnType<typeof getSectionNewsId>>
 >;
+export type DeleteSectionNewsIdResult = NonNullable<
+  Awaited<ReturnType<typeof deleteSectionNewsId>>
+>;
 export type PutSectionNewsIdResult = NonNullable<
   Awaited<ReturnType<typeof putSectionNewsId>>
+>;
+export type PutSectionNewsIdAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof putSectionNewsIdAssets>>
 >;
 export type PostWebhookResult = NonNullable<
   Awaited<ReturnType<typeof postWebhook>>

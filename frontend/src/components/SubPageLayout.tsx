@@ -17,7 +17,7 @@ const SubPageLayout = async ({
   if (!data) return null;
 
   return (
-    <div className="relative min-h-svh">
+    <div className="relative min-h-[70svh]">
       {data.image && (
         <div className="absolute inset-0 bg-white">
           <Image
@@ -31,7 +31,7 @@ const SubPageLayout = async ({
       )}
       <div
         className={cn(
-          "relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-md m-auto z-10",
+          "relative pt-8 md:pt-36 pb-8 px-2 max-w-screen-lg m-auto z-10",
           className
         )}
       >

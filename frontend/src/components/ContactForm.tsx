@@ -28,8 +28,8 @@ export default function ContactForm({
   const heroSection = data?.sections?.hero;
 
   return (
-    <div className="bg-gray-50">
-      <section className="py-12 max-w-screen-xl mx-auto">
+    <div className="bg-accent grid place-items-center">
+      <section className="py-12 max-w-screen-xl mx-auto rounded-3xl">
         <div className="container px-4">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="w-full md:w-1/2">

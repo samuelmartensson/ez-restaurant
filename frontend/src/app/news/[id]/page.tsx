@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 import SubPageLayout from "@/components/SubPageLayout";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { getCustomerConfig } from "@/mock_db";
 import { Fragment } from "react";
 
@@ -21,28 +20,36 @@ const NewsId = async ({ params }: { params: Promise<{ id: string }> }) => {
     );
 
   return (
-    <SubPageLayout title={article.title}>
+    <SubPageLayout title={news}>
       <title>{`${news} | ${data?.siteName}`}</title>
-      <div className="container gap-2 grid mx-auto">
-        <Card key={article.id} className="border-none">
-          <CardContent className="pt-6 flex flex-col gap-4">
-            {article.image && (
-              <img
-                className="w-full max-h-96 rounded-lg object-cover"
-                src={article.image}
-                alt=""
-              />
-            )}
-            <CardDescription className="text-foreground text-base text-pretty">
+      <div className="gap-2 grid mx-auto">
+        <div className="w-full h-full flex md:flex-row flex-col rounded-3xl bg-white">
+          {article.image && (
+            <img
+              className="md:m-5 md:rounded-2xl rounded-3xl md:size-80 md:aspect-square w-full h-80 object-cover"
+              src={article.image}
+              alt=""
+            />
+          )}
+          <div className="p-5 grid content-start">
+            <div className="text-sm text-foreground/40 mb-3">
+              {new Date(article.date ?? "").toLocaleDateString("sv-SE", {
+                dateStyle: "long",
+              })}
+            </div>
+            <div className="mb-2 text-3xl font-bold font-customer">
+              {article.title}
+            </div>
+            <div className="flex gap-4 mb-4 leading-relaxed">
               {article.content?.split("\n")?.map((line, index) => (
                 <Fragment key={index}>
                   {line}
                   <br />
                 </Fragment>
               ))}
-            </CardDescription>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </SubPageLayout>
   );

@@ -7,8 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 const Hero = ({ data }: { data: CustomerConfigResponse }) => {
-  const { orderNow, menu, openHoursCta } = data.siteTranslations || {};
+  const { orderNow, menu, openHoursToday, openHoursCta } =
+    data.siteTranslations || {};
   const heroSection = data?.sections?.hero;
+  const todaysOpenHour = data.openingHours?.find(
+    (item) => item.day === new Date().getDay() || 7
+  );
 
   return (
     <div className="relative grid place-items-center min-h-svh">
@@ -65,8 +69,12 @@ const Hero = ({ data }: { data: CustomerConfigResponse }) => {
       </div>
       <Link
         href="#open-hours"
-        className="absolute md:bottom-4 bottom-28 grid place-items-center text-white"
+        className="absolute md:bottom-4 bottom-16 grid place-items-center text-white"
       >
+        <div className="text-primary-foreground mb-2 font-bold">
+          {openHoursToday}: {todaysOpenHour?.openTime} -{" "}
+          {todaysOpenHour?.closeTime}
+        </div>
         <span>{openHoursCta ?? "Open hours"}</span>
         <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
       </Link>

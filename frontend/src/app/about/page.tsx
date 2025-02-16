@@ -14,30 +14,31 @@ const About = async () => {
   return (
     <SubPageLayout title={aboutSection.aboutTitle ?? ""}>
       <title>{`${aboutSection?.aboutTitle} | ${data?.meta.siteName}`}</title>
-      <div className="container mx-auto">
-        <Card className="border-none">
-          {!!aboutSection?.image && (
-            <div className="p-2">
-              <Image
-                src={aboutSection?.image ?? ""}
-                alt=""
-                width={600}
-                height={600}
-                className="m-auto w-full max-h-96 object-cover rounded-xl"
-              />
-            </div>
+      <div className="gap-2 grid mx-auto">
+        <div className="w-full h-full flex md:flex-row flex-col rounded-3xl bg-white">
+          {aboutSection.image && (
+            <Image
+              width={600}
+              height={600}
+              className="md:m-5 md:rounded-2xl rounded-3xl md:size-80 md:aspect-square w-full h-80 object-cover"
+              src={aboutSection.image}
+              alt=""
+            />
           )}
-          <CardContent className="p-8 grid gap-4 justify-items-start">
-            <CardDescription className="text-base mb-4 text-foreground text-pretty">
+          <div className="p-5 grid content-start">
+            <div className="mt-6 mb-2 text-3xl font-bold font-customer">
+              {aboutSection.aboutTitle}: {data.meta.siteName}
+            </div>
+            <div className="flex gap-4 mb-4 leading-relaxed">
               {descriptionLines?.map((line, index) => (
                 <Fragment key={index}>
                   {line}
                   <br />
                 </Fragment>
               ))}
-            </CardDescription>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </SubPageLayout>
   );

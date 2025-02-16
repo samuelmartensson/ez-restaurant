@@ -5,7 +5,6 @@ import {
 } from "@/generated/endpoints";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
 
 interface Props {
   translations: SiteTranslationsResponse;
@@ -25,39 +24,40 @@ const NewsWidget = ({ translations, articles }: Props) => {
 
           return (
             <div
-              className="w-full h-full border-l-2 border-primary p-8 flex flex-col bg-gray-50"
+              className="w-full h-full flex flex-col rounded-3xl bg-white"
               key={article.id}
             >
-              <div className="mb-4 text-2xl font-bold font-customer">
-                {article.title}
-              </div>
-              <div className="flex gap-4">
-                {article.image && (
-                  <img
-                    className="size-24 md:size-32 rounded-lg object-cover"
-                    src={article.image}
-                    alt=""
-                  />
-                )}
-                <div>{truncatedContent}</div>
-              </div>
-              <div className="flex justify-between mt-auto items-end pt-4">
-                <div className="text-sm text-muted-foreground">
+              {article.image && (
+                <img
+                  className="w-full h-80 rounded-3xl object-cover"
+                  src={article.image}
+                  alt=""
+                />
+              )}
+              <div className="p-5 grid">
+                <div className="text-sm text-foreground/40 mb-3">
                   {new Date(article.date ?? "").toLocaleDateString("sv-SE", {
-                    dateStyle: "medium",
+                    dateStyle: "long",
                   })}
                 </div>
-                <Button asChild variant="outline">
-                  <Link href={`/news/${article.id}`}>
-                    {translations.readMore}
-                  </Link>
-                </Button>
+                <div className="mb-2 text-3xl font-bold font-customer">
+                  {article.title}
+                </div>
+                <div className="flex gap-4 mb-4">
+                  <div className="leading-relaxed">{truncatedContent}</div>
+                </div>
+                <div className="justify-self-end flex justify-between mt-auto items-end pt-4">
+                  <Button asChild variant="secondary">
+                    <Link href={`/news/${article.id}`}>
+                      {translations.readMore}
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
-      <Separator className="mt-16 max-w-screen-lg mx-auto" />
     </div>
   );
 };

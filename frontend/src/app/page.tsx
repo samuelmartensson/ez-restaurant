@@ -11,12 +11,11 @@ export default async function Home() {
   return (
     <main>
       <Hero data={data} />
-
       {(data.sections?.newsArticles ?? [])?.length > 0 && (
-        <div className="pt-16 px-2">
+        <div className="py-16 px-2 bg-gray-100">
           <NewsWidget
             translations={data.siteTranslations || {}}
-            articles={data.sections?.newsArticles ?? []}
+            articles={data.sections?.newsArticles?.slice(0, 4) ?? []}
           />
         </div>
       )}
