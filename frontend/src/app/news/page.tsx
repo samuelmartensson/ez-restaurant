@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import NewsWidget from "@/components/NewsWidget";
 import SubPageLayout from "@/components/SubPageLayout";
 import { getCustomerConfig } from "@/mock_db";

@@ -1,5 +1,4 @@
 import SubPageLayout from "@/components/SubPageLayout";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { getAbout } from "@/mock_db";
 import Image from "next/image";
 import { Fragment } from "react";
