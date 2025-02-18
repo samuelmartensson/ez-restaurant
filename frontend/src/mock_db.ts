@@ -31,7 +31,7 @@ const resolveParams = async () => {
   const customerId = headerList.get(CUSTOMER_ID_HEADER);
   if (!customerId) return [null, null];
 
-  let selectedLanguage = cookieList.get("lang")?.value ?? "-";
+  let selectedLanguage = cookieList.get("lang")?.value ?? "";
   const configResponse = await getPublicGetCustomerConfigMeta({
     Key: customerId,
     Language: selectedLanguage,

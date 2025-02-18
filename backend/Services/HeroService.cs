@@ -14,7 +14,7 @@ public class HeroService(RestaurantContext context, S3Service s3Service, Transla
                     .Include(cf => cf.SiteSectionHero)
                     .FirstOrDefaultAsync((x) => x.Domain == key);
 
-        if (customerConfig?.SiteSectionHero == null)
+        if (customerConfig == null)
         {
             throw new Exception("CustomerConfig not found for the provided key.");
         }

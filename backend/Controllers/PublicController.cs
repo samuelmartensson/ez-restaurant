@@ -45,7 +45,7 @@ public class PublicController(
     [HttpGet("get-customer-config-meta")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CustomerConfigMetaResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCustomerConfigMeta([FromQuery, Required] string Key, [FromQuery, Required] string Language)
+    public async Task<IActionResult> GetCustomerConfigMeta([FromQuery, Required] string Key, [FromQuery] string? Language)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         var cf = await context.CustomerConfigs.Where((x) =>
@@ -65,16 +65,15 @@ public class PublicController(
         {
             return NotFound(new { message = "CustomerConfig not found for the provided key." });
         }
-        string resolvedLanguage = Language ?? cf.Languages.Split(",").First() ?? "";
+        string resolvedLanguage = Language ?? cf.Languages.Split(",").First() ?? cf.DefaultLanguage;
 
         if (string.IsNullOrEmpty(resolvedLanguage))
         {
             return BadRequest(new { message = "Language could not be resolved." });
         }
-
-
         stopwatch.Stop();
         Console.WriteLine($"GetCustomerMeta: {stopwatch.ElapsedMilliseconds} milliseconds");
+
 
         return Ok(new CustomerConfigMetaResponse
         {

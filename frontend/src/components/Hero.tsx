@@ -83,8 +83,14 @@ const Hero = ({
         className="absolute md:bottom-4 bottom-16 grid place-items-center text-white"
       >
         <div className="text-primary-foreground mb-2 font-bold">
-          {openHoursToday}: {todaysOpenHour?.openTime} -{" "}
-          {todaysOpenHour?.closeTime}
+          {todaysOpenHour?.isClosed ? "" : openHoursToday + ":"}
+          {todaysOpenHour?.isClosed ? (
+            ` ${data.siteTranslations?.closed}`
+          ) : (
+            <>
+              {todaysOpenHour?.openTime} - {todaysOpenHour?.closeTime}
+            </>
+          )}
         </div>
         <span>{openHoursCta ?? "Open hours"}</span>
         <ChevronDown className="animate-[bounce_3s_ease-in-out_infinite]" />
