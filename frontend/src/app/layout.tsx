@@ -1,10 +1,11 @@
-import { Navigation } from "@/components/Navigation";
-import { CustomerConfigResponse } from "@/generated/endpoints";
-import { getCustomerConfig, getCustomerMeta } from "@/mock_db";
-import "./globals.css";
 import DomainNotFound from "@/components/DomainNotFound";
 import Footer from "@/components/Footer";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { Navigation } from "@/components/Navigation";
+import { CustomerConfigResponse } from "@/generated/endpoints";
+import { getCustomerConfig, getCustomerMeta } from "@/mock_db";
+import { Metadata } from "next/types";
+import "./globals.css";
 
 const themes = (font: string) =>
   ({
@@ -39,6 +40,22 @@ const FontInitializer = ({
     >{`@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');`}</style>
   );
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  // read route params
+  const meta = await getCustomerMeta();
+
+  return {
+    icons: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: meta?.logo ?? "",
+      },
+    ],
+  };
+}
 
 export default async function RootLayout({
   children,

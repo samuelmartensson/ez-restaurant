@@ -58,6 +58,7 @@ public class PublicController(
                 x.SiteName,
                 x.Currency,
                 x.SiteSectionHero.Image,
+                x.Logo,
                 HasMenu = x.MenuCategorys.Count() > 0
             }).FirstOrDefaultAsync();
 
@@ -83,6 +84,7 @@ public class PublicController(
             SiteName = await translationService.GetByKey(resolvedLanguage, Key, "site:name") ?? cf.SiteName,
             Currency = cf.Currency,
             Image = cf.Image,
+            Logo = cf.Logo,
             HasMenu = cf.HasMenu
         });
     }

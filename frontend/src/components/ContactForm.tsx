@@ -29,8 +29,8 @@ export default function ContactForm({
 
   return (
     <div className="bg-accent grid place-items-center">
-      <section className="py-12 max-w-screen-xl mx-auto rounded-3xl">
-        <div className="container px-4">
+      <section className="py-12 w-full max-w-screen-xl mx-auto rounded-3xl">
+        <div className="px-4">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="w-full md:w-1/2">
               {heroSection?.heroImage ? (

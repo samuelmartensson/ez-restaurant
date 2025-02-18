@@ -5,101 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 import { authorizedFetch } from "../authorized-fetch";
-export type PutSectionNewsIdAssetsBody = {
-  Image?: Blob;
-  removedAssets?: string[];
-};
-
-export type PutSectionNewsIdAssetsParams = {
-  Key: string;
-  Language: string;
-};
-
-export type PutSectionNewsIdParams = {
-  Key: string;
-  Language: string;
-};
-
-export type DeleteSectionNewsIdParams = {
-  Key: string;
-  Language: string;
-};
-
-export type GetSectionNewsId200 = { [key: string]: NewsArticleResponse };
-
-export type GetSectionNewsIdParams = {
-  Key: string;
-  Language: string;
-};
-
-export type PostSectionNewsParams = {
-  Key: string;
-  Language: string;
-};
-
-export type GetSectionNewsParams = {
-  Key: string;
-  Language: string;
-};
-
-export type DeleteSectionGalleryParams = {
-  id?: number;
-  Key: string;
-  Language: string;
-};
-
-export type PostSectionGalleryBody = {
-  Images?: Blob[];
-};
-
-export type PostSectionGalleryParams = {
-  Key: string;
-  Language: string;
-};
-
-export type PostSectionAboutAssetsBody = {
-  Image?: Blob;
-  removedAssets?: string[];
-};
-
-export type PostSectionAboutAssetsParams = {
-  Key: string;
-  Language: string;
-};
-
-export type PostSectionAboutParams = {
-  Key: string;
-  Language: string;
-};
-
-export type GetSectionAbout200 = { [key: string]: AboutResponse };
-
-export type GetSectionAboutParams = {
-  Key: string;
-  Language: string;
-};
-
-export type PostSectionHeroAssetsBody = {
-  Image?: Blob;
-  removedAssets?: string[];
-};
-
-export type PostSectionHeroAssetsParams = {
-  Key: string;
-  Language: string;
-};
-
-export type PostSectionHeroParams = {
-  key: string;
-};
-
-export type GetSectionHero200 = { [key: string]: HeroResponse };
-
-export type GetSectionHeroParams = {
-  Key: string;
-  Language: string;
-};
-
 export type PostPublicContactParams = {
   key: string;
 };
@@ -128,7 +33,7 @@ export type GetPublicAboutParams = {
 
 export type GetPublicGetCustomerConfigMetaParams = {
   Key: string;
-  Language: string;
+  Language?: string;
 };
 
 export type PostOpeningHourParams = {
@@ -141,8 +46,41 @@ export type GetOpeningHourParams = {
   Language: string;
 };
 
-export type PostMenuImportqoplamenuParams = {
-  url?: string;
+export type PutNewsArticleIdAssetsBody = {
+  Image?: Blob;
+  removedAssets?: string[];
+};
+
+export type PutNewsArticleIdAssetsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PutNewsArticleIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type DeleteNewsArticleIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetNewsArticleId200 = { [key: string]: NewsArticleResponse };
+
+export type GetNewsArticleIdParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostNewsArticleParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetNewsArticleParams = {
+  Key: string;
+  Language: string;
 };
 
 export type PostMenuCategoryOrderParams = {
@@ -165,6 +103,42 @@ export type PostMenuItemsBody = {
 };
 
 export type PostMenuItemsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostHeroAssetsBody = {
+  Image?: Blob;
+  removedAssets?: string[];
+};
+
+export type PostHeroAssetsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostHeroParams = {
+  key: string;
+};
+
+export type GetHero200 = { [key: string]: HeroResponse };
+
+export type GetHeroParams = {
+  Key: string;
+  Language: string;
+};
+
+export type DeleteGalleryParams = {
+  id?: number;
+  Key: string;
+  Language: string;
+};
+
+export type PostGalleryBody = {
+  Images?: Blob[];
+};
+
+export type PostGalleryParams = {
   Key: string;
   Language: string;
 };
@@ -225,6 +199,28 @@ export type PostCustomerSiteConfigurationParams = {
 
 export type DeleteCustomerConfigParams = {
   key: string;
+};
+
+export type PostAboutAssetsBody = {
+  Image?: Blob;
+  removedAssets?: string[];
+};
+
+export type PostAboutAssetsParams = {
+  Key: string;
+  Language: string;
+};
+
+export type PostAboutParams = {
+  Key: string;
+  Language: string;
+};
+
+export type GetAbout200 = { [key: string]: AboutResponse };
+
+export type GetAboutParams = {
+  Key: string;
+  Language: string;
 };
 
 export interface UploadHeroLocalizedFields {
@@ -431,6 +427,8 @@ export interface CustomerConfigMetaResponse {
   /** @nullable */
   image?: string | null;
   languages?: string[];
+  /** @nullable */
+  logo?: string | null;
   siteName?: string;
 }
 
@@ -518,6 +516,46 @@ export interface AboutResponse {
   description?: string;
   image?: string;
 }
+
+export const getAbout = (params: GetAboutParams) => {
+  return authorizedFetch<GetAbout200>({ url: `/About`, method: "GET", params });
+};
+
+export const postAbout = (
+  uploadAboutRequest: UploadAboutRequest,
+  params: PostAboutParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/About`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: uploadAboutRequest,
+    params,
+  });
+};
+
+export const postAboutAssets = (
+  postAboutAssetsBody: PostAboutAssetsBody,
+  params: PostAboutAssetsParams,
+) => {
+  const formData = new FormData();
+  if (postAboutAssetsBody.Image !== undefined) {
+    formData.append("Image", postAboutAssetsBody.Image);
+  }
+  if (postAboutAssetsBody.removedAssets !== undefined) {
+    postAboutAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/About/assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
 
 export const getCustomerCustomer = () => {
   return authorizedFetch<CustomerResponse>({
@@ -680,6 +718,68 @@ export const getCustomerAnalytics = (params: GetCustomerAnalyticsParams) => {
   });
 };
 
+export const postGallery = (
+  postGalleryBody: PostGalleryBody,
+  params: PostGalleryParams,
+) => {
+  const formData = new FormData();
+  if (postGalleryBody.Images !== undefined) {
+    postGalleryBody.Images.forEach((value) => formData.append("Images", value));
+  }
+
+  return authorizedFetch<void>({
+    url: `/Gallery`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
+export const deleteGallery = (params: DeleteGalleryParams) => {
+  return authorizedFetch<void>({ url: `/Gallery`, method: "DELETE", params });
+};
+
+export const getHero = (params: GetHeroParams) => {
+  return authorizedFetch<GetHero200>({ url: `/Hero`, method: "GET", params });
+};
+
+export const postHero = (
+  uploadHeroRequest: UploadHeroRequest,
+  params: PostHeroParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/Hero`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: uploadHeroRequest,
+    params,
+  });
+};
+
+export const postHeroAssets = (
+  postHeroAssetsBody: PostHeroAssetsBody,
+  params: PostHeroAssetsParams,
+) => {
+  const formData = new FormData();
+  if (postHeroAssetsBody.Image !== undefined) {
+    formData.append("Image", postHeroAssetsBody.Image);
+  }
+  if (postHeroAssetsBody.removedAssets !== undefined) {
+    postHeroAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/Hero/assets`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+  });
+};
+
 export const postMenuItems = (
   postMenuItemsBody: PostMenuItemsBody,
   params: PostMenuItemsParams,
@@ -735,12 +835,83 @@ export const postMenuCategoryOrder = (
   });
 };
 
-export const postMenuImportqoplamenu = (
-  params?: PostMenuImportqoplamenuParams,
+export const getNewsArticle = (params: GetNewsArticleParams) => {
+  return authorizedFetch<NewsArticleResponse[]>({
+    url: `/NewsArticle`,
+    method: "GET",
+    params,
+  });
+};
+
+export const postNewsArticle = (
+  addNewsArticleRequest: AddNewsArticleRequest,
+  params: PostNewsArticleParams,
 ) => {
   return authorizedFetch<void>({
-    url: `/Menu/importqoplamenu`,
+    url: `/NewsArticle`,
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: addNewsArticleRequest,
+    params,
+  });
+};
+
+export const getNewsArticleId = (
+  id: number,
+  params: GetNewsArticleIdParams,
+) => {
+  return authorizedFetch<GetNewsArticleId200>({
+    url: `/NewsArticle/${id}`,
+    method: "GET",
+    params,
+  });
+};
+
+export const deleteNewsArticleId = (
+  id: number,
+  params: DeleteNewsArticleIdParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/NewsArticle/${id}`,
+    method: "DELETE",
+    params,
+  });
+};
+
+export const putNewsArticleId = (
+  id: number,
+  addNewsArticleRequest: AddNewsArticleRequest,
+  params: PutNewsArticleIdParams,
+) => {
+  return authorizedFetch<void>({
+    url: `/NewsArticle/${id}`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    data: addNewsArticleRequest,
+    params,
+  });
+};
+
+export const putNewsArticleIdAssets = (
+  id: number,
+  putNewsArticleIdAssetsBody: PutNewsArticleIdAssetsBody,
+  params: PutNewsArticleIdAssetsParams,
+) => {
+  const formData = new FormData();
+  if (putNewsArticleIdAssetsBody.Image !== undefined) {
+    formData.append("Image", putNewsArticleIdAssetsBody.Image);
+  }
+  if (putNewsArticleIdAssetsBody.removedAssets !== undefined) {
+    putNewsArticleIdAssetsBody.removedAssets.forEach((value) =>
+      formData.append("removedAssets", value),
+    );
+  }
+
+  return authorizedFetch<void>({
+    url: `/NewsArticle/${id}/assets`,
+    method: "PUT",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
     params,
   });
 };
@@ -827,207 +998,17 @@ export const postPublicContact = (
   });
 };
 
-export const getSectionHero = (params: GetSectionHeroParams) => {
-  return authorizedFetch<GetSectionHero200>({
-    url: `/Section/hero`,
-    method: "GET",
-    params,
-  });
-};
-
-export const postSectionHero = (
-  uploadHeroRequest: UploadHeroRequest,
-  params: PostSectionHeroParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Section/hero`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: uploadHeroRequest,
-    params,
-  });
-};
-
-export const postSectionHeroAssets = (
-  postSectionHeroAssetsBody: PostSectionHeroAssetsBody,
-  params: PostSectionHeroAssetsParams,
-) => {
-  const formData = new FormData();
-  if (postSectionHeroAssetsBody.Image !== undefined) {
-    formData.append("Image", postSectionHeroAssetsBody.Image);
-  }
-  if (postSectionHeroAssetsBody.removedAssets !== undefined) {
-    postSectionHeroAssetsBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-
-  return authorizedFetch<void>({
-    url: `/Section/hero/assets`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-  });
-};
-
-export const getSectionAbout = (params: GetSectionAboutParams) => {
-  return authorizedFetch<GetSectionAbout200>({
-    url: `/Section/about`,
-    method: "GET",
-    params,
-  });
-};
-
-export const postSectionAbout = (
-  uploadAboutRequest: UploadAboutRequest,
-  params: PostSectionAboutParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Section/about`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: uploadAboutRequest,
-    params,
-  });
-};
-
-export const postSectionAboutAssets = (
-  postSectionAboutAssetsBody: PostSectionAboutAssetsBody,
-  params: PostSectionAboutAssetsParams,
-) => {
-  const formData = new FormData();
-  if (postSectionAboutAssetsBody.Image !== undefined) {
-    formData.append("Image", postSectionAboutAssetsBody.Image);
-  }
-  if (postSectionAboutAssetsBody.removedAssets !== undefined) {
-    postSectionAboutAssetsBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-
-  return authorizedFetch<void>({
-    url: `/Section/about/assets`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-  });
-};
-
-export const postSectionGallery = (
-  postSectionGalleryBody: PostSectionGalleryBody,
-  params: PostSectionGalleryParams,
-) => {
-  const formData = new FormData();
-  if (postSectionGalleryBody.Images !== undefined) {
-    postSectionGalleryBody.Images.forEach((value) =>
-      formData.append("Images", value),
-    );
-  }
-
-  return authorizedFetch<void>({
-    url: `/Section/gallery`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-  });
-};
-
-export const deleteSectionGallery = (params: DeleteSectionGalleryParams) => {
-  return authorizedFetch<void>({
-    url: `/Section/gallery`,
-    method: "DELETE",
-    params,
-  });
-};
-
-export const getSectionNews = (params: GetSectionNewsParams) => {
-  return authorizedFetch<NewsArticleResponse[]>({
-    url: `/Section/news`,
-    method: "GET",
-    params,
-  });
-};
-
-export const postSectionNews = (
-  addNewsArticleRequest: AddNewsArticleRequest,
-  params: PostSectionNewsParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Section/news`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: addNewsArticleRequest,
-    params,
-  });
-};
-
-export const getSectionNewsId = (
-  id: number,
-  params: GetSectionNewsIdParams,
-) => {
-  return authorizedFetch<GetSectionNewsId200>({
-    url: `/Section/news/${id}`,
-    method: "GET",
-    params,
-  });
-};
-
-export const deleteSectionNewsId = (
-  id: number,
-  params: DeleteSectionNewsIdParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Section/news/${id}`,
-    method: "DELETE",
-    params,
-  });
-};
-
-export const putSectionNewsId = (
-  id: number,
-  addNewsArticleRequest: AddNewsArticleRequest,
-  params: PutSectionNewsIdParams,
-) => {
-  return authorizedFetch<void>({
-    url: `/Section/news/${id}`,
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    data: addNewsArticleRequest,
-    params,
-  });
-};
-
-export const putSectionNewsIdAssets = (
-  id: number,
-  putSectionNewsIdAssetsBody: PutSectionNewsIdAssetsBody,
-  params: PutSectionNewsIdAssetsParams,
-) => {
-  const formData = new FormData();
-  if (putSectionNewsIdAssetsBody.Image !== undefined) {
-    formData.append("Image", putSectionNewsIdAssetsBody.Image);
-  }
-  if (putSectionNewsIdAssetsBody.removedAssets !== undefined) {
-    putSectionNewsIdAssetsBody.removedAssets.forEach((value) =>
-      formData.append("removedAssets", value),
-    );
-  }
-
-  return authorizedFetch<void>({
-    url: `/Section/news/${id}/assets`,
-    method: "PUT",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-    params,
-  });
-};
-
 export const postWebhook = () => {
   return authorizedFetch<void>({ url: `/webhook`, method: "POST" });
 };
 
+export type GetAboutResult = NonNullable<Awaited<ReturnType<typeof getAbout>>>;
+export type PostAboutResult = NonNullable<
+  Awaited<ReturnType<typeof postAbout>>
+>;
+export type PostAboutAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof postAboutAssets>>
+>;
 export type GetCustomerCustomerResult = NonNullable<
   Awaited<ReturnType<typeof getCustomerCustomer>>
 >;
@@ -1055,6 +1036,17 @@ export type DeleteCustomerDomainResult = NonNullable<
 export type GetCustomerAnalyticsResult = NonNullable<
   Awaited<ReturnType<typeof getCustomerAnalytics>>
 >;
+export type PostGalleryResult = NonNullable<
+  Awaited<ReturnType<typeof postGallery>>
+>;
+export type DeleteGalleryResult = NonNullable<
+  Awaited<ReturnType<typeof deleteGallery>>
+>;
+export type GetHeroResult = NonNullable<Awaited<ReturnType<typeof getHero>>>;
+export type PostHeroResult = NonNullable<Awaited<ReturnType<typeof postHero>>>;
+export type PostHeroAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof postHeroAssets>>
+>;
 export type PostMenuItemsResult = NonNullable<
   Awaited<ReturnType<typeof postMenuItems>>
 >;
@@ -1067,8 +1059,23 @@ export type DeleteMenuCategoryResult = NonNullable<
 export type PostMenuCategoryOrderResult = NonNullable<
   Awaited<ReturnType<typeof postMenuCategoryOrder>>
 >;
-export type PostMenuImportqoplamenuResult = NonNullable<
-  Awaited<ReturnType<typeof postMenuImportqoplamenu>>
+export type GetNewsArticleResult = NonNullable<
+  Awaited<ReturnType<typeof getNewsArticle>>
+>;
+export type PostNewsArticleResult = NonNullable<
+  Awaited<ReturnType<typeof postNewsArticle>>
+>;
+export type GetNewsArticleIdResult = NonNullable<
+  Awaited<ReturnType<typeof getNewsArticleId>>
+>;
+export type DeleteNewsArticleIdResult = NonNullable<
+  Awaited<ReturnType<typeof deleteNewsArticleId>>
+>;
+export type PutNewsArticleIdResult = NonNullable<
+  Awaited<ReturnType<typeof putNewsArticleId>>
+>;
+export type PutNewsArticleIdAssetsResult = NonNullable<
+  Awaited<ReturnType<typeof putNewsArticleIdAssets>>
 >;
 export type GetOpeningHourResult = NonNullable<
   Awaited<ReturnType<typeof getOpeningHour>>
@@ -1093,48 +1100,6 @@ export type GetPublicGetCustomerMenuResult = NonNullable<
 >;
 export type PostPublicContactResult = NonNullable<
   Awaited<ReturnType<typeof postPublicContact>>
->;
-export type GetSectionHeroResult = NonNullable<
-  Awaited<ReturnType<typeof getSectionHero>>
->;
-export type PostSectionHeroResult = NonNullable<
-  Awaited<ReturnType<typeof postSectionHero>>
->;
-export type PostSectionHeroAssetsResult = NonNullable<
-  Awaited<ReturnType<typeof postSectionHeroAssets>>
->;
-export type GetSectionAboutResult = NonNullable<
-  Awaited<ReturnType<typeof getSectionAbout>>
->;
-export type PostSectionAboutResult = NonNullable<
-  Awaited<ReturnType<typeof postSectionAbout>>
->;
-export type PostSectionAboutAssetsResult = NonNullable<
-  Awaited<ReturnType<typeof postSectionAboutAssets>>
->;
-export type PostSectionGalleryResult = NonNullable<
-  Awaited<ReturnType<typeof postSectionGallery>>
->;
-export type DeleteSectionGalleryResult = NonNullable<
-  Awaited<ReturnType<typeof deleteSectionGallery>>
->;
-export type GetSectionNewsResult = NonNullable<
-  Awaited<ReturnType<typeof getSectionNews>>
->;
-export type PostSectionNewsResult = NonNullable<
-  Awaited<ReturnType<typeof postSectionNews>>
->;
-export type GetSectionNewsIdResult = NonNullable<
-  Awaited<ReturnType<typeof getSectionNewsId>>
->;
-export type DeleteSectionNewsIdResult = NonNullable<
-  Awaited<ReturnType<typeof deleteSectionNewsId>>
->;
-export type PutSectionNewsIdResult = NonNullable<
-  Awaited<ReturnType<typeof putSectionNewsId>>
->;
-export type PutSectionNewsIdAssetsResult = NonNullable<
-  Awaited<ReturnType<typeof putSectionNewsIdAssets>>
 >;
 export type PostWebhookResult = NonNullable<
   Awaited<ReturnType<typeof postWebhook>>
