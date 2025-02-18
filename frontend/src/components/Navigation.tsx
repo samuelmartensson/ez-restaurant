@@ -168,7 +168,7 @@ export function Navigation({
   meta,
 }: {
   data: SiteConfig;
-  meta: CustomerConfigMetaResponse;
+  meta: CustomerConfigMetaResponse | null;
 }) {
   const pathname = usePathname();
   const { menu, aboutTitle, news, orderNow, gallery } =
