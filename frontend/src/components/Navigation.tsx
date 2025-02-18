@@ -20,7 +20,7 @@ const MobileNavigation = ({
   meta,
 }: {
   data: SiteConfig;
-  meta: CustomerConfigMetaResponse;
+  meta: CustomerConfigMetaResponse | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const { menu, gallery, news, aboutTitle, orderNow } =
@@ -246,7 +246,7 @@ export function Navigation({
   if (!isLoad) return null;
 
   if (isMobile) {
-    return <MobileNavigation data={data} />;
+    return <MobileNavigation meta={meta} data={data} />;
   }
 
   return (
