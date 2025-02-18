@@ -34,7 +34,7 @@ const NewsWidget = ({ translations, articles }: Props) => {
                   alt=""
                 />
               )}
-              <div className="p-5 grid">
+              <div className="p-5 grid flex-1">
                 <div className="text-sm text-foreground/40 mb-3">
                   {new Date(article.date ?? "").toLocaleDateString("sv-SE", {
                     dateStyle: "long",
