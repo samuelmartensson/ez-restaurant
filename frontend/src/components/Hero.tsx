@@ -20,7 +20,7 @@ const Hero = ({
     data.siteTranslations || {};
   const heroSection = data?.sections?.hero;
   const todaysOpenHour = data.openingHours?.find(
-    (item) => item.day === new Date().getDay() || 7
+    (item) => item.day === (new Date().getDay() || 7)
   );
 
   return (
@@ -83,7 +83,7 @@ const Hero = ({
         className="absolute md:bottom-4 bottom-16 grid place-items-center text-white"
       >
         <div className="text-primary-foreground mb-2 font-bold">
-          {todaysOpenHour?.isClosed ? "" : openHoursToday + ":"}
+          {todaysOpenHour?.isClosed ? "" : openHoursToday + ": "}
           {todaysOpenHour?.isClosed ? (
             ` ${data.siteTranslations?.closed}`
           ) : (
