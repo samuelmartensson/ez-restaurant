@@ -203,10 +203,14 @@ export function AppSidebar() {
       <SidebarFooter className="border-t shadow-2xl md:shadow-none md:shadow-black">
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel className="h-auto font-bold">
+            <SidebarGroupLabel className="mb-1 h-auto text-base font-bold">
               My account
             </SidebarGroupLabel>
-            <SidebarGroupLabel>{user?.fullName}</SidebarGroupLabel>
+            <SidebarGroupLabel className="mb-4 grid h-auto gap-1">
+              <span>{user?.fullName}</span>
+              <span>{user?.emailAddresses.toString() ?? ""}</span>
+            </SidebarGroupLabel>
+
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
