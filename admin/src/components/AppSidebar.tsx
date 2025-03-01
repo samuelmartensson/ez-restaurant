@@ -36,6 +36,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { ConfigSwitcher } from "./ConfigSwitcher";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import BrandLogo from "./BrandLogo";
 
 const settings = [
   {
@@ -203,6 +204,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t shadow-2xl md:shadow-none md:shadow-black">
         <SidebarContent>
           <SidebarGroup>
+            <BrandLogo className="mx-auto mb-3 w-32" />
             <SidebarGroupLabel className="mb-1 h-auto text-base font-bold">
               My account
             </SidebarGroupLabel>

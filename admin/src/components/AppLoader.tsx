@@ -1,7 +1,7 @@
 "use client";
 
-import { Coffee } from "lucide-react";
 import { useEffect, useState } from "react";
+import BrandLogo from "./BrandLogo";
 
 const AppLoader = () => {
   const [loadingPhrase, setLoadingPhrase] = useState("");
@@ -11,14 +11,14 @@ const AppLoader = () => {
       "Setting things up",
       "Almost there",
       "Loading your experience",
-      "Please wait...",
+      "Please wait",
       "Gathering data",
       "Crunching numbers",
       "Preparing everything",
-      "Just a moment...",
+      "Just a moment",
       "Hang tight",
       "Getting things ready",
-      "We’re on it",
+      "We're on it",
       "Making things happen",
       "Working on it",
       "Taking care of it",
@@ -27,12 +27,64 @@ const AppLoader = () => {
       "Fetching results",
       "Building your experience",
       "Hold tight",
-      "Initializing...",
+      "Initializing",
       "Please be patient",
       "Finishing up",
       "Bringing it all together",
       "Your content is almost ready",
       "Just a few more seconds",
+      "Brewing your results",
+      "Summoning your data",
+      "Weaving digital magic",
+      "Untangling the internet",
+      "Connecting the dots",
+      "Polishing pixels",
+      "Computing awesomeness",
+      "Decoding the universe",
+      "Aligning the stars",
+      "Forging your experience",
+      "Assembling bytes",
+      "Sprinkling digital fairy dust",
+      "Herding electrons",
+      "Calibrating quantum flux",
+      "Scanning the horizon",
+      "Powering up the engines",
+      "Feeding the hamsters",
+      "Charging the crystals",
+      "Consulting the oracle",
+      "Igniting the processors",
+      "Waking up the servers",
+      "Channeling digital energy",
+      "Spinning up the gears",
+      "Warming up the matrix",
+      "Refactoring reality",
+      "Defragmenting dimensions",
+      "Navigating cyberspace",
+      "Unlocking potential",
+      "Bending time and space",
+      "Harmonizing algorithms",
+      "Tuning the digital orchestra",
+      "Mining for gold nuggets",
+      "Translating binary whispers",
+      "Calculating the incalculable",
+      "Manifesting your request",
+      "Unfolding possibilities",
+      "Traversing the digital frontier",
+      "Compiling brilliance",
+      "Buffering excellence",
+      "Distilling knowledge",
+      "Synchronizing particles",
+      "Generating awesomeness",
+      "Parsing the impossible",
+      "Optimizing your journey",
+      "Bridging digital divides",
+      "Shuffling the deck",
+      "Whispering to databases",
+      "Arranging digital atoms",
+      "Taming wild data",
+      "Orchestrating digital symphonies",
+      "Crafting your moment",
+      "Painting your canvas",
     ];
 
     const randomIndex = Math.floor(Math.random() * phrases.length);
@@ -46,12 +98,9 @@ const AppLoader = () => {
   return (
     <div className="grid h-svh w-svw place-items-center">
       <div className="grid place-items-center">
-        <div className="flex items-center gap-2">
-          <Coffee size={28} />
-          <h1 className="text-3xl">EZRest</h1>
-        </div>
+        <BrandLogo className="w-52" />
         <p className="h-4 animate-in fade-in">
-          {loadingPhrase ?? "Initializing..."}
+          {loadingPhrase ? `${loadingPhrase}...` : "Initializing..."}
         </p>
       </div>
     </div>
