@@ -108,6 +108,7 @@ public class CustomerController(
             if (IsExpired)
             {
                 customer.Subscription = SubscriptionState.Free;
+                customer.SubscriptionExpireAt = subscription.CurrentPeriodEnd;
                 await context.SaveChangesAsync();
             }
         }
@@ -129,6 +130,7 @@ public class CustomerController(
             AvailableLanguages = translationContext.languages,
             DefaultLanguage = c.DefaultLanguage
         }).ToList();
+
 
         return Ok(
             new CustomerResponse

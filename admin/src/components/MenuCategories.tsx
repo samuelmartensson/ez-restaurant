@@ -25,8 +25,15 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import React, { Dispatch, SetStateAction } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoveHorizontal,
+  Plus,
+  Save,
+  Trash,
+} from "lucide-react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 type Item = { id: number; name: string; order: number; description: string };
 interface Props {
@@ -146,6 +153,8 @@ const MenuCategories = ({
   onBadgeClick,
   onOrderChange,
 }: Props) => {
+  const [isAdd, setIsAdd] = useState(false);
+  const [isReorder, setIsReorder] = useState(false);
   const sensor = useSensor(PointerSensor, {
     activationConstraint: { distance: 10 },
   });
@@ -178,14 +187,134 @@ const MenuCategories = ({
   return (
     <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
       <div className="sticky top-0 z-10 mb-4 overflow-auto bg-white">
+        <h2 className="mb-4 text-lg font-bold">Categories</h2>
+        <div className="mb-2 flex flex-wrap gap-2 overflow-auto">
+          {isReorder && (
+            <Badge className="self-center bg-blue-500 text-base font-normal text-white">
+              Drag or click the arrows to change the category order.
+            </Badge>
+          )}
+          {!isReorder && (
+            <>
+              <div className="grid flex-1 gap-1">
+                {(isAdd || isSelected) && (
+                  <Input
+                    autoFocus
+                    className="min-w-48 flex-1 duration-150"
+                    placeholder="Add category..."
+                    value={category.name}
+                    onChange={(e) =>
+                      setCategory((s) => ({ ...s, name: e.target.value }))
+                    }
+                  />
+                )}
+                {isSelected && (
+                  <Input
+                    className="flex-1"
+                    placeholder="Category description"
+                    value={category.description}
+                    onChange={(e) =>
+                      setCategory((s) => ({
+                        ...s,
+                        description: e.target.value,
+                      }))
+                    }
+                  />
+                )}
+              </div>
+              <Button
+                onClick={() => {
+                  if (isAdd || isSelected) {
+                    onClick();
+                  }
+                  setIsAdd((s) => !s);
+                }}
+              >
+                {isSelected ? <Save /> : <Plus />}
+                {isSelected ? "Save" : "Add category"}
+              </Button>
+              {isSelected && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="size-12"
+                      size="icon"
+                      variant="destructive"
+                    >
+                      <Trash />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you absolutely sure?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete the{" "}
+                        <span className="font-bold">{category.name}</span>{" "}
+                        category and all its items.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="destructive"
+                        type="button"
+                        onClick={onDelete}
+                      >
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </>
+          )}
+          <Button
+            className="ml-auto"
+            variant={isReorder ? "default" : "outline"}
+            onClick={() => {
+              setIsReorder((s) => !s);
+              if (isReorder) {
+                onClick();
+              }
+            }}
+          >
+            {isReorder ? <Save /> : <MoveHorizontal />}
+            {isReorder ? "Save order" : "Change order"}
+          </Button>
+        </div>
         <SortableContext items={items} strategy={horizontalListSortingStrategy}>
           <div
+            key={items.length}
             style={{ maxWidth: "100%" }}
-            className="mb-4 flex gap-1 overflow-auto py-2"
+            className="mb-4 flex gap-1 overflow-auto py-2 duration-300 animate-in fade-in-0 slide-in-from-top-1"
           >
             {items.map(({ id, name, description }) => {
               const parsedId = Number(id);
               const isSelected = selectedCategory === parsedId;
+
+              if (!isReorder) {
+                return (
+                  <Badge
+                    onClick={() => {
+                      onBadgeClick({
+                        id: parsedId,
+                        isSelected,
+                        name,
+                        description,
+                      });
+                    }}
+                    variant={
+                      selectedCategory === parsedId ? "default" : "secondary"
+                    }
+                    className="flex cursor-pointer gap-1 whitespace-nowrap rounded-full text-xs md:text-base"
+                    key={id}
+                  >
+                    <div className="size-10 h-8" />
+                    {name}
+                    <div className="size-10 h-8" />
+                  </Badge>
+                );
+              }
 
               return (
                 <DraggableBadge
@@ -212,59 +341,6 @@ const MenuCategories = ({
             })}
           </div>
         </SortableContext>
-        <div className="mb-2 flex flex-wrap gap-2 overflow-auto">
-          <Input
-            className="flex-1"
-            placeholder="Add category..."
-            value={category.name}
-            onChange={(e) =>
-              setCategory((s) => ({ ...s, name: e.target.value }))
-            }
-          />
-          {isSelected && (
-            <div className="w-full">
-              <Input
-                className="flex-1"
-                placeholder="Category description"
-                value={category.description}
-                onChange={(e) =>
-                  setCategory((s) => ({ ...s, description: e.target.value }))
-                }
-              />
-            </div>
-          )}
-          {isSelected && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="ml-auto" variant="destructive">
-                  Delete
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Are you absolutely sure?</DialogTitle>
-                  <DialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the <span className="font-bold">{category.name}</span>{" "}
-                    category and all its items.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    onClick={onDelete}
-                  >
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-          <Button onClick={onClick}>
-            {isSelected ? "Update category" : "Add category"}
-          </Button>
-        </div>
       </div>
     </DndContext>
   );

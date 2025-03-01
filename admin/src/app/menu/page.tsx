@@ -240,6 +240,8 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   const [uploadedImages, setUploadedImages] = useState<Record<string, File>>(
     {},
   );
+  const [lastEditedFieldId, setLastEditedFieldId] =
+    useState<(typeof inputSchema)[number][number]["id"]>("name");
 
   const [selectedCategory, setSelectedCategory] = useState<number>(-1);
   const [addCategory, setAddCategory] = useState<{
@@ -260,7 +262,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     resolver: zodResolver(formSchema),
   });
 
-  const { fields, append, remove, move } = useFieldArray({
+  const { fields, append, insert, remove, move } = useFieldArray({
     name: "menu",
     control: form.control,
     keyName: "formId",
@@ -292,15 +294,17 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
   };
 
   const handleUpdateCategory = async () => {
-    if (!addCategory.name.trim()) return;
-    await updateCategory({
-      data: {
-        id: selectedCategory,
-        name: addCategory.name,
-        description: addCategory.description,
-      },
-      params,
-    });
+    if (addCategory.name.trim()) {
+      await updateCategory({
+        data: {
+          id: selectedCategory,
+          name: addCategory.name,
+          description: addCategory.description,
+        },
+        params,
+      });
+    }
+
     await updateCategoryOrder({
       data: categoryList.map((item, index) => ({ ...item, order: index + 1 })),
       params: { key: selectedDomain },
@@ -329,12 +333,14 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
     remove(deletedItems);
     setDeletedItems([]);
 
+    await handleUpdateCategory();
     await updateMenu({
       params,
       data: {
         menuItemsJson: JSON.stringify(
           form.getValues("menu").map((d, index) => ({
             ...d,
+            id: d.tempId ? -1 : d.id,
             image: d.image === ACTIONS.REMOVE ? ACTIONS.REMOVE : "",
             price: Number(d.price),
             categoryId: Number(d.categoryId),
@@ -346,7 +352,6 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
         ),
       },
     });
-    await handleUpdateCategory();
     refetchAndSync();
     toast.success("Updated menu.");
     setUploadedImages({});
@@ -433,7 +438,11 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
       >
         <div className="relative grid grid-rows-[auto_1fr]">
           {Categories}
-          <div className="flex flex-col gap-2 p-2">
+          <h2 className="mb-4 text-lg font-bold">Menu items</h2>
+          <div
+            key={selectedCategory}
+            className="flex flex-col gap-2 p-2 duration-300 animate-in fade-in-0 slide-in-from-top-1"
+          >
             <DndContext sensors={sensors} onDragEnd={onDragEnd}>
               <SortableContext
                 items={fields}
@@ -518,15 +527,17 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                             variant="outline"
                             type="button"
                             onClick={() => {
+                              const newIndex = index + 1;
                               const item = {
                                 ...form.watch(`menu.${index}`),
+                                name:
+                                  form.watch(`menu.${index}.name`) + " (copy)",
                                 tempId: uuidv4(),
-                                id: -1,
+                                id: Math.max(...fields.map((f) => f.id)) + 1,
                               };
-                              console.log(form.watch(`menu.${index}`));
 
-                              append({ ...item, index: fields.length });
-                              setSelectedField(fields.length);
+                              insert(newIndex, { ...item, index: newIndex });
+                              setSelectedField(newIndex);
                             }}
                           >
                             <Copy /> Copy
@@ -562,6 +573,15 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                     className="sticky top-0 grid gap-4 p-4 animate-in fade-in"
                     key={selectedFieldIndex}
                   >
+                    <Button
+                      onClick={() => setSelectedField(-1)}
+                      className="ml-auto hidden md:flex"
+                      variant="ghost"
+                      type="button"
+                    >
+                      Close
+                      <X />
+                    </Button>
                     {inputSchema.map((inputRow) => (
                       <div key={inputRow[0].id} className="flex gap-2">
                         {inputRow.map((input) => (
@@ -573,20 +593,37 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                             }
                             render={({ field }) => {
                               let render = (
-                                <Input {...field} value={field.value ?? ""} />
+                                <Input
+                                  autoFocus={input.id === lastEditedFieldId}
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onFocus={() => setLastEditedFieldId(input.id)}
+                                />
                               );
 
                               if (input.type === "textarea") {
-                                render = <Textarea {...field} />;
+                                render = (
+                                  <Textarea
+                                    autoFocus={input.id === lastEditedFieldId}
+                                    {...field}
+                                    onFocus={() =>
+                                      setLastEditedFieldId(input.id)
+                                    }
+                                  />
+                                );
                               }
 
                               if (input.type === "number") {
                                 render = (
                                   <Input
+                                    autoFocus={input.id === lastEditedFieldId}
                                     {...field}
                                     value={field.value ?? ""}
                                     onChange={(e) =>
                                       field.onChange(Number(e.target.value))
+                                    }
+                                    onFocus={() =>
+                                      setLastEditedFieldId(input.id)
                                     }
                                     type={input.type}
                                   />

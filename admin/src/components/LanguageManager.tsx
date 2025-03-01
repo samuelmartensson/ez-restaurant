@@ -41,8 +41,6 @@ const LanguageManager = () => {
   }, [languages]);
 
   useEffect(() => {
-    console.log("xd");
-
     if (!defaultLanguageValue) setDefaultLanguage(defaultLanguage ?? "");
   }, [defaultLanguage, defaultLanguageValue]);
 

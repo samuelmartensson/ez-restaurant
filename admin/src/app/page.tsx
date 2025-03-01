@@ -204,7 +204,6 @@ const Site = () => {
         toast.loading("Generating theme...", { id: loadId });
         themeConfig = await getTheme(data.ThemeColorConfig ?? "");
         toast.dismiss(loadId);
-        console.log(themeConfig);
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {

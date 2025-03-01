@@ -121,7 +121,6 @@ const News = () => {
         removedAssets: Object.keys(deletedAssets),
       },
     });
-    console.log(deletedAssets);
 
     await refetch();
     toast.success("Article updated.");

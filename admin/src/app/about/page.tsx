@@ -113,7 +113,7 @@ const About = () => {
     <Form {...form}>
       <form
         className="grid max-w-lg gap-4 overflow-auto"
-        onSubmit={form.handleSubmit(onSubmit, (err) => console.log(err))}
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         {inputSchema.map((input) => (
           <LocalizedFormField key={input.id} name={input.id}>

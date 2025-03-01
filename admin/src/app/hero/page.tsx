@@ -83,12 +83,6 @@ const Hero = () => {
 
   useEffect(() => {
     if (!hero) return;
-    console.log(
-      mapToLocalizedFields(selectedConfig?.languages ?? [], hero || {}, [
-        "siteMetaTitle",
-        "siteName",
-      ]),
-    );
 
     form.reset({
       Image: hero?.[selectedLanguage]?.heroImage ?? "",

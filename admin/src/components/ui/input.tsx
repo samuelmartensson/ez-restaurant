@@ -80,7 +80,6 @@ function FileInput({
         accept={accept}
         type="file"
         ref={fileInputRef}
-        onBlur={() => console.log("blu")}
         onChange={handleFileChange}
         className="hidden"
       />

@@ -41,9 +41,11 @@ const FontInitializer = ({
   );
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata | void> {
   // read route params
   const meta = await getCustomerMeta();
+
+  if (!meta?.logo) return;
 
   return {
     icons: [

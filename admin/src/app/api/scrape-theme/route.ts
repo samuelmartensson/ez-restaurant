@@ -6,7 +6,6 @@ export const maxDuration = 30;
 export async function GET(request: NextRequest) {
   const isLocal = !!process.env.CHROME_EXECUTABLE_PATH;
   const color = request.nextUrl.searchParams.get("color") ?? "";
-  console.log(request.nextUrl.searchParams.get("color"));
 
   const browser = await puppeteer.launch({
     args: isLocal ? puppeteer.defaultArgs() : chromium.args,
