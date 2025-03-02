@@ -200,7 +200,7 @@ const MenuCategories = ({
                 {(isAdd || isSelected) && (
                   <Input
                     autoFocus
-                    className="min-w-48 flex-1 duration-150"
+                    className="min-w-48 flex-1"
                     placeholder="Add category..."
                     value={category.name}
                     onChange={(e) =>
@@ -210,7 +210,7 @@ const MenuCategories = ({
                 )}
                 {isSelected && (
                   <Input
-                    className="flex-1"
+                    className="flex-1 duration-300 animate-in fade-in slide-in-from-top-2"
                     placeholder="Category description"
                     value={category.description}
                     onChange={(e) =>
@@ -226,8 +226,10 @@ const MenuCategories = ({
                 onClick={() => {
                   if (isAdd || isSelected) {
                     onClick();
+                    setIsAdd(false);
+                  } else {
+                    setIsAdd(true);
                   }
-                  setIsAdd((s) => !s);
                 }}
               >
                 {isSelected ? <Save /> : <Plus />}

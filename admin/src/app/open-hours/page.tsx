@@ -158,7 +158,7 @@ const OpenHours = ({
   return (
     <Form {...formNormal}>
       <form
-        className="grid gap-4 overflow-auto"
+        className="grid gap-4 overflow-auto pb-16"
         onSubmit={formNormal.handleSubmit(onSubmit)}
       >
         <div className="flex flex-wrap gap-16 sm:gap-8">
@@ -326,7 +326,10 @@ const OpenHours = ({
           </div>
         </div>
 
-        <Button type="submit">
+        <Button
+          className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
+          type="submit"
+        >
           <Save /> Save
         </Button>
       </form>

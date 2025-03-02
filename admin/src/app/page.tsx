@@ -238,7 +238,7 @@ const Site = () => {
 
   if (isMedia) {
     return (
-      <FormLayout title="Media">
+      <FormLayout key="media" title="Media">
         {hasSubscription(() => (
           <Form {...form}>
             <form
@@ -412,7 +412,7 @@ const Site = () => {
 
   if (isSocials) {
     return (
-      <FormLayout title="Social channels">
+      <FormLayout key="social" title="Social channels">
         {hasSubscription(() => (
           <Form {...form}>
             <form
@@ -452,7 +452,7 @@ const Site = () => {
   }
 
   return (
-    <FormLayout title="General">
+    <FormLayout key="main" title="General">
       <Form {...form}>
         <form
           className="relative grid max-w-lg gap-4 overflow-auto pb-20"

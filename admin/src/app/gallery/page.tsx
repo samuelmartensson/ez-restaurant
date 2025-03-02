@@ -68,7 +68,7 @@ const Gallery = () => {
 
   return (
     <Form {...form}>
-      <form className="grid gap-8">
+      <form className="grid gap-8 pb-16">
         <div className="grid max-w-lg grid-cols-2 gap-4 md:grid-cols-3">
           {fields.map((item, index) => (
             <FormField
@@ -155,7 +155,7 @@ const Gallery = () => {
         </div>
 
         <Button
-          className="justify-self-start"
+          className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
           type="button"
           disabled={isPending}
           onClick={() => append({ image: "" as unknown as string, id: -1 })}

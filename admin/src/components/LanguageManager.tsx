@@ -81,7 +81,10 @@ const LanguageManager = () => {
           </div>
         ))}
       </div>
-      <Button className="mt-4" onClick={() => onSubmitInternal()}>
+      <Button
+        className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
+        onClick={() => onSubmitInternal()}
+      >
         <Save /> Save
       </Button>
     </div>
