@@ -17,19 +17,10 @@ OpeningHourService openingHourService
 
     [RequireSubscription(SubscriptionState.Free)]
     [HttpGet]
-    [ProducesResponseType(typeof(List<OpeningHourResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<Dictionary<string, OpeningHourResponse>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOpeningHours([FromQuery, Required] CommonQueryParameters queryParameters)
     {
-        var openingHours = (await openingHourService.GetOpeningHours(queryParameters))
-            .Select(o => new OpeningHourResponse
-            {
-                OpenTime = o.OpenTime.ToString(@"hh\:mm"),
-                CloseTime = o.CloseTime.ToString(@"hh\:mm"),
-                Day = o.Day,
-                Id = o.Id,
-                IsClosed = o.IsClosed,
-                Label = o.Label
-            });
+        var openingHours = await openingHourService.GetOpeningHours(queryParameters);
         return Ok(openingHours);
     }
 

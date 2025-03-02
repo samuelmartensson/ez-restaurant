@@ -1,8 +1,8 @@
 "use client";
 
-import CycleLanguageLabel from "@/components/CycleLanguageLabel";
 import { useDataContext } from "@/components/DataContextProvider";
 import hasDomain from "@/components/hasDomain";
+import LocalizedFormField from "@/components/LocalizedFormField";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,11 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
-  OpeningHourResponse,
+  GetOpeningHour200Item,
   PostOpeningHourMutationBody,
   useGetOpeningHour,
   usePostOpeningHour,
 } from "@/generated/endpoints";
+import { mapToLocalizedFields } from "@/utils/mapToLocalizedFields";
 import { Plus, Save, Trash } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -55,7 +56,7 @@ const inputSchema = [
 ] as const;
 
 const DataLayer = () => {
-  const { selectedDomain, params } = useDataContext();
+  const { selectedDomain, selectedLanguage, params } = useDataContext();
 
   const { data: openingHours, isLoading } = useGetOpeningHour(params, {
     query: {
@@ -65,12 +66,12 @@ const DataLayer = () => {
   });
 
   const normalOpeningHours = useMemo(
-    () => (openingHours || [])?.filter((o) => o?.day !== 0),
-    [openingHours],
+    () => (openingHours || []).filter((o) => o?.[selectedLanguage]?.day !== 0),
+    [openingHours, selectedLanguage],
   );
   const specialOpeningHours = useMemo(
-    () => (openingHours || [])?.filter((o) => o?.day === 0),
-    [openingHours],
+    () => (openingHours || []).filter((o) => o?.[selectedLanguage]?.day === 0),
+    [openingHours, selectedLanguage],
   );
 
   if (isLoading) return <></>;
@@ -82,10 +83,11 @@ const OpenHours = ({
   normalOpeningHours,
   specialOpeningHours,
 }: {
-  normalOpeningHours: OpeningHourResponse[];
-  specialOpeningHours: OpeningHourResponse[];
+  normalOpeningHours: GetOpeningHour200Item[];
+  specialOpeningHours: GetOpeningHour200Item[];
 }) => {
-  const { selectedDomain, params } = useDataContext();
+  const { selectedConfig, selectedLanguage, selectedDomain, params } =
+    useDataContext();
 
   const formNormal = useForm<PostOpeningHourMutationBody>({
     defaultValues: normalOpeningHours,
@@ -112,7 +114,15 @@ const OpenHours = ({
   async function onSubmit(data: PostOpeningHourMutationBody) {
     await updateOpeningHour({
       data: [...Object.values(data), ...formSpecial.getValues("special")].map(
-        (i) => ({ ...i, id: Number(i.id) }),
+        (i) => ({
+          ...i,
+          id: Number(i.id),
+          localizedFields: mapToLocalizedFields(
+            selectedConfig?.languages ?? [],
+            i.localizedFields ?? {},
+            ["label"],
+          ),
+        }),
       ),
       params,
     });
@@ -127,8 +137,23 @@ const OpenHours = ({
 
   useEffect(() => {
     if (!specialOpeningHours) return;
-    formSpecial.reset({ special: specialOpeningHours });
-  }, [specialOpeningHours, formSpecial]);
+
+    formSpecial.reset({
+      special: specialOpeningHours.map((item) => ({
+        ...item[selectedLanguage],
+        localizedFields: mapToLocalizedFields(
+          selectedConfig?.languages ?? [],
+          item || {},
+          ["label"],
+        ),
+      })),
+    });
+  }, [
+    specialOpeningHours,
+    formSpecial,
+    selectedConfig?.languages,
+    selectedLanguage,
+  ]);
 
   return (
     <Form {...formNormal}>
@@ -140,7 +165,8 @@ const OpenHours = ({
           <div className="min-w-80 max-w-lg flex-1">
             <h2 className="mb-6 text-xl">Regular hours</h2>
             <div className="grid gap-4">
-              {normalOpeningHours?.map((value, index) => {
+              {normalOpeningHours?.map((item, index) => {
+                const value = item[selectedLanguage];
                 const isClosed = formNormal.watch(`${index}.isClosed`);
 
                 return (
@@ -209,8 +235,7 @@ const OpenHours = ({
                     <div className="grid grid-cols-2 gap-2">
                       <FormItem className="col-span-2">
                         <FormLabel className="flex justify-between gap-2">
-                          <CycleLanguageLabel label="Label" />
-                          <div className="flex justify-between gap-2">
+                          <div className="ml-auto flex justify-between gap-2">
                             <Button
                               onClick={() => remove(index)}
                               className="ml-auto"
@@ -236,12 +261,16 @@ const OpenHours = ({
                             </div>
                           </div>
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...formSpecial.register(`special.${index}.label`)}
-                            defaultValue={value?.label ?? ""}
-                          />
-                        </FormControl>
+                        <LocalizedFormField name="label">
+                          {(name) => (
+                            <Input
+                              className="mt-1"
+                              {...formSpecial.register(
+                                `special.${index}.localizedFields.${name}`,
+                              )}
+                            />
+                          )}
+                        </LocalizedFormField>
                         <FormMessage />
                       </FormItem>
                       {inputSchema.map((input) => (

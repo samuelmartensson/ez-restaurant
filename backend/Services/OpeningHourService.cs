@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
+using Models.Responses;
 
 public class OpeningHourService(RestaurantContext context, TranslationService translationService)
 {
@@ -33,44 +34,58 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
         return openingHours;
     }
 
-    public async Task<List<OpeningHour>> GetOpeningHours(CommonQueryParameters queryParameters)
+    public async Task<List<Dictionary<string, OpeningHourResponse>>> GetOpeningHours(CommonQueryParameters queryParameters)
     {
         var openingHours = await context.OpeningHours
             .Where(o => o.CustomerConfigDomain == queryParameters.Key)
             .OrderBy(o => o.Day)
             .ToListAsync();
+        var openingHourList = new List<Dictionary<string, OpeningHourResponse>>();
 
         if (!openingHours.Any())
         {
             var openingHoursInit = InitializeWeeklyOpeningHours(queryParameters.Key);
             await context.AddRangeAsync(openingHoursInit);
             await context.SaveChangesAsync();
-            return openingHoursInit;
+            openingHours = openingHoursInit;
         }
 
-        var openingHourList = new List<OpeningHour>();
+        var languages = (await context.CustomerConfigs
+            .Select(x => new { x.Languages, x.Domain })
+            .Where((x) => x.Domain == queryParameters.Key)
+            .FirstOrDefaultAsync())?.Languages ?? "";
+
         foreach (var o in openingHours)
         {
-            var translatedLabel = await translationService.GetByKey(
-                queryParameters.Language,
-                queryParameters.Key,
-                ConstructTranslationKey(o.Id)
-            );
+            var responseDictionary = new Dictionary<string, OpeningHourResponse>();
 
-            openingHourList.Add(new OpeningHour
+            foreach (var language in languages.Split(",").ToList())
             {
-                CustomerConfigDomain = o.CustomerConfigDomain,
-                OpenTime = o.OpenTime,
-                CloseTime = o.CloseTime,
-                Day = o.Day,
-                Id = o.Id,
-                IsClosed = o.IsClosed,
-                Label = translatedLabel ?? o.Label
-            });
+                if (string.IsNullOrEmpty(language)) continue;
+
+                var translatedLabel = await translationService.GetByKey(
+                    language,
+                    queryParameters.Key,
+                    ConstructTranslationKey(o.Id)
+                );
+
+                var localizedResponse = new OpeningHourResponse
+                {
+
+                    OpenTime = o.OpenTime.ToString(),
+                    CloseTime = o.CloseTime.ToString(),
+                    Day = o.Day,
+                    Id = o.Id,
+                    IsClosed = o.IsClosed,
+                    Label = translatedLabel ?? o.Label
+                };
+
+                responseDictionary[language] = localizedResponse;
+            }
+            openingHourList.Add(responseDictionary);
         }
 
         return openingHourList;
-
     }
 
 
@@ -97,6 +112,12 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
             queryParameters.Key,
             itemsToDelete.Select(item => ConstructTranslationKey(item.Id)).ToList()
         );
+        var languages = ((await context.CustomerConfigs
+            .Select(x => new { x.Languages, x.Domain })
+            .Where((x) => x.Domain == queryParameters.Key)
+            .FirstOrDefaultAsync())?.Languages ?? "").Split(",").ToList();
+
+
 
         foreach (var newHour in newOpeningHours)
         {
@@ -111,7 +132,7 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
                 existingHour.OpenTime = openTime;
                 existingHour.CloseTime = closeTime;
                 existingHour.IsClosed = newHour.IsClosed;
-                existingHour.Label = newHour.Label;
+                existingHour.Label = newHour.LocalizedFields[languages.First()].Label ?? "";
                 translationId = existingHour.Id;
             }
             else
@@ -124,22 +145,23 @@ public class OpeningHourService(RestaurantContext context, TranslationService tr
                     CloseTime = closeTime,
                     OpenTime = openTime,
                     IsClosed = newHour.IsClosed,
-                    Label = newHour.Label,
+                    Label = newHour.LocalizedFields[languages.First()].Label ?? "",
                     Day = 0,
                 };
                 await context.AddAsync(openHour);
                 await context.SaveChangesAsync();
                 translationId = openHour.Id;
             }
-            ;
 
             if (isSpecial)
             {
-                await translationService.CreateOrUpdateByKey(
-                    queryParameters.Language,
-                    queryParameters.Key,
-                    ConstructTranslationKey(translationId),
-                    newHour.Label
+                var localizedTranslations = languages.Select(language => (language, new Dictionary<string, string> {
+                    { ConstructTranslationKey(translationId), newHour.LocalizedFields[language].Label ?? "" },
+                })).ToList();
+
+                await translationService.CreateOrUpdateByKeys(
+                    localizedTranslations,
+                    queryParameters.Key
                 );
             }
 

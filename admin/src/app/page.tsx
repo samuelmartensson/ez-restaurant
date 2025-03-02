@@ -1,6 +1,5 @@
 "use client";
 
-import CycleLanguageLabel from "@/components/CycleLanguageLabel";
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import FormLayout from "@/components/FormLayout";
@@ -467,13 +466,7 @@ const Site = () => {
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <FormLabel>
-                      {input.translate ? (
-                        <CycleLanguageLabel label={input.label} />
-                      ) : (
-                        input.label
-                      )}
-                    </FormLabel>
+                    <FormLabel>{input.label}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

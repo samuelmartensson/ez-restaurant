@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Requests;
 
-public class AboutService(RestaurantContext context, S3Service s3Service, IHttpContextAccessor httpContext, TranslationService translationService)
+public class AboutService(RestaurantContext context, S3Service s3Service, TranslationService translationService)
 {
     private RestaurantContext context = context;
     private readonly S3Service s3Service = s3Service;
-    private readonly IHttpContextAccessor httpContext = httpContext;
     private TranslationService translationService = translationService;
 
 

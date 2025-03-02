@@ -47,13 +47,15 @@ export type GetPublicAboutParams = {
 
 export type GetPublicGetCustomerConfigMetaParams = {
   Key: string;
-  Language: string;
+  Language?: string;
 };
 
 export type PostOpeningHourParams = {
   Key: string;
   Language: string;
 };
+
+export type GetOpeningHour200Item = { [key: string]: OpeningHourResponse };
 
 export type GetOpeningHourParams = {
   Key: string;
@@ -441,6 +443,8 @@ export interface CustomerConfigMetaResponse {
   /** @nullable */
   image?: string | null;
   languages?: string[];
+  /** @nullable */
+  logo?: string | null;
   siteName?: string;
 }
 
@@ -491,12 +495,20 @@ export interface AnalyticsResponse {
   previousMenu?: AnalyticsResponsePreviousMenu;
 }
 
+export interface AddOpenHourLocalizedFields {
+  /** @nullable */
+  label?: string | null;
+}
+
+export type AddOpeningHourRequestLocalizedFields = {
+  [key: string]: AddOpenHourLocalizedFields;
+};
+
 export interface AddOpeningHourRequest {
   closeTime?: string;
   id?: number;
   isClosed?: boolean;
-  /** @nullable */
-  label?: string | null;
+  localizedFields?: AddOpeningHourRequestLocalizedFields;
   openTime?: string;
 }
 
@@ -2939,7 +2951,7 @@ export const getOpeningHour = (
   params: GetOpeningHourParams,
   signal?: AbortSignal,
 ) => {
-  return authorizedFetch<OpeningHourResponse[]>({
+  return authorizedFetch<GetOpeningHour200Item[]>({
     url: `/OpeningHour`,
     method: "GET",
     params,

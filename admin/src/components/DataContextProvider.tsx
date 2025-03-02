@@ -16,7 +16,7 @@ import {
 } from "react";
 import AppLoader from "./AppLoader";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 
 const DataContext = createContext<{
   customer: CustomerResponse | undefined;
@@ -74,7 +74,12 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
         Language: selectedLanguage,
         cache: false,
       },
-      { query: { enabled: !!selectedDomain && !!selectedLanguage } },
+      {
+        query: {
+          enabled: !!selectedDomain && !!selectedLanguage,
+          placeholderData: keepPreviousData,
+        },
+      },
     );
   const configs = customer?.customerConfigs ?? [];
 
