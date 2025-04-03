@@ -204,7 +204,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t shadow-2xl md:shadow-none md:shadow-black">
         <SidebarContent>
           <SidebarGroup>
-            <BrandLogo className="mx-auto mb-3 w-32" />
+            <BrandLogo className="mx-auto mb-2 w-24" />
             <SidebarGroupLabel className="mb-1 h-auto text-base font-bold">
               My account
             </SidebarGroupLabel>
