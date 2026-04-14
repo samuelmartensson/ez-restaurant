@@ -1,73 +1,69 @@
-name: .NET Publish and Deploy to AWS EC2
+name: Deploy Backend to AWS ECS
 
 on:
   push:
     branches:
-      - main # Trigger on push to the main branch
+      - main
+    paths:
+      - "backend/**"
+
+env:
+  AWS_REGION: eu-central-1
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}   # e.g. ez-restaurant-backend
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}         # e.g. ez-restaurant
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}         # e.g. ez-restaurant-backend
+  TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION_FAMILY }} # e.g. ez-restaurant-backend
+  CONTAINER_NAME: backend
 
 jobs:
-  build-and-deploy:
+  deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Step 2: Set up .NET 8.0.x
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          dotnet-version: "8.0.x"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Step 3: Restore dependencies and publish the project
-      - name: Publish .NET project
-        run: |
-          dotnet restore
-          dotnet publish -c Release -o ./publish
-        working-directory: backend
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 4: Copy published files to AWS EC2 instance
-      - name: Copy files to EC2 via SSH
+      - name: Build, tag, and push image to ECR
+        id: build-image
         env:
-          SSH_KEY: ${{ secrets.SU_PW }} # SSH key stored in GitHub Secrets
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./backend/publish ec2-user@ec2-13-61-21-245.eu-north-1.compute.amazonaws.com:app
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # Step 5: Update environment variables in the systemd service file
-      - name: Update environment variables
-        env:
-          SSH_KEY: ${{ secrets.SU_PW }} # SSH key stored in GitHub Secrets
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+      - name: Download current task definition
         run: |
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-61-21-245.eu-north-1.compute.amazonaws.com "sudo bash -c '\
-          sed -i \"/^Environment=/d\" /etc/systemd/system/backend.service
-          sed -i \"/^\[Service\]/a \\
-          Environment=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID\\n\\
-          Environment=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY\\n\\
-          Environment=CLERK_SECRET_KEY=$CLERK_SECRET_KEY\\n\\
-          Environment=STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY\\n\\
-          Environment=VERCEL_TOKEN=$VERCEL_TOKEN\\n\\
-          Environment=SMTP_PASSWORD=$SMTP_PASSWORD\\n\\
-          Environment=GOOGLE_APPLICATION_CREDENTIALS=/home/ec2-user/ezrest-service-account.json\\n\\
-          Environment=CONNECTION_STRING=\\\"$CONNECTION_STRING\\\"\" /etc/systemd/system/backend.service'"
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.TASK_DEFINITION }} \
+            --query taskDefinition \
+            > task-definition.json
 
-      # Step 6: Restart the .NET app on the EC2 instance
-      - name: Restart .NET app
-        env:
-          SSH_KEY: ${{ secrets.SU_PW }} # SSH key stored in GitHub Secrets
-        run: |
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-13-61-21-245.eu-north-1.compute.amazonaws.com "sudo systemctl daemon-reload && sudo systemctl restart backend.service"
+      - name: Update ECS task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
