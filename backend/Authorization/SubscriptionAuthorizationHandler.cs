@@ -37,7 +37,7 @@ public class SubscriptionAuthorizationHandler(RestaurantContext dbContext) : Aut
             return;
         }
 
-        if (customer.Subscription != 0 && DateTime.Now > customer.SubscriptionExpireAt)
+        if (customer.Subscription != SubscriptionState.Free && DateTime.Now > customer.SubscriptionExpireAt)
         {
             context.Fail();
         }
