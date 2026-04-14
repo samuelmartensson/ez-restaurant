@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     "clipboard-write",
   ]);
 
-  page.setDefaultTimeout(2000);
+  page.setDefaultTimeout(30000);
   await page.goto(siteUrl);
   await page.evaluate(() => {
     localStorage.setItem(
@@ -220,13 +220,22 @@ export async function GET(request: NextRequest) {
   });
   await page.reload();
 
-  const input = await page.$("#color-text");
+  await page.waitForSelector("xpath//button[contains(., 'Export')]");
+  const input = await page.$(
+    "xpath//html/body/div[3]/div[2]/div/div[3]/div/div[2]/div/div/div/div[1]/div/input",
+  );
+
+  await input?.click({ clickCount: 3 });
   await input?.type("#" + color);
   await page.click(
-    "xpath//html/body/div[1]/div/div/div/div[2]/div[2]/div/div/div[2]/div[3]/button[2]",
+    "xpath//html/body/div[3]/div[2]/div/div[3]/div/div[1]/div/div/div/div[3]/div[1]/button[1]",
   );
+  const exportBtn = await page.$(
+    "xpath//html/body/div[3]/div[1]/div[2]/button[6]",
+  );
+  await exportBtn?.click();
   const dialogElement = await page.$('[role="dialog"]');
-  const copyBtn = await dialogElement?.$("button");
+  const copyBtn = await dialogElement?.$('[data-slot="copy-button"]');
   await copyBtn?.click();
 
   const clipboardText = await page.evaluate(() =>

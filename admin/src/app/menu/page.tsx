@@ -606,6 +606,7 @@ const AdminMenu = ({ data }: { data: MenuResponse }) => {
                                   <Textarea
                                     autoFocus={input.id === lastEditedFieldId}
                                     {...field}
+                                    rows={5}
                                     onFocus={() =>
                                       setLastEditedFieldId(input.id)
                                     }
