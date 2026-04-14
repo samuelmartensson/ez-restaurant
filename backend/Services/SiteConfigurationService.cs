@@ -88,7 +88,7 @@ public class SiteConfigurationService(RestaurantContext context, S3Service s3Ser
         var newConfig = new CustomerConfig
         {
             CustomerId = customerId,
-            Domain = domain.Replace(" ", "").ToLower(),
+            Domain = domain.Replace(" ", ""),
             HeroType = 1,
             SiteName = domain,
             Theme = "rustic",

@@ -2,7 +2,7 @@ using Database.Models;
 
 public enum SubscriptionState
 {
-    Free,
+    Free = 0,
     Premium
 }
 
