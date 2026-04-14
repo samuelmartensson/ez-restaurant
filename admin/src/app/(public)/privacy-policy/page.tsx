@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 export default function PrivacyPolicy() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 text-sm text-gray-800">
@@ -46,9 +47,7 @@ export default function PrivacyPolicy() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold">
-          3. How We Use Your Data
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold">3. How We Use Your Data</h2>
         <ul className="list-inside list-disc space-y-2 pl-2">
           <li>To create and maintain your account.</li>
           <li>
@@ -66,9 +65,7 @@ export default function PrivacyPolicy() {
             To detect and prevent fraud, abuse, or violations of our Terms of
             Service.
           </li>
-          <li>
-            To comply with applicable laws and legal obligations.
-          </li>
+          <li>To comply with applicable laws and legal obligations.</li>
         </ul>
       </section>
 
@@ -146,9 +143,10 @@ export default function PrivacyPolicy() {
           </li>
         </ul>
         <p className="mt-3">
-          To exercise any of these rights, contact us at the email address below.
-          You also have the right to lodge a complaint with the Swedish Authority
-          for Privacy Protection (Integritetsskyddsmyndigheten, IMY) at{" "}
+          To exercise any of these rights, contact us at the email address
+          below. You also have the right to lodge a complaint with the Swedish
+          Authority for Privacy Protection (Integritetsskyddsmyndigheten, IMY)
+          at{" "}
           <a href="https://www.imy.se" className="underline">
             imy.se
           </a>
@@ -159,10 +157,10 @@ export default function PrivacyPolicy() {
       <section className="mb-8">
         <h2 className="mb-3 text-lg font-semibold">7. Cookies</h2>
         <p>
-          We use strictly necessary cookies for authentication session management
-          (provided by Clerk). We do not use advertising or tracking cookies. No
-          consent banner is required for strictly necessary cookies under ePrivacy
-          rules.
+          We use strictly necessary cookies for authentication session
+          management (provided by Clerk). We do not use advertising or tracking
+          cookies. No consent banner is required for strictly necessary cookies
+          under ePrivacy rules.
         </p>
       </section>
 

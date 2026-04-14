@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 export default function TermsOfService() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 text-sm text-gray-800">
@@ -16,20 +17,14 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold">
-          2. Account Registration
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold">2. Account Registration</h2>
         <p className="mb-2">
           You must create an account to use EZ Rest. You are responsible for:
         </p>
         <ul className="list-inside list-disc space-y-2 pl-2">
           <li>Providing accurate and up-to-date account information.</li>
-          <li>
-            Maintaining the confidentiality of your login credentials.
-          </li>
-          <li>
-            All activity that occurs under your account.
-          </li>
+          <li>Maintaining the confidentiality of your login credentials.</li>
+          <li>All activity that occurs under your account.</li>
         </ul>
         <p className="mt-3">
           You must be at least 18 years old to create an account. Accounts are
@@ -61,9 +56,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold">
-          4. Billing and Payment
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold">4. Billing and Payment</h2>
         <p className="mb-2">
           Payments are processed by Stripe. By subscribing, you authorise us to
           charge your payment method on a recurring monthly basis. You agree to
@@ -124,9 +117,7 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold">
-          7. Custom Domains
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold">7. Custom Domains</h2>
         <p>
           Premium subscribers may connect a custom domain to their restaurant
           site via our Vercel integration. You are solely responsible for
@@ -141,9 +132,7 @@ export default function TermsOfService() {
         <h2 className="mb-3 text-lg font-semibold">8. Acceptable Use</h2>
         <p className="mb-2">You may not use EZ Rest to:</p>
         <ul className="list-inside list-disc space-y-2 pl-2">
-          <li>
-            Violate any applicable law or regulation.
-          </li>
+          <li>Violate any applicable law or regulation.</li>
           <li>
             Upload malicious code, viruses, or any content intended to harm
             users or systems.
@@ -215,10 +204,7 @@ export default function TermsOfService() {
           Swedish courts, unless mandatory consumer protection law in your
           country requires otherwise. If you are a consumer in the EU, you may
           also use the EU Online Dispute Resolution platform at{" "}
-          <a
-            href="https://ec.europa.eu/consumers/odr"
-            className="underline"
-          >
+          <a href="https://ec.europa.eu/consumers/odr" className="underline">
             ec.europa.eu/consumers/odr
           </a>
           .
