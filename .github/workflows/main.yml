@@ -10,9 +10,9 @@ on:
 env:
   AWS_REGION: eu-central-1
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} # e.g. ez-restaurant-backend
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }} # e.g. ez-restaurant
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }} # e.g. default
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }} # e.g. ez-restaurant-backend
-  TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION_FAMILY }} # e.g. ez-restaurant-backend
+  TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION_FAMILY }} # e.g. default-ez-restaurant-backend
   CONTAINER_NAME: Main
 
 jobs:
