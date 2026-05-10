@@ -164,7 +164,7 @@ public class PublicController(
             var result = await context.CustomerConfigs
                     .AsNoTracking()
                     .AsSplitQuery()
-                    .Where((x) => x.Domain.ToLower() == Key || x.CustomDomain == Key)
+                    .Where((x) => x.Domain.ToLower() == Key.ToLower() || x.CustomDomain == Key)
                     .Include(cf => cf.SiteSectionHero)
                     .Include(cf => cf.SiteSectionAbout)
                     .Include(cf => cf.SiteSectionGallery)
