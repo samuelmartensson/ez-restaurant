@@ -1,5 +1,6 @@
 "use client";
 
+import ActionBar from "@/components/ActionBar";
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import hasDomain from "@/components/hasDomain";
@@ -201,12 +202,11 @@ const About = () => {
             }}
           />
         ))}
-        <Button
-          className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-          type="submit"
-        >
-          <Save /> Save
-        </Button>
+        <ActionBar>
+          <Button type="submit">
+            <Save /> Save
+          </Button>
+        </ActionBar>
       </form>
     </Form>
   );

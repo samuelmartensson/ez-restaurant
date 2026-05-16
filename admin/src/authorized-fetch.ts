@@ -45,6 +45,7 @@ export const authorizedFetch = async <T>({
   }
 
   const finalURL = `${baseURL}${url}?${urlParameters.toString()}`;
+
   const isFormData =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (headers as any)?.["Content-Type"] === "multipart/form-data";

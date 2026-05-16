@@ -21,7 +21,7 @@ public class KeyAuthorizationHandler(RestaurantContext dbContext) : Authorizatio
         }
 
         var httpContext = context.Resource as DefaultHttpContext;
-        var requestKey = httpContext?.Request.Query["key"].ToString();
+        var requestKey = httpContext?.Request.Query["key"].ToString().ToLower();
 
         if (string.IsNullOrEmpty(requestKey))
         {

@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 import { Save } from "lucide-react";
 import { LanguagePicker } from "./LanguagePicker";
 import { toast } from "sonner";
+import ActionBar from "./ActionBar";
 
 const LanguageManager = () => {
   const {
@@ -81,12 +82,11 @@ const LanguageManager = () => {
           </div>
         ))}
       </div>
-      <Button
-        className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-        onClick={() => onSubmitInternal()}
-      >
-        <Save /> Save
-      </Button>
+      <ActionBar>
+        <Button onClick={() => onSubmitInternal()}>
+          <Save /> Save
+        </Button>
+      </ActionBar>
     </div>
   );
 };

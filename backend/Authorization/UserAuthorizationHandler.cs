@@ -14,6 +14,7 @@ public class UserAuthorizationHandler() : AuthorizationHandler<UserRequirement>
         if (string.IsNullOrEmpty(userId))
         {
             context.Fail();
+            return;
         }
 
         context.Succeed(requirement);

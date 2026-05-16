@@ -25,7 +25,7 @@ public class HeroController(HeroService heroService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadHero([FromBody] UploadHeroRequest fields, [FromQuery, Required] string key)
     {
-        await heroService.UpdateHero(fields, key);
+        await heroService.UpdateHero(fields, key.ToLower());
         return Ok(new { message = "Success" });
     }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import ActionBar from "@/components/ActionBar";
 import { useDataContext } from "@/components/DataContextProvider";
 import FormImagePreview from "@/components/FormImagePreview";
 import FormLayout from "@/components/FormLayout";
@@ -396,13 +397,11 @@ const Site = () => {
                   />
                 ))}
               </div>
-              <Button
-                className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-                disabled={isPending}
-                type="submit"
-              >
-                <Save /> Save
-              </Button>
+              <ActionBar>
+                <Button disabled={isPending} type="submit">
+                  <Save /> Save
+                </Button>
+              </ActionBar>
             </form>
           </Form>
         ))()}
@@ -437,13 +436,11 @@ const Site = () => {
                   }}
                 />
               ))}
-              <Button
-                className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-                disabled={isPending}
-                type="submit"
-              >
-                <Save /> Save
-              </Button>
+              <ActionBar>
+                <Button disabled={isPending} type="submit">
+                  <Save /> Save
+                </Button>
+              </ActionBar>
             </form>
           </Form>
         ))()}
@@ -508,13 +505,11 @@ const Site = () => {
               />
             ))}
           </div>
-          <Button
-            className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-            disabled={isPending}
-            type="submit"
-          >
-            <Save /> Save
-          </Button>
+          <ActionBar>
+            <Button disabled={isPending} type="submit">
+              <Save /> Save
+            </Button>
+          </ActionBar>
         </form>
       </Form>
     </FormLayout>

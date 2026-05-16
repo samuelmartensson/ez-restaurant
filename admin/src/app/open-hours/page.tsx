@@ -1,5 +1,6 @@
 "use client";
 
+import ActionBar from "@/components/ActionBar";
 import { useDataContext } from "@/components/DataContextProvider";
 import hasDomain from "@/components/hasDomain";
 import LocalizedFormField from "@/components/LocalizedFormField";
@@ -36,24 +37,6 @@ const dayMap: { [key: number]: string } = {
   6: "Saturday",
   7: "Sunday",
 };
-
-const inputSchema = [
-  {
-    id: "openTime",
-    label: "Open",
-    type: "time",
-  },
-  {
-    id: "closeTime",
-    label: "Close",
-    type: "time",
-  },
-  {
-    id: "id",
-    label: "",
-    type: "hidden",
-  },
-] as const;
 
 const DataLayer = () => {
   const { selectedDomain, selectedLanguage, params } = useDataContext();
@@ -130,10 +113,10 @@ const OpenHours = ({
     refetch();
   }
 
-  useEffect(() => {
-    if (!normalOpeningHours) return;
-    formNormal.reset(normalOpeningHours);
-  }, [normalOpeningHours, formNormal]);
+  // useEffect(() => {
+  //   if (!normalOpeningHours) return;
+  //   formNormal.reset(normalOpeningHours);
+  // }, [normalOpeningHours, formNormal]);
 
   useEffect(() => {
     if (!specialOpeningHours) return;
@@ -168,10 +151,13 @@ const OpenHours = ({
               {normalOpeningHours?.map((item, index) => {
                 const value = item[selectedLanguage];
                 const isClosed = formNormal.watch(`${index}.isClosed`);
-
+                console.log(value.day && dayMap[value.day], isClosed);
                 return (
-                  <div key={value.id}>
-                    <div className="flex justify-between gap-2">
+                  <div
+                    key={value.id + String(isClosed)}
+                    className="border-b-2 pb-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
                       <span>{value.day && dayMap[value.day]}</span>
                       <FormField
                         control={formNormal.control}
@@ -179,15 +165,14 @@ const OpenHours = ({
                         defaultValue={!!value?.isClosed}
                         render={({ field }) => {
                           return (
-                            <FormItem className="flex items-center space-x-2 rounded-full border p-2">
-                              <FormLabel className="pb-0">Open</FormLabel>
+                            <FormItem className="flex items-center space-x-2 rounded-full">
+                              <FormLabel className="pb-0">Closed</FormLabel>
                               <FormControl>
                                 <Switch
                                   checked={field.value}
                                   onCheckedChange={field.onChange}
                                 />
                               </FormControl>
-                              <FormLabel className="pb-0">Closed</FormLabel>
                               <FormMessage />
                             </FormItem>
                           );
@@ -195,30 +180,35 @@ const OpenHours = ({
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {inputSchema.map((input) => (
-                        <FormItem
-                          style={{ display: isClosed ? "none" : "block" }}
-                          key={`${index}.${input.id}`}
-                        >
-                          <FormLabel>{input.label}</FormLabel>
-                          <FormControl>
-                            {input.type === "hidden" ? (
-                              <Input
-                                type="hidden"
-                                {...formNormal.register(`${index}.${input.id}`)}
-                                defaultValue={Number(value[input.id])}
-                              />
-                            ) : (
-                              <Input
-                                {...formNormal.register(`${index}.${input.id}`)}
-                                defaultValue={value[input.id]}
-                                type="time"
-                              />
-                            )}
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      ))}
+                      <FormItem
+                        style={{ display: isClosed ? "none" : "block" }}
+                      >
+                        <FormControl>
+                          <Input
+                            {...formNormal.register(`${index}.openTime`)}
+                            defaultValue={value.openTime}
+                            type="time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                      <FormItem
+                        style={{ display: isClosed ? "none" : "block" }}
+                      >
+                        <FormControl>
+                          <Input
+                            {...formNormal.register(`${index}.closeTime`)}
+                            defaultValue={value.closeTime}
+                            type="time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                      <Input
+                        type="hidden"
+                        {...formNormal.register(`${index}.id`)}
+                        defaultValue={Number(value.id)}
+                      />
                     </div>
                   </div>
                 );
@@ -230,23 +220,20 @@ const OpenHours = ({
             <div className="grid gap-4">
               {fields?.map((value, index) => {
                 const isClosed = formSpecial.watch(`special.${index}.isClosed`);
+                const localizedFields = formSpecial.watch(
+                  `special.${index}.localizedFields`,
+                );
+
                 return (
-                  <div key={value.id}>
+                  <div key={value.id} className="border-b-2 pb-2">
                     <div className="grid grid-cols-2 gap-2">
                       <FormItem className="col-span-2">
-                        <FormLabel className="flex justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            {localizedFields?.[selectedLanguage]?.label ?? "-"}
+                          </div>
                           <div className="ml-auto flex justify-between gap-2">
-                            <Button
-                              onClick={() => remove(index)}
-                              className="ml-auto"
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                            >
-                              <Trash />
-                            </Button>
-                            <div className="flex items-center space-x-2 rounded-full border p-2">
-                              <Label>Open</Label>
+                            <div className="flex items-center space-x-2 rounded-full">
                               <Switch
                                 checked={isClosed}
                                 name={`${index}.isClosed`}
@@ -259,8 +246,17 @@ const OpenHours = ({
                               />
                               <Label>Closed</Label>
                             </div>
+                            <Button
+                              onClick={() => remove(index)}
+                              className="ml-auto"
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                            >
+                              <Trash />
+                            </Button>
                           </div>
-                        </FormLabel>
+                        </div>
                         <LocalizedFormField name="label">
                           {(name) => (
                             <Input
@@ -273,36 +269,35 @@ const OpenHours = ({
                         </LocalizedFormField>
                         <FormMessage />
                       </FormItem>
-                      {inputSchema.map((input) => (
-                        <FormItem
-                          style={{ display: isClosed ? "none" : "block" }}
-                          key={`${index}.${input.id}`}
-                        >
-                          <FormLabel>{input.label}</FormLabel>
-                          <FormControl>
-                            {input.type === "hidden" ? (
-                              <Input
-                                type="hidden"
-                                {...formSpecial.register(
-                                  `special.${index}.${input.id}`,
-                                  {
-                                    value: Number(value[input.id]),
-                                  },
-                                )}
-                              />
-                            ) : (
-                              <Input
-                                {...formSpecial.register(
-                                  `special.${index}.${input.id}`,
-                                )}
-                                defaultValue={value[input.id]}
-                                type="time"
-                              />
-                            )}
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      ))}
+                      <FormItem
+                        style={{ display: isClosed ? "none" : "block" }}
+                      >
+                        <FormControl>
+                          <Input
+                            {...formNormal.register(`${index}.openTime`)}
+                            defaultValue={value.openTime}
+                            type="time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                      <FormItem
+                        style={{ display: isClosed ? "none" : "block" }}
+                      >
+                        <FormControl>
+                          <Input
+                            {...formNormal.register(`${index}.closeTime`)}
+                            defaultValue={value.closeTime}
+                            type="time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                      <Input
+                        type="hidden"
+                        {...formNormal.register(`${index}.id`)}
+                        defaultValue={Number(value.id)}
+                      />
                     </div>
                   </div>
                 );
@@ -326,12 +321,11 @@ const OpenHours = ({
           </div>
         </div>
 
-        <Button
-          className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-          type="submit"
-        >
-          <Save /> Save
-        </Button>
+        <ActionBar>
+          <Button type="submit">
+            <Save /> Save
+          </Button>
+        </ActionBar>
       </form>
     </Form>
   );

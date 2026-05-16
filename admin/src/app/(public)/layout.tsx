@@ -1,3 +1,4 @@
+import BrandLogo from "@/components/BrandLogo";
 import "../globals.css";
 
 export default function PublicLayout({
@@ -6,8 +7,11 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased">{children}</body>
-    </html>
+    <>
+      <header className="border-b px-6 py-4">
+        <BrandLogo className="h-16 w-auto" />
+      </header>
+      {children}
+    </>
   );
 }

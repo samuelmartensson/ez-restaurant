@@ -113,7 +113,7 @@ const Domain = () => {
           <span className="text-muted-foreground">
             Will make your website directly available on:
           </span>{" "}
-          {domainNameValue}.ezrest.se
+          {domainNameValue.toLowerCase()}.ezrest.se
         </p>
       </div>
 

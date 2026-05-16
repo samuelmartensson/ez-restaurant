@@ -14,12 +14,14 @@ import {
   SignedOut,
 } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 import "./globals.css";
 import AppLoader from "@/components/AppLoader";
 import { Button } from "@/components/ui/button";
 import { Languages } from "lucide-react";
+import { PUBLIC_PATHS } from "@/lib/public-paths";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +71,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isPublicPage = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+
   return (
     <html lang="en">
       <title>EZ Rest</title>
@@ -76,17 +81,23 @@ export default function AdminLayout({
         <ClerkProvider>
           <Toaster position="bottom-center" />
           <QueryClientProvider client={queryClient}>
-            <SignedIn>
-              <DataContextProvider>
-                <Content>{children}</Content>
-              </DataContextProvider>
-            </SignedIn>
-            <ClerkLoading>
-              <AppLoader />
-            </ClerkLoading>
-            <SignedOut>
-              <RedirectToSignUp />
-            </SignedOut>
+            {isPublicPage ? (
+              children
+            ) : (
+              <>
+                <SignedIn>
+                  <DataContextProvider>
+                    <Content>{children}</Content>
+                  </DataContextProvider>
+                </SignedIn>
+                <ClerkLoading>
+                  <AppLoader />
+                </ClerkLoading>
+                <SignedOut>
+                  <RedirectToSignUp />
+                </SignedOut>
+              </>
+            )}
           </QueryClientProvider>
         </ClerkProvider>
       </body>

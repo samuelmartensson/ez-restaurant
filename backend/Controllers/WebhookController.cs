@@ -22,7 +22,8 @@ namespace webapi.Controllers
 
             try
             {
-                const string endpointSecret = "whsec_SiXsiS6H3T32zxW1BIBozbZuiBvNMHgv";
+                // const string endpointSecret = "whsec_SiXsiS6H3T32zxW1BIBozbZuiBvNMHgv";
+                const string endpointSecret = "whsec_41fe53cf290ced48afbfcce198332db1b3aa3fa1a66b44abdd32cf45daeb1ae4";
                 var stripeEvent = EventUtility.ConstructEvent(json,
                     Request.Headers["Stripe-Signature"], endpointSecret);
 

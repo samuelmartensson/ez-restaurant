@@ -18,6 +18,7 @@ import {
   BarChart,
   Clock,
   CreditCard,
+  ExternalLink,
   Globe,
   Home,
   Image,
@@ -27,16 +28,15 @@ import {
   Languages,
   LogOut,
   Newspaper,
-  ScreenShare,
   Settings2,
   SquareMenu,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import BrandLogo from "./BrandLogo";
 import { ConfigSwitcher } from "./ConfigSwitcher";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import BrandLogo from "./BrandLogo";
 
 const settings = [
   {
@@ -126,6 +126,8 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
+                    className="text-base"
+                    size="lg"
                     onClick={() => {
                       const prodUrl = customDomain
                         ? `https://${customDomain}`
@@ -140,12 +142,14 @@ export function AppSidebar() {
                     }}
                     disabled={!selectedDomain}
                   >
-                    <ScreenShare />
+                    <ExternalLink />
                     <span>Preview my site</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
+                    className="text-base"
+                    size="lg"
                     onClick={() => setOpenMobile(false)}
                     asChild
                     isActive={"/domains" === pathname}
@@ -158,6 +162,8 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
+                    className="text-base"
+                    size="lg"
                     onClick={() => setOpenMobile(false)}
                     asChild
                     isActive={"/analytics" === pathname}
@@ -182,6 +188,8 @@ export function AppSidebar() {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
+                      size="lg"
+                      className="text-base"
                       onClick={() => setOpenMobile(false)}
                       asChild
                       isActive={

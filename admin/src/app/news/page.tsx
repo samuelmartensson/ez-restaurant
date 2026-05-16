@@ -1,7 +1,10 @@
 "use client";
 
 import { useDataContext } from "@/components/DataContextProvider";
+import LocalizedFormField from "@/components/LocalizedFormField";
 import hasDomain from "@/components/hasDomain";
+import hasSubscription from "@/components/hasSubscription";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,13 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  PostNewsArticleMutationBody,
-  useDeleteNewsArticleId,
-  useGetNewsArticle,
-  usePostNewsArticle,
-} from "@/generated/endpoints";
-import { useForm } from "react-hook-form";
-import {
   Form,
   FormControl,
   FormField,
@@ -28,15 +24,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  PostNewsArticleMutationBody,
+  useDeleteNewsArticleId,
+  useGetNewsArticle,
+  usePostNewsArticle,
+} from "@/generated/endpoints";
 import { Pen, Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import ActionBar from "@/components/ActionBar";
 import { useState } from "react";
-import LocalizedFormField from "@/components/LocalizedFormField";
-import hasSubscription from "@/components/hasSubscription";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const inputSchema = [
   {
@@ -119,71 +118,6 @@ const News = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ActionBar>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="fixed inset-x-6 bottom-4 max-w-lg md:left-[--sidebar-width] md:ml-6"
-              type="button"
-            >
-              <Plus /> Add new article
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>News article</DialogTitle>
-              <DialogDescription>Add a new article</DialogDescription>
-            </DialogHeader>
-
-            <Form {...form}>
-              <form
-                className="grid max-w-lg gap-4 overflow-auto"
-                onSubmit={form.handleSubmit(onSubmit)}
-              >
-                {inputSchema.map((input) => (
-                  <LocalizedFormField name={input.id} key={input.id}>
-                    {(name) => (
-                      <FormField
-                        key={input.id}
-                        control={form.control}
-                        name={`localizedFields.${name}`}
-                        render={({ field }) => {
-                          let render = (
-                            <Input {...field} value={field.value ?? ""} />
-                          );
-
-                          if (input.type === "textarea") {
-                            render = (
-                              <Textarea
-                                rows={8}
-                                {...field}
-                                value={field.value ?? ""}
-                              />
-                            );
-                          }
-
-                          return (
-                            <FormItem>
-                              <FormLabel>{input.label}</FormLabel>
-                              <FormControl>{render}</FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    )}
-                  </LocalizedFormField>
-                ))}
-                <DialogFooter>
-                  <Button>
-                    <Plus /> Add
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </ActionBar>
 
       <div className="grid gap-2">
         {data?.map((d) => (
@@ -226,6 +160,66 @@ const News = () => {
           </div>
         ))}
       </div>
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogTrigger asChild>
+          <Button className="mt-4 max-w-lg" type="button">
+            <Plus /> Add new article
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>News article</DialogTitle>
+            <DialogDescription>Add a new article</DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form
+              className="grid max-w-lg gap-4 overflow-auto"
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
+              {inputSchema.map((input) => (
+                <LocalizedFormField name={input.id} key={input.id}>
+                  {(name) => (
+                    <FormField
+                      key={input.id}
+                      control={form.control}
+                      name={`localizedFields.${name}`}
+                      render={({ field }) => {
+                        let render = (
+                          <Input {...field} value={field.value ?? ""} />
+                        );
+
+                        if (input.type === "textarea") {
+                          render = (
+                            <Textarea
+                              rows={8}
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          );
+                        }
+
+                        return (
+                          <FormItem>
+                            <FormLabel>{input.label}</FormLabel>
+                            <FormControl>{render}</FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  )}
+                </LocalizedFormField>
+              ))}
+              <DialogFooter>
+                <Button>
+                  <Plus /> Add
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
